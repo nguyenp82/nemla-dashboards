@@ -1,0 +1,1825 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Ledger · Nguyen's personal finances</title>
+<link rel="icon" type="image/png" href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAIAAAACACAYAAADDPmHLAAAGqElEQVR42u2dfUxVZRzHv+dweRMRBEIRBTXfEEHFlwQULGVWikNTaNXKtdrKLUHNdJTldDFd5dTmH9oqt9YmvsXUyLTlBFFDY2ikU8gXFF9QFEUJvFxuf/hXTs+5XC5wnuf5fv+E32X3PN/P7+U5h+degKIoiqIoFaWpcJFbcqOd7r52Xt4ljQAoYLSqYGg0XG0gNJquNgwajVcbBI2mqw2DRuPVBkGj8WqDoNN8ta9X40KoXQ10mq92NdBovNrVQKf5alcDnearDYFG49VuCTrNV7sa6DRfbQh0mq82BDrNVxsCnearDYFO89WGQKf5akOgcynVls7sV7sK6DRfbQh0mq82BJwBFJdmhewP6R2D6e//5NZra6v/xP7v34Sz1dGhCxUYEoWM7P0e+3v1tVXYs3GGR9+jOw+O9K42v70KjxqD0VMXMZXd9EWKFhCb9Db6Dn2eBHTGDGDJwU/TkDxrDQKC+7AKtNEfTQTzE9IWI3biu6Zxt2pO4ddvX0erw97p73HUlBzEpbz3v5/t2ZiO+trKLgHB1XlAql1AWGQ8xkxbyrreES1AlD3/sOfeQPTwaWwFLvol5X2AxIzPERgSxfT2FACi3fHz9u2OlKz18LL5sgqoWAGARzeXxr30MVNcVgDOlxeYxgwem4kB8el0uT0AWLX8Vxz+BjWVRaZxE9JXIihsINuAdC3A6UTJro/w4O41wzCbjz9SsjbA5u3HdG8rAFYf/pob61G8fSFaHS2GccHhgzB+xgpWARmHwJuXy1F24EvTuGdHZWBQwitMeRl3AWeObkH1mQOmceNfXo7gXkPouisAiLb3P1KQi/t3LhvGeHn7ITVrA7x9A9gGZLsPYG9qwKH8bDhaHhrG9QjtjwnpK5n6sgEAALevncaJfXmmcf3jpmPo+NfoPiS8E3ju+FZc/Otn07gx05YhtE8sAZCh/z+uo7uX4+6t88bzgM0HKZnr4OPXQ+k5QMpnAS0PG1GUn40We5NhXPee/ZA0K48VQEbV11aidO8K07h+w6YiJnEeAZBR/5QXoKpsp2lcQtqHCOs7kgDIqNLCVbhz46zxInjZkJK5Dr7dggmAbHLYm1CUnw178wPDuICgCCTPXgNomtoAyHje717dRRzd/YlpXOTgVIxw4b+PZdoJKHM28FLFLzhb+qNp3KgXstErehxbgIw6sW816q5WGMZouhcmzV0Lv4BQAiCbWh12FOVn42HTPcM4/8BnMGnOl9A0nQDIpvv1NSjZtcw0rvfARMRPnk8AZNSVs7/jdMl3pnFxqfMRMTCJAMiost++Qm11mfE8oOmYOOcL+AeGEwDZ5Gx1oHj7QjQ33jGM8wsIRcrctdB0LwIgmxrv3cDhnUvgdLYaxoVHj8XoKTkEQEZdrTqMiqJNpnGxye8gcshkAiCjTh78GtcvHIPJQIDk2WsQEBRBAKSbB5ytKN6xGP823DSM8/UPQkrmOuheNgIgm5ru16F4xyLTTxsL6zsSCWlLCICMunHxOMoPbjCNi0l8C1ExaQRARlUUb0ZN5SHTuKSMPHTv2U8+AET4zvsOHghQsmup6aFTb79ApGath5fNR6jLe9xfVoAnqLmxHkXbckwPnYZEDMfYF3PZAmTUrSsnXTp0OmTcq+gfN50AyChXD50mzlyFHmEDCICMOlKQi4bb1YYxNp9uwn40HQEwkb2pAUXbckwPnUrVApTfCTwmVw+dirYDYAVog84d34oLp/aqUQGoJ+vYnk9ND50SAIn16NDpAtNDp1IAwDngyaqvrcIfLhw6FaH/swK4qfMuHjoVQZZ4sO3Ol0bN/KDwqb+ru/o3Cjd17EfClRauQmjkCPTsNVTeGYBt4Oly2JtwKH+B6aFTK5d/toB2qqHukkuHToXeBbAKGMvVQ6dWzH7LzAC3r5/BD58NExaCE/tWIywyHqGRcRwCVVSrw47CzXPlbAFsA+LKFd84BCou3ZM0UWJlPysA1TYAWAXkyn63KgAhkMd8tgDKPQBYBeTI/nZVAEIgvvlsAVT7AGAVEDv7PVIBCIG45nusBRACMc3nDEB5DgBWAfGy3+MVgBCIZX6HtABCII75HTYDEAIxzO/QIZAQiLGeuohvmuYLAgAhsP76dao5Mn4jmeiJo8t4UTTfogAQAuutT5eawZbQ9Ymhq3jRNN8iFUD1amCFBNC5GGpfryUXXeZqYDXQLZ11MoFg1QonTNkVEQYR2ppwfVcEEESaZ4QevKwEg6hDrFSTd2cCIcuuRYmtV3vA4M0qiqIoSlL9B79giOk5UV6XAAAAAElFTkSuQmCC">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300..900;1,9..144,300..900&family=Manrope:wght@300..800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.0/chart.umd.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@azure/msal-browser@3/lib/msal-browser.min.js"></script>
+<style>
+  :root {
+    --bg: #F7F4EE;
+    --surface: #FDFBF7;
+    --surface-2: #F1ECE2;
+    --surface-3: #E8E2D4;
+    --border: #E0D9C9;
+    --border-strong: #C9C0AB;
+    --text: #2A2822;
+    --text-dim: #5E574B;
+    --text-faint: #8F897A;
+    --accent: #A07A1F;
+    --accent-dim: #C9A14A;
+    --accent-soft: #F3E9CF;
+    --positive: #5B8C47;
+    --positive-soft: #E5EEDB;
+    --negative: #B85838;
+    --negative-soft: #F3DDD1;
+    --neutral: #3E6A88;
+    --neutral-soft: #DCE6EE;
+    --danger: #A33F3F;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html, body { background: var(--bg); color: var(--text); font-family: 'Manrope', sans-serif; font-size: 14px; line-height: 1.5; -webkit-font-smoothing: antialiased; }
+  body {
+    min-height: 100vh;
+    background-image:
+      radial-gradient(circle at 12% 8%, rgba(160,122,31,0.06) 0%, transparent 45%),
+      radial-gradient(circle at 88% 92%, rgba(62,106,136,0.05) 0%, transparent 50%);
+    background-attachment: fixed;
+  }
+
+  button { font-family: inherit; cursor: pointer; border: none; background: none; color: inherit; }
+  input, select { font-family: inherit; color: inherit; }
+  .mono { font-family: 'JetBrains Mono', monospace; font-variant-numeric: tabular-nums; }
+  .serif { font-family: 'Fraunces', serif; font-optical-sizing: auto; }
+  .italic { font-style: italic; }
+
+  /* Layout */
+  .app { max-width: 1440px; margin: 0 auto; padding: 32px 40px 80px; }
+  @media (max-width: 720px) { .app { padding: 20px 16px 60px; } }
+
+  /* Header */
+  .brand { display: flex; align-items: baseline; justify-content: space-between; padding-bottom: 28px; border-bottom: 1px solid var(--border); margin-bottom: 32px; flex-wrap: wrap; gap: 12px; }
+  .brand-title { font-family: 'Fraunces', serif; font-weight: 300; font-size: 38px; letter-spacing: -0.02em; }
+  .brand-title em { font-style: italic; color: var(--accent); font-weight: 400; }
+  .brand-tagline { font-size: 12px; color: var(--text-faint); letter-spacing: 0.08em; text-transform: uppercase; margin-top: 4px; }
+  .brand-meta { font-size: 12px; color: var(--text-faint); letter-spacing: 0.06em; }
+  .brand-meta .dot { color: var(--accent); margin: 0 8px; }
+
+  /* Landing (upload) */
+  .landing { display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 60vh; text-align: center; }
+  .landing h2 { font-family: 'Fraunces', serif; font-weight: 300; font-size: 52px; line-height: 1.1; letter-spacing: -0.025em; max-width: 680px; margin-bottom: 20px; }
+  .landing h2 em { color: var(--accent); font-style: italic; }
+  .landing p { color: var(--text-dim); max-width: 520px; margin-bottom: 40px; font-size: 15px; }
+  .drop-zone { display: block; width: 100%; max-width: 560px; border: 1px dashed var(--border-strong); border-radius: 2px; padding: 48px 32px; transition: all 0.2s; background: var(--surface); cursor: pointer; text-align: center; }
+  .drop-zone.drag { border-color: var(--accent); background: var(--surface-2); }
+  .drop-zone-label { font-family: 'Fraunces', serif; font-style: italic; font-size: 20px; color: var(--text-dim); margin-bottom: 8px; }
+  .drop-zone-hint { font-size: 13px; color: var(--text-faint); letter-spacing: 0.04em; }
+  .drop-zone-button { display: inline-block; margin-top: 20px; padding: 10px 24px; border: 1px solid var(--accent); color: var(--accent); font-size: 13px; letter-spacing: 0.08em; text-transform: uppercase; border-radius: 2px; transition: all 0.2s; }
+  .drop-zone-button:hover { background: var(--accent); color: #FFFFFF; }
+  .supported { display: flex; gap: 16px; margin-top: 32px; color: var(--text-faint); font-size: 12px; letter-spacing: 0.05em; flex-wrap: wrap; justify-content: center; }
+  .supported span { padding: 4px 10px; border: 1px solid var(--border); border-radius: 2px; }
+
+  /* Filters bar */
+  .filters { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; padding: 14px 16px; background: var(--surface); border: 1px solid var(--border); border-radius: 2px; margin-bottom: 24px; }
+  .filter-group { display: flex; align-items: center; gap: 8px; }
+  .filter-label { font-size: 11px; letter-spacing: 0.1em; color: var(--text-faint); text-transform: uppercase; }
+  .filter-select, .filter-input { background: var(--surface-2); border: 1px solid var(--border); color: var(--text); padding: 7px 12px; font-size: 13px; border-radius: 2px; outline: none; min-width: 140px; }
+  .filter-select:focus, .filter-input:focus { border-color: var(--accent); }
+  .filter-toggle { display: flex; align-items: center; gap: 8px; padding: 7px 12px; background: var(--surface-2); border: 1px solid var(--border); border-radius: 2px; font-size: 12px; }
+  .filter-toggle input { accent-color: var(--accent); }
+  .spacer { flex: 1; }
+  .ghost-btn { padding: 7px 14px; background: transparent; border: 1px solid var(--border); color: var(--text-dim); font-size: 12px; letter-spacing: 0.06em; text-transform: uppercase; border-radius: 2px; transition: all 0.15s; }
+  .ghost-btn:hover { border-color: var(--accent); color: var(--accent); }
+
+  /* KPIs */
+  .kpi-grid { display: grid; grid-template-columns: repeat(6, 1fr); gap: 1px; background: var(--border); border: 1px solid var(--border); border-radius: 4px; overflow: hidden; margin-bottom: 28px; box-shadow: 0 1px 2px rgba(42,40,34,0.03); }
+  @media (max-width: 1300px) { .kpi-grid { grid-template-columns: repeat(3, 1fr); } }
+  @media (max-width: 700px) { .kpi-grid { grid-template-columns: repeat(2, 1fr); } }
+  .kpi { background: var(--surface); padding: 20px 20px; }
+  .kpi-label { font-size: 10px; letter-spacing: 0.1em; color: var(--text-faint); text-transform: uppercase; margin-bottom: 10px; display: flex; align-items: center; gap: 6px; }
+  .kpi-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--accent); }
+  .kpi-dot.pos { background: var(--positive); }
+  .kpi-dot.neg { background: var(--negative); }
+  .kpi-dot.net { background: var(--neutral); }
+  .kpi-value { font-family: 'Fraunces', serif; font-weight: 300; font-size: 30px; letter-spacing: -0.02em; line-height: 1; }
+  .kpi-value.pos { color: var(--positive); }
+  .kpi-value.neg { color: var(--negative); }
+  .kpi-sub { font-size: 12px; color: var(--text-faint); margin-top: 8px; font-family: 'JetBrains Mono', monospace; }
+
+  /* Panels */
+  .panel { background: var(--surface); border: 1px solid var(--border); border-radius: 4px; padding: 24px; margin-bottom: 24px; box-shadow: 0 1px 2px rgba(42,40,34,0.03); }
+  .panel-header { display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 20px; padding-bottom: 14px; border-bottom: 1px solid var(--border); flex-wrap: wrap; gap: 12px; }
+  .panel-title { font-family: 'Fraunces', serif; font-weight: 300; font-size: 22px; letter-spacing: -0.01em; }
+  .panel-title em { color: var(--accent); font-style: italic; }
+  .panel-subtitle { font-size: 12px; color: var(--text-faint); letter-spacing: 0.04em; margin-top: 4px; }
+  .panel-meta { font-size: 12px; color: var(--text-faint); font-family: 'JetBrains Mono', monospace; }
+
+  /* Grid */
+  .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; }
+  @media (max-width: 980px) { .two-col { grid-template-columns: 1fr; } }
+
+  .chart-wrap { position: relative; height: 320px; }
+  .chart-wrap.tall { height: 380px; }
+
+  /* Category list */
+  .cat-list { display: flex; flex-direction: column; gap: 1px; background: var(--border); border: 1px solid var(--border); border-radius: 2px; overflow: hidden; }
+  .cat-row { display: grid; grid-template-columns: 16px 1fr auto auto; gap: 14px; align-items: center; padding: 12px 16px; background: var(--surface); transition: background 0.15s; }
+  .cat-row:hover { background: var(--surface-2); }
+  .cat-swatch { width: 10px; height: 10px; border-radius: 50%; }
+  .cat-name { font-size: 13px; color: var(--text); }
+  .cat-pct { font-size: 12px; color: var(--text-faint); font-family: 'JetBrains Mono', monospace; min-width: 48px; text-align: right; }
+  .cat-amount { font-family: 'JetBrains Mono', monospace; font-size: 13px; color: var(--text); min-width: 100px; text-align: right; }
+  .cat-bar-wrap { grid-column: 1 / -1; height: 3px; background: var(--surface-3); border-radius: 2px; overflow: hidden; margin-top: 8px; }
+  .cat-bar { height: 100%; background: var(--accent); }
+
+  /* Transactions */
+  .tx-head { display: grid; grid-template-columns: 90px 1fr 120px 140px 110px 40px; gap: 14px; padding: 12px 16px; background: var(--surface-2); border-bottom: 1px solid var(--border); font-size: 11px; letter-spacing: 0.08em; color: var(--text-faint); text-transform: uppercase; }
+  .tx-head .sortable { cursor: pointer; user-select: none; transition: color 0.1s; display: inline-flex; align-items: center; gap: 5px; }
+  .tx-head .sortable:hover { color: var(--text); }
+  .tx-head .sortable.active { color: var(--accent); }
+  .tx-head .sort-arrow { font-size: 9px; opacity: 0.6; }
+  .tx-head .sortable.active .sort-arrow { opacity: 1; }
+  .tx-row { display: grid; grid-template-columns: 90px 1fr 120px 140px 110px 40px; gap: 14px; padding: 12px 16px; border-bottom: 1px solid var(--border); font-size: 13px; align-items: center; transition: background 0.1s; }
+  .tx-row:hover { background: var(--surface-2); }
+  .tx-row:last-child { border-bottom: none; }
+  .tx-date { color: var(--text-dim); font-family: 'JetBrains Mono', monospace; font-size: 12px; }
+  .tx-desc { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .tx-desc-sub { font-size: 11px; color: var(--text-faint); margin-top: 2px; letter-spacing: 0.04em; }
+  .tx-source { font-size: 11px; color: var(--text-faint); letter-spacing: 0.04em; text-transform: uppercase; }
+  .tx-cat { font-size: 12px; }
+  .tx-cat select { background: transparent; border: 1px solid transparent; padding: 4px 8px; font-size: 12px; cursor: pointer; border-radius: 2px; width: 100%; transition: all 0.15s; }
+  .tx-cat select:hover, .tx-cat select:focus { border-color: var(--border-strong); background: var(--surface-2); }
+  .tx-amount { font-family: 'JetBrains Mono', monospace; text-align: right; font-weight: 500; }
+  .tx-amount.pos { color: var(--positive); }
+  .tx-amount.neg { color: var(--negative); }
+  .tx-menu-btn { color: var(--text-faint); padding: 4px 8px; border-radius: 2px; }
+  .tx-menu-btn:hover { color: var(--text); background: var(--surface-3); }
+  @media (max-width: 880px) {
+    .tx-head, .tx-row { grid-template-columns: 70px 1fr 100px 50px; }
+    .tx-head .hide-sm, .tx-row .hide-sm { display: none; }
+  }
+
+  /* Rules */
+  .rules-list { display: flex; flex-wrap: wrap; gap: 6px; }
+  .rule-chip { display: inline-flex; align-items: center; gap: 6px; padding: 5px 10px; background: var(--surface-2); border: 1px solid var(--border); border-radius: 2px; font-size: 12px; font-family: 'JetBrains Mono', monospace; }
+  .rule-chip .x { color: var(--text-faint); cursor: pointer; font-size: 14px; line-height: 1; }
+  .rule-chip .x:hover { color: var(--danger); }
+  .rule-chip .arrow { color: var(--text-faint); }
+  .rule-chip .cat { color: var(--accent); }
+
+  /* Dialogs */
+  .dialog-backdrop { position: fixed; inset: 0; background: rgba(0,0,0,0.6); display: none; align-items: center; justify-content: center; z-index: 100; padding: 20px; }
+  .dialog-backdrop.open { display: flex; }
+  .dialog { background: var(--surface); border: 1px solid var(--border-strong); border-radius: 2px; padding: 28px; max-width: 480px; width: 100%; }
+  .dialog h3 { font-family: 'Fraunces', serif; font-weight: 300; font-size: 24px; margin-bottom: 16px; letter-spacing: -0.01em; }
+  .dialog p { color: var(--text-dim); margin-bottom: 16px; font-size: 13px; }
+  .dialog-body { margin-bottom: 20px; }
+  .form-row { display: flex; flex-direction: column; gap: 6px; margin-bottom: 14px; }
+  .form-row label { font-size: 11px; letter-spacing: 0.1em; color: var(--text-faint); text-transform: uppercase; }
+  .dialog-actions { display: flex; gap: 10px; justify-content: flex-end; }
+  .btn-primary { padding: 9px 20px; background: var(--accent); color: #FFFFFF; font-size: 12px; letter-spacing: 0.08em; text-transform: uppercase; border-radius: 2px; font-weight: 600; }
+  .btn-primary:hover { background: #8C6A1A; }
+  .btn-secondary { padding: 9px 20px; border: 1px solid var(--border-strong); color: var(--text-dim); font-size: 12px; letter-spacing: 0.08em; text-transform: uppercase; border-radius: 2px; }
+  .btn-secondary:hover { border-color: var(--text-dim); color: var(--text); }
+
+  /* Empty states */
+  .empty { padding: 40px 20px; text-align: center; color: var(--text-faint); font-family: 'Fraunces', serif; font-style: italic; font-size: 16px; }
+
+  /* Toast */
+  .toast { position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%); background: var(--surface-2); border: 1px solid var(--border-strong); padding: 12px 20px; border-radius: 2px; font-size: 13px; z-index: 200; opacity: 0; transition: opacity 0.2s; pointer-events: none; }
+  .toast.show { opacity: 1; }
+
+  /* Source chips */
+  .source-chips { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 20px; }
+  .source-chip { display: inline-flex; align-items: center; gap: 8px; padding: 6px 12px; background: var(--surface-2); border: 1px solid var(--border); border-radius: 2px; font-size: 12px; }
+  .source-chip .name { color: var(--text); font-family: 'JetBrains Mono', monospace; }
+  .source-chip .count { color: var(--text-faint); }
+  .source-chip .type-badge { font-size: 10px; padding: 2px 6px; border-radius: 2px; letter-spacing: 0.06em; text-transform: uppercase; }
+  .source-chip .type-badge.bank { background: rgba(122,158,184,0.15); color: var(--neutral); }
+  .source-chip .type-badge.card { background: rgba(212,168,75,0.15); color: var(--accent); }
+  .source-chip .rm { color: var(--text-faint); cursor: pointer; margin-left: 4px; }
+  .source-chip .rm:hover { color: var(--danger); }
+
+  /* Sign in */
+  .btn-signin { margin-top: 20px; padding: 14px 32px; background: var(--accent); color: #FFFFFF; font-size: 13px; letter-spacing: 0.1em; text-transform: uppercase; border-radius: 2px; font-weight: 600; cursor: pointer; transition: all 0.15s; border: none; font-family: inherit; box-shadow: 0 1px 0 rgba(0,0,0,0.04); }
+  .btn-signin:hover { background: #8C6A1A; transform: translateY(-1px); }
+  .btn-signin:disabled { opacity: 0.5; cursor: not-allowed; }
+  .landing-hint { margin-top: 14px; color: var(--text-faint); font-size: 12px; letter-spacing: 0.04em; max-width: 420px; text-align: center; }
+
+  /* Fallback upload */
+  .fallback-upload { margin-top: 40px; max-width: 560px; width: 100%; }
+  .fallback-upload summary { cursor: pointer; font-family: 'Fraunces', serif; font-style: italic; font-size: 14px; color: var(--text-faint); padding: 14px 0; border-top: 1px solid var(--border); text-align: center; list-style: none; }
+  .fallback-upload summary::-webkit-details-marker { display: none; }
+  .fallback-upload summary:hover { color: var(--text-dim); }
+  .fallback-upload[open] summary { color: var(--text-dim); border-color: var(--border-strong); }
+
+  /* Period picker */
+  .period-picker { display: flex; gap: 12px; align-items: center; flex-wrap: wrap; padding: 16px 20px; background: var(--surface); border: 1px solid var(--border-strong); border-radius: 2px; margin-bottom: 24px; }
+  .period-label { font-family: 'Fraunces', serif; font-style: italic; font-size: 16px; color: var(--text-dim); }
+  .period-meta { font-size: 12px; color: var(--text-faint); font-family: 'JetBrains Mono', monospace; letter-spacing: 0.04em; margin-left: 8px; }
+  .user-chip { display: flex; align-items: center; gap: 8px; padding: 6px 12px; background: var(--surface-2); border: 1px solid var(--border); border-radius: 2px; font-size: 12px; color: var(--text-dim); }
+  .user-chip .initials { width: 22px; height: 22px; border-radius: 50%; background: var(--accent); color: #FFFFFF; font-weight: 600; display: flex; align-items: center; justify-content: center; font-size: 11px; }
+
+  /* Attention rows */
+  .attn-row { display: grid; grid-template-columns: 1fr auto 180px; gap: 16px; align-items: center; padding: 14px 16px; border: 1px solid var(--border); border-radius: 2px; margin-bottom: 8px; background: var(--surface-2); }
+  .attn-row:last-child { margin-bottom: 0; }
+  .attn-desc { font-size: 14px; color: var(--text); margin-bottom: 4px; }
+  .attn-meta { font-size: 11px; color: var(--text-faint); letter-spacing: 0.04em; }
+  .attn-amount { font-size: 16px; font-weight: 500; }
+  .attn-amount.pos { color: var(--positive); }
+  .attn-amount.neg { color: var(--negative); }
+  @media (max-width: 720px) { .attn-row { grid-template-columns: 1fr auto; } .attn-row select { grid-column: 1 / -1; } }
+
+  /* Headings accent */
+  .rule { height: 1px; background: var(--border); margin: 48px 0 32px; position: relative; }
+  .rule::after { content: ''; position: absolute; left: 0; top: -1px; width: 40px; height: 3px; background: var(--accent); }
+
+  .footnote { font-size: 11px; color: var(--text-faint); font-style: italic; margin-top: 8px; font-family: 'Fraunces', serif; }
+
+  ::-webkit-scrollbar { width: 8px; height: 8px; }
+  ::-webkit-scrollbar-track { background: var(--surface); }
+  ::-webkit-scrollbar-thumb { background: var(--border-strong); border-radius: 2px; }
+  ::-webkit-scrollbar-thumb:hover { background: var(--text-faint); }
+</style>
+</head>
+<body>
+<div class="app">
+  <div class="brand">
+    <div>
+      <div class="brand-title">Ledger<em>.</em><span style="color: var(--text-faint); font-weight: 300; font-size: 18px; margin-left: 10px; letter-spacing: 0.02em; font-style: italic; font-family: 'Fraunces', serif;">Nguyen</span></div>
+      <div class="brand-tagline" id="tagline">Personal finances · where the money actually goes</div>
+    </div>
+    <div class="brand-meta" id="brand-meta"></div>
+  </div>
+
+  <div id="landing" class="landing">
+    <h2>A quiet place to watch <em>Nguyen's money.</em></h2>
+    <p>Drop your CSV statements into OneDrive, organised by year and month. Sign in and pick a month to see where the money went.</p>
+
+    <button class="btn-signin" id="btn-signin">Sign in with Microsoft</button>
+    <div class="landing-hint">Uses your Nemla work account. Statements stay in your OneDrive. Nothing is copied anywhere else.</div>
+
+    <details class="fallback-upload">
+      <summary>or analyse a single CSV without signing in</summary>
+      <label class="drop-zone" id="drop-zone" for="file-input" style="margin-top: 16px;">
+        <div class="drop-zone-label">Drop CSV files here</div>
+        <div class="drop-zone-hint">One off analysis, rules are not saved between sessions</div>
+      </label>
+      <div style="margin-top: 14px; display: flex; flex-direction: column; align-items: center; gap: 10px;">
+        <input type="file" id="file-input" accept="*/*" multiple style="background: var(--surface-2); color: var(--text); padding: 10px; border: 1px solid var(--border-strong); border-radius: 2px; font-family: inherit; font-size: 13px; max-width: 100%;">
+      </div>
+    </details>
+
+    <div id="status-log" style="margin-top: 32px; min-height: 60px; max-width: 560px; width: 100%; background: var(--surface-2); border: 1px solid var(--border); border-radius: 2px; padding: 12px 16px; font-family: 'JetBrains Mono', monospace; font-size: 12px; color: var(--text-dim); text-align: left; white-space: pre-wrap; line-height: 1.6;">Ready. Sign in or upload a CSV to begin.</div>
+  </div>
+
+  <div id="dashboard" hidden>
+    <div class="period-picker" id="period-picker" hidden>
+      <div class="period-label">Viewing</div>
+      <select class="filter-select" id="period-year" style="min-width: 100px;"></select>
+      <select class="filter-select" id="period-month" style="min-width: 130px;"></select>
+      <button class="ghost-btn" id="btn-load-period" style="border-color: var(--accent); color: var(--accent);">Load</button>
+      <div class="period-meta" id="period-meta"></div>
+      <div class="spacer"></div>
+      <div class="user-chip" id="user-chip" hidden></div>
+      <button class="ghost-btn" id="btn-signout" hidden>Sign out</button>
+    </div>
+
+    <div class="source-chips" id="source-chips"></div>
+
+    <div class="filters">
+      <div class="filter-group">
+        <span class="filter-label">Range</span>
+        <select class="filter-select" id="filter-range">
+          <option value="3m">Last 3 months</option>
+          <option value="6m">Last 6 months</option>
+          <option value="12m">Last 12 months</option>
+          <option value="ytd">Year to date</option>
+          <option value="all">All time</option>
+          <option value="custom">Custom</option>
+        </select>
+      </div>
+      <div class="filter-group" id="custom-range-wrap" style="display:none">
+        <input type="date" class="filter-input" id="filter-from">
+        <input type="date" class="filter-input" id="filter-to">
+      </div>
+      <label class="filter-toggle">
+        <input type="checkbox" id="filter-exclude-cc" checked>
+        Exclude card payments from expense total
+      </label>
+      <div class="spacer"></div>
+      <label class="ghost-btn" for="file-input" style="cursor:pointer">+ Add CSV</label>
+      <button class="ghost-btn" id="btn-reset">Reset</button>
+    </div>
+
+    <div class="kpi-grid">
+      <div class="kpi">
+        <div class="kpi-label"><span class="kpi-dot pos"></span>Income</div>
+        <div class="kpi-value pos mono" id="kpi-income">—</div>
+        <div class="kpi-sub" id="kpi-income-sub"></div>
+      </div>
+      <div class="kpi">
+        <div class="kpi-label"><span class="kpi-dot" style="background: #A33F3F"></span>Mortgage &amp; loans</div>
+        <div class="kpi-value mono" id="kpi-mortgage" style="color: #A33F3F">—</div>
+        <div class="kpi-sub" id="kpi-mortgage-sub"></div>
+      </div>
+      <div class="kpi">
+        <div class="kpi-label"><span class="kpi-dot neg"></span>Everyday spend</div>
+        <div class="kpi-value neg mono" id="kpi-expenses">—</div>
+        <div class="kpi-sub" id="kpi-expenses-sub"></div>
+      </div>
+      <div class="kpi">
+        <div class="kpi-label"><span class="kpi-dot" style="background: var(--accent)"></span>Card payments</div>
+        <div class="kpi-value mono" id="kpi-cc" style="color: var(--accent)">—</div>
+        <div class="kpi-sub" id="kpi-cc-sub"></div>
+      </div>
+      <div class="kpi">
+        <div class="kpi-label"><span class="kpi-dot net"></span>Net</div>
+        <div class="kpi-value mono" id="kpi-net">—</div>
+        <div class="kpi-sub" id="kpi-net-sub"></div>
+      </div>
+      <div class="kpi">
+        <div class="kpi-label"><span class="kpi-dot"></span>Savings rate</div>
+        <div class="kpi-value mono" id="kpi-sr">—</div>
+        <div class="kpi-sub" id="kpi-sr-sub"></div>
+      </div>
+    </div>
+
+    <div class="panel" id="attention-panel" hidden>
+      <div class="panel-header">
+        <div>
+          <div class="panel-title">Needs <em>a second look</em></div>
+          <div class="panel-subtitle">Big inflows tagged as transfers, or large uncategorised items. Click to retag.</div>
+        </div>
+        <button class="ghost-btn" id="btn-dismiss-attention">Dismiss</button>
+      </div>
+      <div id="attention-body"></div>
+    </div>
+
+    <div class="panel">
+      <div class="panel-header">
+        <div>
+          <div class="panel-title">Income <em>versus</em> outflow</div>
+          <div class="panel-subtitle">By month, for the selected period</div>
+        </div>
+        <div class="panel-meta" id="ie-meta"></div>
+      </div>
+      <div class="chart-wrap tall"><canvas id="chart-ie"></canvas></div>
+    </div>
+
+    <div class="two-col">
+      <div class="panel">
+        <div class="panel-header">
+          <div>
+            <div class="panel-title">Spending by <em>category</em></div>
+            <div class="panel-subtitle">Total across the selected period</div>
+          </div>
+          <div class="panel-meta" id="cat-meta"></div>
+        </div>
+        <div class="chart-wrap"><canvas id="chart-cat"></canvas></div>
+      </div>
+      <div class="panel">
+        <div class="panel-header">
+          <div>
+            <div class="panel-title">The <em>breakdown</em></div>
+            <div class="panel-subtitle">Click a category to filter transactions</div>
+          </div>
+        </div>
+        <div class="cat-list" id="cat-list"></div>
+      </div>
+    </div>
+
+    <div class="panel">
+      <div class="panel-header">
+        <div>
+          <div class="panel-title">Custom <em>rules</em></div>
+          <div class="panel-subtitle">Overrides you set this session. Click any transaction category below to add one.</div>
+        </div>
+        <button class="ghost-btn" id="btn-clear-rules">Clear all</button>
+      </div>
+      <div class="rules-list" id="rules-list"></div>
+      <div class="empty" id="rules-empty">No custom rules yet</div>
+    </div>
+
+    <div class="panel" style="padding: 0;">
+      <div class="panel-header" style="padding: 20px 24px; margin: 0;">
+        <div>
+          <div class="panel-title">Transactions</div>
+          <div class="panel-subtitle" id="tx-subtitle">Showing transactions in the selected period</div>
+        </div>
+        <div class="filter-group">
+          <input type="search" class="filter-input" id="tx-search" placeholder="Search description...">
+          <select class="filter-select" id="tx-cat-filter">
+            <option value="">All categories</option>
+          </select>
+        </div>
+      </div>
+      <div class="tx-head">
+        <div><span class="sortable" data-sort="date">Date <span class="sort-arrow"></span></span></div>
+        <div><span class="sortable" data-sort="description">Description <span class="sort-arrow"></span></span></div>
+        <div class="hide-sm"><span class="sortable" data-sort="source">Source <span class="sort-arrow"></span></span></div>
+        <div class="hide-sm"><span class="sortable" data-sort="category">Category <span class="sort-arrow"></span></span></div>
+        <div style="text-align:right"><span class="sortable" data-sort="amount">Amount <span class="sort-arrow"></span></span></div>
+        <div></div>
+      </div>
+      <div id="tx-body"></div>
+      <div style="padding: 16px 24px; text-align: center;">
+        <button class="ghost-btn" id="btn-show-more" hidden>Show 50 more</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="dialog-backdrop" id="dialog-recat">
+  <div class="dialog">
+    <h3>Recategorise</h3>
+    <p id="recat-body"></p>
+    <div class="dialog-body">
+      <div class="form-row">
+        <label>New category</label>
+        <select class="filter-select" id="recat-category" style="width:100%"></select>
+      </div>
+      <label class="filter-toggle">
+        <input type="checkbox" id="recat-save-rule" checked>
+        Save as a rule for transactions matching this pattern
+      </label>
+      <div class="form-row" id="recat-pattern-wrap">
+        <label>Match pattern (any transaction containing this text)</label>
+        <input type="text" class="filter-input" id="recat-pattern" style="width:100%">
+      </div>
+    </div>
+    <div class="dialog-actions">
+      <button class="btn-secondary" id="recat-cancel">Cancel</button>
+      <button class="btn-primary" id="recat-apply">Apply</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+/* ============================================================
+   CONFIGURATION — Replace placeholders after app registration
+   See README.md for step by step setup
+   ============================================================ */
+const AZURE_CLIENT_ID = '516dddcd-f75b-4312-95b0-3a3a5d24db31';
+const AZURE_TENANT_ID = '91faaa92-6633-43b2-a302-8122e930e674';
+const ONEDRIVE_ROOT = 'Apps/Personal';  // folder path in OneDrive root
+
+/* ============================================================
+   STATE
+   ============================================================ */
+const state = {
+  files: [],           // [{ name, type: 'bank'|'card', count, id }]
+  transactions: [],    // all parsed
+  customRules: [],     // [{ pattern, category }]
+  attentionDismissed: false,
+  // Auth and cloud state
+  msal: null,          // MSAL instance
+  account: null,       // signed in account
+  connected: false,    // true once signed in and loaded from OneDrive
+  currentPeriod: null, // { year: '2026', month: '04' }
+  availableYears: [],
+  availableMonths: {}, // { '2026': ['01','02','03'] }
+  filters: {
+    range: '3m',
+    from: null,
+    to: null,
+    excludeCC: true,
+    category: '',
+    search: ''
+  },
+  sort: { column: 'date', direction: 'desc' },  // 'date' | 'desc' | 'source' | 'category' | 'amount'  ·  'asc' | 'desc'
+  txShowCount: 50,
+  charts: {}
+};
+
+const CATEGORY_COLORS = {
+  'Groceries':          '#6B9D4D',
+  'Dining':             '#C45F3C',
+  'Fuel':               '#B08840',
+  'Transport':          '#4B7D9C',
+  'Utilities':          '#8B63A8',
+  'Insurance':          '#5E997B',
+  'Entertainment':      '#C99324',
+  'Shopping':           '#D17A52',
+  'Health':             '#6BA4B3',
+  'Kids & School':      '#D19E4A',
+  'Cash':               '#7A6F5D',
+  'Mortgage & Loans':   '#A33F3F',
+  'Fees & Interest':    '#5E554A',
+  'Subscriptions':      '#A7649C',
+  'Income':             '#5B8C47',
+  'Transfers':          '#4A5568',
+  'Credit Card Payment':'#A07A1F',
+  'Uncategorised':      '#8F897A'
+};
+
+// Order matters: earlier rules win. Put specific, high-confidence rules first.
+const DEFAULT_RULES = {
+  'Income':             ['salary','wages','payroll','pay run','dividend','interest earned','tax refund','refund purchase','rebate'],
+  'Credit Card Payment':[
+    'credit card payment','cba cc','commbank cc','anz cc','anz credit','anz cards','cba cards',
+    'mastercard payment','visa payment','qantas money','qantas card','qantas visa','qantas credit','qantascc',
+    'amex payment','card payment to','payment received','credit card direct',
+    'cba cr card','cr card autopay','card autopay','autopay pmnt','cards commbank'
+  ],
+  'Mortgage & Loans':   ['home loan','mortgage','loan repayment','ln repay','home ln','housing loan','personal loan','car loan'],
+  'Groceries':          ['woolworths','coles','aldi','iga','costco','harris farm','foodworks','metro fresh'],
+  'Dining':             ['mcdonald','kfc','subway','hungry jack','guzman','nando','uber eats','menulog','deliveroo','doordash','pizza','sushi','cafe','restaurant','bakery','starbucks','gloria jean','boost juice','chatime','gongcha'],
+  'Fuel':               ['bp ','bp ret','shell ','caltex','ampol','7-eleven','united pet','metro petroleum','mobil ','liberty '],
+  'Transport':          ['uber trip','uber*','didi ','ola cabs','ola *','opal card','opal ','transport nsw','transport for nsw','toll road','linkt','e-toll','etoll','cabcharge','taxi ','13cabs','wilson parking','secure parking','care park','parking '],
+  'Utilities':          ['energy australia','energyaustralia','agl ','origin energy','red energy','alinta','sydney water','hunter water','telstra','optus','vodafone','tpg','belong','aussie broadband','iinet','more telecom','amaysim'],
+  'Insurance':          ['nrma','aami','bupa','medibank','hcf','allianz','suncorp insur','qbe ','youi','real insurance','budget direct','racv','racq'],
+  'Entertainment':      ['netflix','spotify','disney','apple.com/bill','amazon prime','stan.com','binge','kayo','foxtel','paramount','youtube premium','hbo','audible','steam ','nintendo','playstation','xbox','tatts'],
+  'Shopping':           ['amazon','kmart','big w','target','bunnings','jb hi-fi','jb hifi','harvey norman','officeworks','ikea','myer','david jones','the iconic','kathmandu','anaconda','rebel sport','chemist warehouse','dan murphy','bws','liquorland'],
+  'Health':             ['chemist','pharmacy','priceline','medicare','medical','dental','physio','optometrist','bupa claim','vision'],
+  'Kids & School':      ['daycare','childcare','school','kindergarten','kidstuff','toys r us','kmart toy','primary school','high school'],
+  'Cash':               ['atm ','wdl atm','withdrawal','cash out','cash advance'],
+  'Fees & Interest':    ['bank fee','interest charge','account fee','international txn fee','currency conversion','overseas transaction','monthly fee'],
+  'Subscriptions':      ['openai','chatgpt','anthropic','claude','github','microsoft','office 365','google one','dropbox','icloud','adobe','canva','notion','figma','linkedin premium'],
+  'Transfers':          ['transfer to','transfer from','osko','bpay','internet transfer','direct debit','fast transfer','beem ','payid']
+};
+
+/* ============================================================
+   UTILITIES
+   ============================================================ */
+const fmt = {
+  money: (n, showSign = false) => {
+    const abs = Math.abs(n);
+    const s = abs.toLocaleString('en-AU', { style: 'currency', currency: 'AUD', minimumFractionDigits: 2 });
+    return (showSign ? (n >= 0 ? '+' : '−') : (n < 0 ? '−' : '')) + s.replace('-','');
+  },
+  moneyShort: (n) => {
+    const abs = Math.abs(n);
+    let out;
+    if (abs >= 1000000) out = (abs/1000000).toFixed(1) + 'M';
+    else if (abs >= 1000) out = (abs/1000).toFixed(1) + 'k';
+    else out = abs.toFixed(0);
+    return (n < 0 ? '−' : '') + '$' + out;
+  },
+  date: (d) => d.toLocaleDateString('en-AU', { day: '2-digit', month: 'short' }),
+  dateLong: (d) => d.toLocaleDateString('en-AU', { day: '2-digit', month: 'short', year: 'numeric' }),
+  monthKey: (d) => d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0'),
+  monthLabel: (key) => {
+    const [y,m] = key.split('-');
+    return new Date(y, m-1, 1).toLocaleDateString('en-AU', { month: 'short', year: '2-digit' });
+  }
+};
+
+function parseDate(v) {
+  if (!v) return null;
+  const s = v.toString().trim();
+  // DD/MM/YYYY or DD-MM-YYYY
+  let m = s.match(/^(\d{1,2})[\/\-](\d{1,2})[\/\-](\d{2,4})$/);
+  if (m) {
+    let [_, d, mo, y] = m;
+    if (y.length === 2) y = (parseInt(y) > 50 ? '19' : '20') + y;
+    const date = new Date(parseInt(y), parseInt(mo)-1, parseInt(d));
+    if (!isNaN(date)) return date;
+  }
+  // DD Mon YY / DD Month YYYY
+  m = s.match(/^(\d{1,2})\s+([A-Za-z]{3,9})\s+(\d{2,4})$/);
+  if (m) {
+    const date = new Date(m[1] + ' ' + m[2] + ' ' + m[3]);
+    if (!isNaN(date)) return date;
+  }
+  // YYYY-MM-DD
+  m = s.match(/^(\d{4})[\/\-](\d{1,2})[\/\-](\d{1,2})/);
+  if (m) {
+    const date = new Date(parseInt(m[1]), parseInt(m[2])-1, parseInt(m[3]));
+    if (!isNaN(date)) return date;
+  }
+  return null;
+}
+
+function parseAmount(v) {
+  if (v === undefined || v === null || v === '') return null;
+  const s = v.toString().replace(/[\$,\s]/g,'').replace(/^\((.*)\)$/, '-$1');
+  const n = parseFloat(s);
+  return isNaN(n) ? null : n;
+}
+
+function isNumericStr(v) { return parseAmount(v) !== null; }
+
+function cleanDesc(s) {
+  return s.toString().replace(/\s+/g,' ').trim();
+}
+
+/* ============================================================
+   CSV PARSING
+   ============================================================ */
+function parseCSVContent(text, fileName) {
+  if (!text || !text.length) throw new Error('File is empty');
+  const results = Papa.parse(text.trim(), { skipEmptyLines: true });
+  if (results.errors && results.errors.length && results.data.length === 0) {
+    throw new Error('CSV parse error: ' + results.errors[0].message);
+  }
+  return extractTransactions(results.data, fileName);
+}
+
+function parseCSVFile(file) {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      try { resolve(parseCSVContent(e.target.result, file.name)); }
+      catch (err) { reject(err); }
+    };
+    reader.onerror = () => reject(new Error('Could not read file'));
+    reader.readAsText(file);
+  });
+}
+
+function extractTransactions(rows, fileName) {
+  if (!rows.length) return [];
+
+  // Detect header row
+  const headerKeywords = /date|amount|description|narrat|detail|transaction|debit|credit|balance|particulars/i;
+  const firstRow = rows[0].map(c => (c||'').toString().toLowerCase());
+  const hasHeader = firstRow.filter(c => headerKeywords.test(c)).length >= 2;
+
+  const header = hasHeader ? firstRow : null;
+  const dataRows = hasHeader ? rows.slice(1) : rows;
+
+  if (!dataRows.length) return [];
+
+  // Determine columns
+  let idx = { date: -1, amount: -1, desc: -1, debit: -1, credit: -1 };
+
+  if (hasHeader) {
+    header.forEach((c, i) => {
+      if (/^date|transaction date|posted|process date/.test(c) && idx.date === -1) idx.date = i;
+      else if (/^amount$|^amt$|transaction amount/.test(c) && idx.amount === -1) idx.amount = i;
+      else if (/debit|withdrawal/.test(c) && idx.debit === -1) idx.debit = i;
+      else if (/credit|deposit/.test(c) && idx.credit === -1) idx.credit = i;
+      else if (/desc|narrat|detail|particulars|merchant/.test(c) && idx.desc === -1) idx.desc = i;
+    });
+  }
+
+  // Autodetect if still missing (typical for CBA, ANZ no-header CSVs)
+  if (idx.date === -1 || idx.desc === -1 || (idx.amount === -1 && (idx.debit === -1 || idx.credit === -1))) {
+    const sample = dataRows.find(r => r.some(c => c && c.toString().trim())) || dataRows[0];
+    const colInfo = sample.map((v, i) => ({
+      i,
+      isDate: parseDate(v) !== null,
+      isNum: isNumericStr(v) && !/^\d{1,2}[\/\-]\d/.test(v.toString()),
+      isText: v && v.toString().length > 3 && !isNumericStr(v) && parseDate(v) === null,
+      val: v
+    }));
+
+    if (idx.date === -1) {
+      const c = colInfo.find(c => c.isDate);
+      if (c) idx.date = c.i;
+    }
+    // Find description: longest non-numeric non-date text column
+    if (idx.desc === -1) {
+      let best = null;
+      colInfo.forEach(c => {
+        if (c.isText && (!best || c.val.toString().length > best.val.toString().length)) best = c;
+      });
+      if (best) idx.desc = best.i;
+    }
+    // Find amount: numeric column that isn't the balance
+    if (idx.amount === -1) {
+      // Look across multiple rows to find which numeric column varies (amount) vs runs sequentially (balance)
+      const numCols = colInfo.filter(c => c.isNum).map(c => c.i);
+      if (numCols.length === 1) idx.amount = numCols[0];
+      else if (numCols.length >= 2) {
+        // Balance column tends to be monotonic-ish and always positive/large; amount has negatives
+        let bestAmount = numCols[0];
+        let maxNegatives = -1;
+        numCols.forEach(ci => {
+          const negs = dataRows.slice(0, 20).filter(r => {
+            const n = parseAmount(r[ci]);
+            return n !== null && n < 0;
+          }).length;
+          if (negs > maxNegatives) { maxNegatives = negs; bestAmount = ci; }
+        });
+        idx.amount = bestAmount;
+      }
+    }
+  }
+
+  if (idx.date === -1 || idx.desc === -1) return [];
+
+  const transactions = [];
+  dataRows.forEach((row, ri) => {
+    const d = parseDate(row[idx.date]);
+    if (!d) return;
+    let amount = null;
+    if (idx.amount !== -1) {
+      amount = parseAmount(row[idx.amount]);
+    } else if (idx.debit !== -1 || idx.credit !== -1) {
+      const deb = idx.debit !== -1 ? parseAmount(row[idx.debit]) : null;
+      const cre = idx.credit !== -1 ? parseAmount(row[idx.credit]) : null;
+      if (cre !== null && cre !== 0) amount = Math.abs(cre);
+      else if (deb !== null && deb !== 0) amount = -Math.abs(deb);
+    }
+    if (amount === null) return;
+    const desc = cleanDesc(row[idx.desc] || '');
+    if (!desc) return;
+    transactions.push({
+      id: fileName + '-' + ri + '-' + Math.random().toString(36).slice(2,8),
+      date: d,
+      amount,
+      description: desc,
+      source: fileName,
+      category: null
+    });
+  });
+  return transactions;
+}
+
+/* ============================================================
+   CATEGORISATION
+   ============================================================ */
+function autoCategorise(desc) {
+  const d = desc.toLowerCase();
+  // Custom rules first
+  for (const rule of state.customRules) {
+    if (d.includes(rule.pattern.toLowerCase())) return rule.category;
+  }
+  // Default rules
+  for (const [cat, keywords] of Object.entries(DEFAULT_RULES)) {
+    for (const k of keywords) {
+      if (d.includes(k)) return cat;
+    }
+  }
+  return 'Uncategorised';
+}
+
+function recategoriseAll() {
+  // Build a map of filename -> source type for quick lookup
+  const fileTypes = {};
+  state.files.forEach(f => { fileTypes[f.name] = f.type; });
+
+  state.transactions.forEach(t => {
+    t.category = autoCategorise(t.description);
+    // Override: positive entries on credit card files are card payments received,
+    // not real income. Tag them as Credit Card Payment so they don't inflate income.
+    if (fileTypes[t.source] === 'card' && t.amount > 0) {
+      t.category = 'Credit Card Payment';
+    }
+  });
+}
+
+/* ============================================================
+   FILE DETECTION
+   ============================================================ */
+function detectFileType(transactions, fileName) {
+  // Credit card files: most transactions negative, description contains common merchants
+  // Bank files: mix of positive and negative, may contain CC payment patterns
+  const n = fileName.toLowerCase();
+  if (/credit|card|visa|master|amex|qantas/.test(n)) return 'card';
+  if (/savings|transact|cheque|debit|account/.test(n)) return 'bank';
+  // Heuristic: if >90% of non-trivial amounts are negative, likely a card
+  const amts = transactions.map(t => t.amount).filter(a => Math.abs(a) > 1);
+  if (!amts.length) return 'bank';
+  const negRatio = amts.filter(a => a < 0).length / amts.length;
+  if (negRatio > 0.85) return 'card';
+  return 'bank';
+}
+
+/* ============================================================
+   FILTERING
+   ============================================================ */
+function getDateRange() {
+  const now = new Date();
+  const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+  const r = state.filters.range;
+  if (r === 'custom' && state.filters.from && state.filters.to) {
+    return { from: new Date(state.filters.from), to: new Date(state.filters.to) };
+  }
+  const to = today;
+  let from;
+  if (r === '3m') from = new Date(today.getFullYear(), today.getMonth()-3, today.getDate());
+  else if (r === '6m') from = new Date(today.getFullYear(), today.getMonth()-6, today.getDate());
+  else if (r === '12m') from = new Date(today.getFullYear(), today.getMonth()-12, today.getDate());
+  else if (r === 'ytd') from = new Date(today.getFullYear(), 0, 1);
+  else if (r === 'all') from = new Date(2000, 0, 1);
+  else from = new Date(today.getFullYear(), today.getMonth()-3, today.getDate());
+  return { from, to };
+}
+
+function isBankToCardPayment(tx) {
+  const file = state.files.find(f => f.name === tx.source);
+  if (!file || file.type !== 'bank') return false;
+  return tx.category === 'Credit Card Payment';
+}
+
+function isCardPaymentReceived(tx) {
+  const file = state.files.find(f => f.name === tx.source);
+  if (!file || file.type !== 'card') return false;
+  return tx.category === 'Credit Card Payment';
+}
+
+function getFilteredTransactions() {
+  const { from, to } = getDateRange();
+  // Only apply date range. CC payments stay visible for transparency;
+  // they are excluded from money math inside aggregate() based on the toggle.
+  return state.transactions.filter(t => {
+    if (t.date < from || t.date > to) return false;
+    return true;
+  });
+}
+
+/* ============================================================
+   AGGREGATION
+   ============================================================ */
+function aggregate(transactions) {
+  const agg = {
+    income: 0,
+    expenses: 0,             // Everyday spend only (excludes Mortgage & Loans and card payments)
+    mortgage: 0,             // Mortgage & Loans total for the period
+    net: 0,
+    cardPayments: 0,         // total BPAY/Direct payments to credit cards this period
+    cardPaymentList: [],     // transactions that are card payments
+    mortgagePayments: [],    // full list of mortgage/loan transactions
+    byMonth: {},             // { 'YYYY-MM': { income, expenses, mortgage } }
+    byCategory: {}           // { cat: amount (positive = expense) }
+  };
+  transactions.forEach(t => {
+    const mk = fmt.monthKey(t.date);
+    if (!agg.byMonth[mk]) agg.byMonth[mk] = { income: 0, expenses: 0, mortgage: 0 };
+
+    // Card payment received on a card file: mirror of a bank-side payment.
+    // Keep it visible in the transactions list but do NOT add to totals (would double count).
+    if (isCardPaymentReceived(t)) {
+      agg.cardPaymentList.push(t);
+      return;
+    }
+
+    // Bank to card payment: real outflow from bank account, but NOT spending since it just moved debt.
+    // This is the ONE place we count the card payment total.
+    if (isBankToCardPayment(t)) {
+      agg.cardPayments += Math.abs(t.amount);
+      agg.cardPaymentList.push(t);
+      if (state.filters.excludeCC) return;  // treat as hidden from expense math
+    }
+
+    if (t.amount > 0) {
+      agg.income += t.amount;
+      agg.byMonth[mk].income += t.amount;
+    } else if (t.amount < 0) {
+      const abs = Math.abs(t.amount);
+      // Mortgage and loans tracked separately so everyday spend is just discretionary.
+      if (t.category === 'Mortgage & Loans') {
+        agg.mortgage += abs;
+        agg.byMonth[mk].mortgage += abs;
+        agg.mortgagePayments.push(t);
+      } else {
+        agg.expenses += abs;
+        agg.byMonth[mk].expenses += abs;
+      }
+      // Keep the category breakdown full (mortgage shows up there too).
+      agg.byCategory[t.category] = (agg.byCategory[t.category] || 0) + abs;
+    }
+  });
+  agg.net = agg.income - agg.expenses - agg.mortgage;
+  agg.savingsRate = agg.income > 0 ? (agg.net / agg.income) : 0;
+  return agg;
+}
+
+/* ============================================================
+   RENDERING
+   ============================================================ */
+function render() {
+  if (!state.transactions.length) {
+    show('#landing'); hide('#dashboard');
+    return;
+  }
+  hide('#landing'); show('#dashboard');
+
+  renderSources();
+  renderRules();
+  const filtered = getFilteredTransactions();
+  const agg = aggregate(filtered);
+  renderKPIs(agg, filtered);
+  renderAttention(filtered);
+  renderIncomeExpenses(agg);
+  renderCategoryChart(agg);
+  renderCategoryList(agg);
+  renderCategoryFilter();
+  renderTransactions(filtered);
+  renderBrandMeta();
+}
+
+function renderAttention(filtered) {
+  if (state.attentionDismissed) { $('#attention-panel').hidden = true; return; }
+  // Surface any positive transfer >$500 (likely salary/misc income) and uncategorised positive/negative >$200
+  const items = filtered.filter(t => {
+    if (t.amount > 500 && t.category === 'Transfers') return true;
+    if (Math.abs(t.amount) > 200 && t.category === 'Uncategorised') return true;
+    return false;
+  }).sort((a,b) => Math.abs(b.amount) - Math.abs(a.amount)).slice(0, 6);
+
+  if (!items.length) { $('#attention-panel').hidden = true; return; }
+  $('#attention-panel').hidden = false;
+
+  const cats = Object.keys(DEFAULT_RULES).concat('Uncategorised');
+  $('#attention-body').innerHTML = items.map(t => `
+    <div class="attn-row">
+      <div class="attn-main">
+        <div class="attn-desc">${escapeHtml(t.description)}</div>
+        <div class="attn-meta">${fmt.date(t.date)} · ${escapeHtml(t.source.replace(/\.csv$/i,''))} · currently ${escapeHtml(t.category)}</div>
+      </div>
+      <div class="attn-amount ${t.amount >= 0 ? 'pos' : 'neg'} mono">${fmt.money(t.amount, true)}</div>
+      <select class="filter-select" data-attncat="${t.id}">
+        <option value="">Retag as...</option>
+        ${cats.filter(c => c !== t.category).map(c => `<option value="${escapeHtml(c)}">${escapeHtml(c)}</option>`).join('')}
+      </select>
+    </div>
+  `).join('');
+
+  $('#attention-body').querySelectorAll('[data-attncat]').forEach(s => {
+    s.onchange = (e) => { if (e.target.value) quickRecat(s.dataset.attncat, e.target.value); };
+  });
+}
+
+function renderBrandMeta() {
+  const { from, to } = getDateRange();
+  $('#brand-meta').textContent = `${fmt.dateLong(from)} — ${fmt.dateLong(to)}`;
+}
+
+function renderSources() {
+  const el = $('#source-chips');
+  el.innerHTML = state.files.map(f => `
+    <span class="source-chip">
+      <span class="name">${escapeHtml(f.name)}</span>
+      <span class="count">${f.count} tx</span>
+      <span class="type-badge ${f.type === 'card' ? 'card' : 'bank'}">${f.type === 'card' ? 'Credit card' : 'Bank'}</span>
+      <span class="rm" data-rm="${f.id}" title="Remove">×</span>
+    </span>
+  `).join('');
+  el.querySelectorAll('[data-rm]').forEach(b => b.onclick = () => removeFile(b.dataset.rm));
+}
+
+function renderKPIs(agg, filtered) {
+  $('#kpi-income').textContent = fmt.money(agg.income);
+  $('#kpi-expenses').textContent = fmt.money(agg.expenses);
+  $('#kpi-mortgage').textContent = agg.mortgage > 0 ? fmt.money(agg.mortgage) : '—';
+  $('#kpi-cc').textContent = agg.cardPayments > 0 ? fmt.money(agg.cardPayments) : '—';
+  $('#kpi-net').textContent = fmt.money(agg.net, true);
+  $('#kpi-net').className = 'kpi-value mono ' + (agg.net >= 0 ? 'pos' : 'neg');
+  const sr = agg.savingsRate * 100;
+  $('#kpi-sr').textContent = isFinite(sr) ? sr.toFixed(1) + '%' : '—';
+  $('#kpi-sr').className = 'kpi-value mono ' + (sr >= 0 ? 'pos' : 'neg');
+  const months = Object.keys(agg.byMonth).length || 1;
+  const purchaseCount = filtered.filter(t => t.amount < 0 && t.category !== 'Mortgage & Loans').length;
+  $('#kpi-income-sub').textContent = months > 1 ? `avg ${fmt.money(agg.income/months)} / mo` : `${filtered.filter(t=>t.amount>0).length} deposits`;
+  $('#kpi-expenses-sub').textContent = months > 1 ? `avg ${fmt.money(agg.expenses/months)} / mo` : `${purchaseCount} purchases`;
+  $('#kpi-mortgage-sub').textContent = agg.mortgagePayments.length ? agg.mortgagePayments.length + ' payment(s)' : 'none this period';
+  const bankSidePayments = agg.cardPaymentList.filter(t => {
+    const f = state.files.find(x => x.name === t.source);
+    return f && f.type === 'bank';
+  });
+  $('#kpi-cc-sub').textContent = bankSidePayments.length ? bankSidePayments.length + ' payment(s) from bank' : 'none this period';
+  $('#kpi-net-sub').textContent = `${filtered.length} transactions`;
+  $('#kpi-sr-sub').textContent = agg.income > 0 ? `${months} mo period` : 'no income this period';
+}
+
+function renderIncomeExpenses(agg) {
+  const months = Object.keys(agg.byMonth).sort();
+  const labels = months.map(fmt.monthLabel);
+  const income = months.map(m => agg.byMonth[m].income);
+  const everyday = months.map(m => agg.byMonth[m].expenses);
+  const mortgage = months.map(m => agg.byMonth[m].mortgage);
+  const totalIn = income.reduce((s,v) => s+v, 0);
+  const totalOut = mortgage.reduce((s,v) => s+v, 0) + everyday.reduce((s,v) => s+v, 0);
+  $('#ie-meta').textContent = fmt.money(totalIn) + ' in · ' + fmt.money(totalOut) + ' out';
+
+  destroyChart('ie');
+  state.charts.ie = new Chart($('#chart-ie'), {
+    type: 'bar',
+    data: {
+      labels,
+      datasets: [
+        { label: 'Income', data: income, backgroundColor: '#5B8C47', borderRadius: 2, barPercentage: 0.8, categoryPercentage: 0.75 },
+        { label: 'Mortgage & loans', data: mortgage, backgroundColor: '#A33F3F', borderRadius: 2, barPercentage: 0.8, categoryPercentage: 0.75 },
+        { label: 'Everyday spend', data: everyday, backgroundColor: '#B85838', borderRadius: 2, barPercentage: 0.8, categoryPercentage: 0.75 }
+      ]
+    },
+    options: {
+      indexAxis: 'y',
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: {
+        legend: {
+          position: 'bottom',
+          align: 'center',
+          labels: { color: '#5E574B', font: { family: 'Manrope', size: 12 }, usePointStyle: true, pointStyle: 'circle', boxWidth: 8, padding: 16 }
+        },
+        tooltip: tooltipStyle(true)
+      },
+      scales: {
+        x: {
+          grid: { color: '#E8E2D4', drawBorder: false },
+          ticks: {
+            color: '#8F897A',
+            font: { family: 'JetBrains Mono', size: 11 },
+            callback: (v) => fmt.moneyShort(v)
+          }
+        },
+        y: {
+          grid: { display: false, drawBorder: false },
+          ticks: { color: '#2A2822', font: { family: 'Manrope', size: 12 } }
+        }
+      }
+    }
+  });
+}
+
+function renderCategoryChart(agg) {
+  const entries = Object.entries(agg.byCategory).sort((a,b) => b[1]-a[1]);
+  $('#cat-meta').textContent = entries.length + ' categories';
+
+  destroyChart('cat');
+  if (!entries.length) { $('#chart-cat').getContext('2d').clearRect(0,0,9999,9999); return; }
+
+  state.charts.cat = new Chart($('#chart-cat'), {
+    type: 'doughnut',
+    data: {
+      labels: entries.map(e => e[0]),
+      datasets: [{
+        data: entries.map(e => e[1]),
+        backgroundColor: entries.map(e => CATEGORY_COLORS[e[0]] || '#8B7D6B'),
+        borderWidth: 2,
+        borderColor: '#FDFBF7'
+      }]
+    },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      cutout: '62%',
+      plugins: {
+        legend: { display: false },
+        tooltip: tooltipStyle(true)
+      }
+    }
+  });
+}
+
+function renderCategoryList(agg) {
+  const entries = Object.entries(agg.byCategory).sort((a,b) => b[1]-a[1]);
+  const total = entries.reduce((s, e) => s + e[1], 0);
+  const el = $('#cat-list');
+  if (!entries.length) { el.innerHTML = '<div class="empty">No expenses in this period</div>'; return; }
+  el.innerHTML = entries.map(([cat, amt]) => {
+    const pct = total > 0 ? (amt/total*100) : 0;
+    return `
+      <div class="cat-row" data-cat-filter="${escapeHtml(cat)}" style="cursor:pointer">
+        <span class="cat-swatch" style="background:${CATEGORY_COLORS[cat]||'#8B7D6B'}"></span>
+        <span class="cat-name">${escapeHtml(cat)}</span>
+        <span class="cat-pct">${pct.toFixed(1)}%</span>
+        <span class="cat-amount">${fmt.money(amt)}</span>
+        <div class="cat-bar-wrap"><div class="cat-bar" style="width:${pct}%;background:${CATEGORY_COLORS[cat]||'#8B7D6B'}"></div></div>
+      </div>
+    `;
+  }).join('');
+  el.querySelectorAll('[data-cat-filter]').forEach(r => {
+    r.onclick = () => {
+      state.filters.category = r.dataset.catFilter;
+      $('#tx-cat-filter').value = state.filters.category;
+      render();
+      document.querySelector('.panel .tx-head')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    };
+  });
+}
+
+function renderCategoryFilter() {
+  const cats = [...new Set(state.transactions.map(t => t.category).filter(Boolean))].sort();
+  const sel = $('#tx-cat-filter');
+  const current = state.filters.category;
+  sel.innerHTML = '<option value="">All categories</option>' + cats.map(c => `<option value="${escapeHtml(c)}">${escapeHtml(c)}</option>`).join('');
+  sel.value = current;
+}
+
+function renderTransactions(filtered) {
+  let list = filtered.slice();
+  if (state.filters.category) list = list.filter(t => t.category === state.filters.category);
+  if (state.filters.search) {
+    const q = state.filters.search.toLowerCase();
+    list = list.filter(t => t.description.toLowerCase().includes(q));
+  }
+  const dir = state.sort.direction === 'asc' ? 1 : -1;
+  list.sort((a, b) => {
+    let av, bv;
+    switch (state.sort.column) {
+      case 'date':        av = a.date.getTime(); bv = b.date.getTime(); break;
+      case 'description': av = a.description.toLowerCase(); bv = b.description.toLowerCase(); break;
+      case 'source':      av = a.source.toLowerCase(); bv = b.source.toLowerCase(); break;
+      case 'category':    av = a.category.toLowerCase(); bv = b.category.toLowerCase(); break;
+      case 'amount':      av = a.amount; bv = b.amount; break;
+      default:            av = a.date.getTime(); bv = b.date.getTime();
+    }
+    if (av < bv) return -1 * dir;
+    if (av > bv) return  1 * dir;
+    return 0;
+  });
+
+  // Update header arrows / active state
+  document.querySelectorAll('.tx-head .sortable').forEach(el => {
+    const isActive = el.dataset.sort === state.sort.column;
+    el.classList.toggle('active', isActive);
+    const arrow = el.querySelector('.sort-arrow');
+    if (arrow) arrow.textContent = isActive ? (state.sort.direction === 'asc' ? '▲' : '▼') : '';
+  });
+
+  $('#tx-subtitle').textContent = `${list.length} transactions${state.filters.category ? ' · ' + state.filters.category : ''}`;
+
+  const cats = [...new Set(state.transactions.map(t => t.category))].sort();
+  const visible = list.slice(0, state.txShowCount);
+  const el = $('#tx-body');
+  if (!list.length) { el.innerHTML = '<div class="empty">No transactions match these filters</div>'; $('#btn-show-more').hidden = true; return; }
+
+  el.innerHTML = visible.map(t => `
+    <div class="tx-row" data-tx="${t.id}">
+      <div class="tx-date">${fmt.date(t.date)}</div>
+      <div class="tx-desc">${escapeHtml(t.description)}<div class="tx-desc-sub hide-sm">${escapeHtml(t.source)}</div></div>
+      <div class="tx-source hide-sm">${escapeHtml(t.source.replace(/\.csv$/i,''))}</div>
+      <div class="tx-cat hide-sm">
+        <select data-txcat="${t.id}">
+          ${cats.map(c => `<option value="${escapeHtml(c)}"${c===t.category?' selected':''}>${escapeHtml(c)}</option>`).join('')}
+        </select>
+      </div>
+      <div class="tx-amount ${t.amount >= 0 ? 'pos' : 'neg'}">${fmt.money(t.amount, true)}</div>
+      <div><button class="tx-menu-btn" data-recat="${t.id}" title="Recategorise">⋯</button></div>
+    </div>
+  `).join('');
+
+  el.querySelectorAll('[data-txcat]').forEach(s => s.onchange = (e) => quickRecat(s.dataset.txcat, e.target.value));
+  el.querySelectorAll('[data-recat]').forEach(b => b.onclick = () => openRecatDialog(b.dataset.recat));
+  $('#btn-show-more').hidden = list.length <= state.txShowCount;
+}
+
+function renderRules() {
+  const el = $('#rules-list');
+  if (!state.customRules.length) { el.innerHTML = ''; $('#rules-empty').style.display = 'block'; return; }
+  $('#rules-empty').style.display = 'none';
+  el.innerHTML = state.customRules.map((r, i) => `
+    <span class="rule-chip">
+      "${escapeHtml(r.pattern)}" <span class="arrow">→</span> <span class="cat">${escapeHtml(r.category)}</span>
+      <span class="x" data-rmrule="${i}">×</span>
+    </span>
+  `).join('');
+  el.querySelectorAll('[data-rmrule]').forEach(b => b.onclick = () => removeRule(parseInt(b.dataset.rmrule)));
+}
+
+/* ============================================================
+   CHART DEFAULTS
+   ============================================================ */
+function chartBaseOptions({ legend = false, money = false } = {}) {
+  return {
+    responsive: true,
+    maintainAspectRatio: false,
+    plugins: {
+      legend: legend ? {
+        position: 'top',
+        align: 'end',
+        labels: { color: '#5E574B', font: { family: 'Manrope', size: 12 }, usePointStyle: true, pointStyle: 'circle', boxWidth: 8 }
+      } : { display: false },
+      tooltip: tooltipStyle(money)
+    },
+    scales: {
+      x: {
+        grid: { color: '#E8E2D4', drawBorder: false },
+        ticks: { color: '#8F897A', font: { family: 'JetBrains Mono', size: 11 } }
+      },
+      y: {
+        grid: { color: '#E8E2D4', drawBorder: false },
+        ticks: {
+          color: '#8F897A',
+          font: { family: 'JetBrains Mono', size: 11 },
+          callback: (v) => money ? fmt.moneyShort(v) : v
+        }
+      }
+    }
+  };
+}
+
+function tooltipStyle(money) {
+  return {
+    backgroundColor: '#FDFBF7',
+    titleColor: '#2A2822',
+    bodyColor: '#2A2822',
+    borderColor: '#C9C0AB',
+    borderWidth: 1,
+    padding: 10,
+    titleFont: { family: 'Manrope', weight: '600' },
+    bodyFont: { family: 'JetBrains Mono' },
+    callbacks: money ? {
+      label: (ctx) => ctx.dataset.label ? `${ctx.dataset.label}: ${fmt.money(ctx.parsed.y ?? ctx.parsed)}` : fmt.money(ctx.parsed)
+    } : {}
+  };
+}
+
+function destroyChart(name) {
+  if (state.charts[name]) { state.charts[name].destroy(); delete state.charts[name]; }
+}
+
+/* ============================================================
+   DIALOG / RULES
+   ============================================================ */
+let recatTxId = null;
+
+function openRecatDialog(txId) {
+  const tx = state.transactions.find(t => t.id === txId);
+  if (!tx) return;
+  recatTxId = txId;
+  $('#recat-body').textContent = `"${tx.description}"  ·  ${fmt.money(tx.amount, true)}`;
+  const cats = Object.keys(DEFAULT_RULES).concat('Uncategorised');
+  $('#recat-category').innerHTML = cats.map(c => `<option value="${escapeHtml(c)}"${c===tx.category?' selected':''}>${escapeHtml(c)}</option>`).join('');
+  // Suggest a pattern: first 2-3 meaningful words of description
+  const pattern = extractPattern(tx.description);
+  $('#recat-pattern').value = pattern;
+  $('#dialog-recat').classList.add('open');
+}
+
+const GENERIC_WORDS = new Set(['transfer','from','with','and','the','for','pay','payment','app','commbank','netbank','direct','credit','debit','purchase','pos','eftpos','australia','aus','nsw','vic','qld','pty','ltd']);
+
+function extractPattern(desc) {
+  // Pull the first recognisable merchant or distinguishing identifier
+  const cleaned = desc.replace(/\d+/g, '').replace(/[\*\-\/\\]/g,' ').replace(/\s+/g,' ').trim();
+  const allWords = cleaned.split(' ').filter(w => w.length > 2);
+  const distinctive = allWords.filter(w => !GENERIC_WORDS.has(w.toLowerCase()));
+  const useWords = distinctive.length ? distinctive : allWords;
+  return (useWords.slice(0, 3).join(' ') || desc).toLowerCase();
+}
+
+function applyRecat() {
+  const tx = state.transactions.find(t => t.id === recatTxId);
+  if (!tx) return;
+  const newCat = $('#recat-category').value;
+  const saveRule = $('#recat-save-rule').checked;
+  const pattern = $('#recat-pattern').value.trim();
+  if (saveRule && pattern) addRule(pattern, newCat);
+  else tx.category = newCat;
+  recategoriseAll();
+  render();
+  closeRecat();
+  toast(saveRule && pattern ? `Rule saved: "${pattern}" → ${newCat}` : `Set to ${newCat}`);
+}
+
+function closeRecat() { $('#dialog-recat').classList.remove('open'); recatTxId = null; }
+
+function quickRecat(txId, newCat) {
+  const tx = state.transactions.find(t => t.id === txId);
+  if (!tx) return;
+  const pattern = extractPattern(tx.description);
+  addRule(pattern, newCat);
+  recategoriseAll();
+  render();
+  toast(`Rule added: "${pattern}" → ${newCat}`);
+}
+
+function addRule(pattern, category) {
+  state.customRules = state.customRules.filter(r => r.pattern.toLowerCase() !== pattern.toLowerCase());
+  state.customRules.unshift({ pattern, category });
+  scheduleRuleSave();
+}
+
+function removeRule(i) {
+  state.customRules.splice(i, 1);
+  recategoriseAll();
+  render();
+  scheduleRuleSave();
+}
+
+/* ============================================================
+   FILE HANDLING
+   ============================================================ */
+async function handleFiles(fileList) {
+  log('handleFiles called with ' + (fileList ? fileList.length : 'null') + ' item(s)');
+  const files = Array.from(fileList || []);
+  if (!files.length) { log('ERROR: No files in FileList'); toast('No files selected'); return; }
+
+  for (const f of files) log('File: ' + f.name + ' (' + f.size + ' bytes, type: ' + (f.type || 'unknown') + ')');
+
+  toast('Reading ' + files.length + ' file(s)...');
+  let totalAdded = 0;
+  let errors = 0;
+
+  for (const file of files) {
+    try {
+      log('Parsing ' + file.name + '...');
+      const txs = await parseCSVFile(file);
+      log(file.name + ': extracted ' + txs.length + ' transactions');
+      if (!txs.length) { toast('No rows parsed from ' + file.name); errors++; continue; }
+      const type = detectFileType(txs, file.name);
+      log(file.name + ': detected as ' + type);
+      const id = 'f-' + Math.random().toString(36).slice(2,9);
+      const existing = state.files.find(f => f.name === file.name);
+      if (existing) {
+        state.transactions = state.transactions.filter(t => t.source !== file.name);
+        state.files = state.files.filter(f => f.name !== file.name);
+      }
+      state.files.push({ name: file.name, type, count: txs.length, id });
+      state.transactions.push(...txs);
+      totalAdded += txs.length;
+    } catch (e) {
+      errors++;
+      log('ERROR parsing ' + file.name + ': ' + (e.message || e));
+      toast(file.name + ': ' + (e.message || 'parse failed'));
+      console.error(file.name, e);
+    }
+  }
+  log('Running categorisation...');
+  try {
+    recategoriseAll();
+    log('Rendering dashboard with ' + state.transactions.length + ' total transactions...');
+    render();
+    log('Render complete.');
+  } catch (e) {
+    log('ERROR during render: ' + (e.message || e));
+    toast('Render failed: ' + (e.message || e));
+    console.error(e);
+  }
+  if (totalAdded > 0) toast('Loaded ' + totalAdded + ' transactions');
+  else if (errors > 0) toast('No transactions loaded. Check file format.');
+}
+
+function removeFile(id) {
+  const f = state.files.find(f => f.id === id);
+  if (!f) return;
+  state.transactions = state.transactions.filter(t => t.source !== f.name);
+  state.files = state.files.filter(x => x.id !== id);
+  render();
+}
+
+/* ============================================================
+   AUTH (MSAL) + MICROSOFT GRAPH
+   ============================================================ */
+const GRAPH_SCOPES = ['Files.ReadWrite', 'User.Read'];
+
+async function initMsal() {
+  if (AZURE_CLIENT_ID.startsWith('__REPLACE')) {
+    log('CONFIG: AZURE_CLIENT_ID / AZURE_TENANT_ID not set. Sign in disabled.');
+    $('#btn-signin').disabled = true;
+    $('#btn-signin').textContent = 'Not configured';
+    return false;
+  }
+  try {
+    state.msal = new msal.PublicClientApplication({
+      auth: {
+        clientId: AZURE_CLIENT_ID,
+        authority: `https://login.microsoftonline.com/${AZURE_TENANT_ID}`,
+        redirectUri: window.location.origin + window.location.pathname
+      },
+      cache: {
+        cacheLocation: 'sessionStorage',
+        storeAuthStateInCookie: false
+      }
+    });
+    await state.msal.initialize();
+
+    // Handle any redirect response
+    const resp = await state.msal.handleRedirectPromise();
+    if (resp?.account) {
+      state.msal.setActiveAccount(resp.account);
+      state.account = resp.account;
+    } else {
+      const accounts = state.msal.getAllAccounts();
+      if (accounts.length) {
+        state.msal.setActiveAccount(accounts[0]);
+        state.account = accounts[0];
+      }
+    }
+    log('MSAL initialised. ' + (state.account ? 'Signed in as ' + state.account.username : 'Not signed in.'));
+    return true;
+  } catch (e) {
+    log('MSAL init failed: ' + e.message);
+    return false;
+  }
+}
+
+async function signIn() {
+  if (!state.msal) return;
+  try {
+    log('Opening sign in...');
+    const resp = await state.msal.loginPopup({ scopes: GRAPH_SCOPES, prompt: 'select_account' });
+    state.msal.setActiveAccount(resp.account);
+    state.account = resp.account;
+    log('Signed in as ' + resp.account.username);
+    await onSignedIn();
+  } catch (e) {
+    if (e.errorCode === 'popup_window_error' || e.errorCode === 'user_cancelled') {
+      log('Popup blocked, redirecting...');
+      state.msal.loginRedirect({ scopes: GRAPH_SCOPES });
+    } else {
+      log('Sign in failed: ' + e.message);
+      toast('Sign in failed: ' + e.message);
+    }
+  }
+}
+
+async function signOut() {
+  if (!state.msal || !state.account) return;
+  await state.msal.logoutPopup({ account: state.account });
+  state.account = null;
+  state.connected = false;
+  state.transactions = [];
+  state.files = [];
+  state.customRules = [];
+  state.currentPeriod = null;
+  render();
+  toast('Signed out');
+}
+
+async function getToken() {
+  const account = state.msal.getActiveAccount();
+  if (!account) throw new Error('Not signed in');
+  try {
+    const r = await state.msal.acquireTokenSilent({ scopes: GRAPH_SCOPES, account });
+    return r.accessToken;
+  } catch (e) {
+    const r = await state.msal.acquireTokenPopup({ scopes: GRAPH_SCOPES });
+    return r.accessToken;
+  }
+}
+
+async function graphFetch(path, options = {}) {
+  const token = await getToken();
+  const res = await fetch('https://graph.microsoft.com/v1.0' + path, {
+    ...options,
+    headers: { 'Authorization': 'Bearer ' + token, ...(options.headers || {}) }
+  });
+  if (!res.ok) {
+    const text = await res.text().catch(() => '');
+    const err = new Error('Graph ' + res.status + ': ' + text.slice(0, 200));
+    err.status = res.status;
+    throw err;
+  }
+  return res;
+}
+
+// Encode an OneDrive path for use in Graph URLs.
+// Graph expects path segments to be URL-encoded individually, but slashes must remain literal.
+function encodePath(p) {
+  return p.split('/').map(encodeURIComponent).join('/');
+}
+
+async function listDriveChildren(folderPath) {
+  const path = folderPath
+    ? `/me/drive/root:/${encodePath(folderPath)}:/children?$top=200`
+    : '/me/drive/root/children?$top=200';
+  try {
+    const res = await graphFetch(path);
+    const data = await res.json();
+    return data.value || [];
+  } catch (e) {
+    if (e.status === 404) return null;
+    throw e;
+  }
+}
+
+// Ensure the configured ONEDRIVE_ROOT path exists. Creates parent folders as needed for nested paths.
+async function ensureRootFolder() {
+  const segments = ONEDRIVE_ROOT.split('/').filter(Boolean);
+  let currentPath = '';
+  for (const seg of segments) {
+    const parentPath = currentPath;
+    currentPath = currentPath ? currentPath + '/' + seg : seg;
+    const items = await listDriveChildren(parentPath);
+    if (items === null) {
+      log('Parent folder "/' + parentPath + '" does not exist. Create it manually in OneDrive first.');
+      return;
+    }
+    const exists = items.some(i => i.name === seg && i.folder);
+    if (!exists) {
+      const createUrl = parentPath
+        ? `/me/drive/root:/${encodePath(parentPath)}:/children`
+        : '/me/drive/root/children';
+      await graphFetch(createUrl, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ name: seg, folder: {}, '@microsoft.graph.conflictBehavior': 'fail' })
+      });
+      log('Created /' + currentPath + ' in OneDrive');
+    }
+  }
+}
+
+async function discoverPeriods() {
+  const rootItems = await listDriveChildren(ONEDRIVE_ROOT);
+  if (!rootItems) { log('OneDrive folder /' + ONEDRIVE_ROOT + ' does not exist'); return; }
+  const years = rootItems.filter(i => i.folder && /^\d{4}$/.test(i.name)).map(i => i.name).sort().reverse();
+  state.availableYears = years;
+  state.availableMonths = {};
+  for (const y of years) {
+    const sub = await listDriveChildren(ONEDRIVE_ROOT + '/' + y);
+    const months = (sub || []).filter(i => i.folder && /^\d{1,2}$/.test(i.name))
+      .map(i => i.name.padStart(2, '0'))
+      .sort()
+      .reverse();
+    state.availableMonths[y] = months;
+  }
+  log('Discovered ' + years.length + ' year(s). Latest: ' + (years[0] ? years[0] + '/' + (state.availableMonths[years[0]][0] || '—') : 'none'));
+}
+
+async function downloadCSV(year, month, filename) {
+  const res = await graphFetch('/me/drive/root:/' + encodePath(ONEDRIVE_ROOT + '/' + year + '/' + month + '/' + filename) + ':/content');
+  return await res.text();
+}
+
+async function loadRulesFromCloud() {
+  try {
+    const res = await graphFetch('/me/drive/root:/' + encodePath(ONEDRIVE_ROOT + '/rules.json') + ':/content');
+    const data = await res.json();
+    if (Array.isArray(data)) { state.customRules = data; log('Loaded ' + data.length + ' custom rules from OneDrive'); }
+  } catch (e) {
+    if (e.status === 404) { log('No rules.json yet (this is fine)'); return; }
+    log('Could not load rules: ' + e.message);
+  }
+}
+
+let rulesSaveTimer;
+function scheduleRuleSave() {
+  if (!state.connected) return;
+  clearTimeout(rulesSaveTimer);
+  rulesSaveTimer = setTimeout(saveRulesToCloud, 1500);
+}
+
+async function saveRulesToCloud() {
+  if (!state.connected) return;
+  try {
+    await graphFetch('/me/drive/root:/' + encodePath(ONEDRIVE_ROOT + '/rules.json') + ':/content', {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(state.customRules, null, 2)
+    });
+    log('Rules saved (' + state.customRules.length + ')');
+  } catch (e) {
+    log('Rule save failed: ' + e.message);
+  }
+}
+
+async function onSignedIn() {
+  state.connected = true;
+  log('Connecting to OneDrive...');
+  try {
+    await ensureRootFolder();
+    await loadRulesFromCloud();
+    await discoverPeriods();
+    populatePeriodDropdowns();
+    // Auto-load the latest period if any
+    if (state.availableYears.length && state.availableMonths[state.availableYears[0]].length) {
+      const y = state.availableYears[0];
+      const m = state.availableMonths[y][0];
+      await loadPeriod(y, m);
+    } else {
+      hide('#landing');
+      show('#dashboard');
+      $('#period-picker').hidden = false;
+      $('#user-chip').hidden = false;
+      $('#btn-signout').hidden = false;
+      updateUserChip();
+      render();
+      toast('Signed in. Drop CSVs into OneDrive/' + ONEDRIVE_ROOT + '/YYYY/MM/ then refresh.');
+    }
+  } catch (e) {
+    log('Post sign in failed: ' + e.message);
+    toast('Error after sign in: ' + e.message);
+  }
+}
+
+function populatePeriodDropdowns() {
+  const ySel = $('#period-year');
+  ySel.innerHTML = state.availableYears.map(y => `<option value="${y}">${y}</option>`).join('');
+  if (state.availableYears.length) {
+    ySel.value = state.currentPeriod?.year || state.availableYears[0];
+    populateMonthDropdown(ySel.value);
+  }
+}
+
+function populateMonthDropdown(year) {
+  const mSel = $('#period-month');
+  const months = state.availableMonths[year] || [];
+  const MONTHS = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+  mSel.innerHTML = months.map(m => `<option value="${m}">${MONTHS[parseInt(m)-1]} ${year}</option>`).join('');
+  if (months.length) mSel.value = state.currentPeriod?.month || months[0];
+}
+
+async function loadPeriod(year, month) {
+  log('Loading ' + year + '/' + month + '...');
+  toast('Loading ' + year + '-' + month + '...');
+  try {
+    const items = await listDriveChildren(ONEDRIVE_ROOT + '/' + year + '/' + month);
+    const csvFiles = (items || []).filter(f => f.file && /\.csv$/i.test(f.name));
+    log('Found ' + csvFiles.length + ' CSV file(s) in ' + year + '/' + month);
+    if (!csvFiles.length) {
+      state.transactions = [];
+      state.files = [];
+      state.currentPeriod = { year, month };
+      hide('#landing');
+      show('#dashboard');
+      $('#period-picker').hidden = false;
+      $('#user-chip').hidden = false;
+      $('#btn-signout').hidden = false;
+      updateUserChip();
+      $('#period-meta').textContent = '0 files';
+      toast('No CSVs in that folder yet');
+      render();
+      return;
+    }
+
+    state.transactions = [];
+    state.files = [];
+    for (const f of csvFiles) {
+      try {
+        log('Downloading ' + f.name + '...');
+        const text = await downloadCSV(year, month, f.name);
+        const txs = parseCSVContent(text, f.name);
+        if (!txs.length) { log(f.name + ': 0 rows extracted'); continue; }
+        const type = detectFileType(txs, f.name);
+        state.files.push({ name: f.name, type, count: txs.length, id: 'f-' + Math.random().toString(36).slice(2,9) });
+        state.transactions.push(...txs);
+        log(f.name + ': ' + txs.length + ' transactions (' + type + ')');
+      } catch (e) {
+        log('Error on ' + f.name + ': ' + e.message);
+      }
+    }
+
+    recategoriseAll();
+    state.currentPeriod = { year, month };
+
+    // Set filter to exactly this month
+    const lastDay = new Date(parseInt(year), parseInt(month), 0).getDate();
+    state.filters.range = 'custom';
+    state.filters.from = year + '-' + month + '-01';
+    state.filters.to = year + '-' + month + '-' + String(lastDay).padStart(2,'0');
+
+    hide('#landing');
+    show('#dashboard');
+    $('#period-picker').hidden = false;
+    $('#user-chip').hidden = false;
+    $('#btn-signout').hidden = false;
+    updateUserChip();
+    $('#filter-range').value = 'custom';
+    $('#filter-from').value = state.filters.from;
+    $('#filter-to').value = state.filters.to;
+    $('#custom-range-wrap').style.display = 'flex';
+    $('#period-meta').textContent = state.transactions.length + ' transactions across ' + state.files.length + ' files';
+    render();
+    toast('Loaded ' + state.transactions.length + ' transactions for ' + year + '-' + month);
+  } catch (e) {
+    log('Load period failed: ' + e.message);
+    toast('Failed: ' + e.message);
+  }
+}
+
+function updateUserChip() {
+  if (!state.account) return;
+  const chip = $('#user-chip');
+  const name = state.account.name || state.account.username;
+  const initials = name.split(' ').map(s => s[0]).filter(Boolean).slice(0, 2).join('').toUpperCase();
+  chip.innerHTML = `<span class="initials">${escapeHtml(initials)}</span><span>${escapeHtml(state.account.username)}</span>`;
+}
+
+/* ============================================================
+   EVENTS / INIT
+   ============================================================ */
+function $(s) { return document.querySelector(s); }
+function show(s) { $(s).hidden = false; }
+function hide(s) { $(s).hidden = true; }
+function escapeHtml(s) { return String(s).replace(/[&<>"']/g, c => ({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;' })[c]); }
+
+let toastTimer;
+function toast(msg) {
+  const t = $('#toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => t.classList.remove('show'), 4500);
+}
+
+function log(msg) {
+  const el = document.getElementById('status-log');
+  if (!el) return;
+  const time = new Date().toLocaleTimeString('en-AU', { hour12: false });
+  el.textContent = `[${time}] ${msg}\n` + el.textContent;
+  // Keep log manageable
+  if (el.textContent.length > 2000) el.textContent = el.textContent.slice(0, 2000);
+}
+
+function initEvents() {
+  // Surface any runtime errors visibly so the user can see what went wrong
+  window.addEventListener('error', (e) => {
+    log('JS ERROR: ' + (e.message || 'unknown'));
+    toast('Error: ' + (e.message || 'unknown'));
+    console.error(e.error || e);
+  });
+  window.addEventListener('unhandledrejection', (e) => {
+    log('PROMISE ERROR: ' + (e.reason?.message || e.reason || 'unknown'));
+    toast('Error: ' + (e.reason?.message || e.reason || 'unknown'));
+    console.error(e.reason);
+  });
+
+  log('Initialising... Papa=' + (typeof Papa) + ', Chart=' + (typeof Chart));
+
+  // Verify libraries loaded
+  if (typeof Papa === 'undefined') {
+    log('ERROR: PapaParse did not load from CDN.');
+    toast('CSV parser failed to load. Check internet connection.');
+    return;
+  }
+  if (typeof Chart === 'undefined') {
+    log('ERROR: Chart.js did not load from CDN.');
+    toast('Chart library failed to load. Check internet connection.');
+    return;
+  }
+  log('Libraries loaded. Ready for file upload.');
+
+  const dz = $('#drop-zone');
+  const fi = $('#file-input');
+  log('Drop zone found: ' + !!dz + ', File input found: ' + !!fi);
+  // Label natively triggers the input click, no JS needed for the click path.
+  fi.onchange = (e) => {
+    log('onchange fired, ' + (e.target.files?.length || 0) + ' file(s) selected');
+    handleFiles(e.target.files);
+    e.target.value = '';
+  };
+  dz.addEventListener('dragover', e => { e.preventDefault(); dz.classList.add('drag'); });
+  dz.addEventListener('dragleave', () => dz.classList.remove('drag'));
+  dz.addEventListener('drop', e => { e.preventDefault(); dz.classList.remove('drag'); handleFiles(e.dataTransfer.files); });
+
+  window.addEventListener('dragover', e => e.preventDefault());
+  window.addEventListener('drop', e => {
+    e.preventDefault();
+    if ($('#dashboard').hidden) return; // landing already handles
+    handleFiles(e.dataTransfer.files);
+  });
+
+  $('#btn-reset').onclick = () => {
+    if (!confirm('Clear all data and start over?')) return;
+    state.files = [];
+    state.transactions = [];
+    state.customRules = [];
+    state.filters.category = '';
+    state.filters.search = '';
+    render();
+  };
+
+  $('#filter-range').onchange = (e) => {
+    state.filters.range = e.target.value;
+    $('#custom-range-wrap').style.display = e.target.value === 'custom' ? 'flex' : 'none';
+    render();
+  };
+  $('#filter-from').onchange = (e) => { state.filters.from = e.target.value; render(); };
+  $('#filter-to').onchange = (e) => { state.filters.to = e.target.value; render(); };
+  $('#filter-exclude-cc').onchange = (e) => { state.filters.excludeCC = e.target.checked; render(); };
+
+  $('#tx-cat-filter').onchange = (e) => { state.filters.category = e.target.value; state.txShowCount = 50; render(); };
+  $('#tx-search').oninput = (e) => { state.filters.search = e.target.value; state.txShowCount = 50; render(); };
+  $('#btn-show-more').onclick = () => { state.txShowCount += 50; render(); };
+
+  // Sortable column headers in transactions list
+  document.querySelectorAll('.tx-head .sortable').forEach(el => {
+    el.onclick = () => {
+      const col = el.dataset.sort;
+      if (state.sort.column === col) {
+        // Same column clicked again, flip direction
+        state.sort.direction = state.sort.direction === 'asc' ? 'desc' : 'asc';
+      } else {
+        // Different column, default to a sensible direction
+        state.sort.column = col;
+        state.sort.direction = (col === 'date' || col === 'amount') ? 'desc' : 'asc';
+      }
+      render();
+    };
+  });
+
+  $('#recat-cancel').onclick = closeRecat;
+  $('#recat-apply').onclick = applyRecat;
+  $('#dialog-recat').onclick = (e) => { if (e.target.id === 'dialog-recat') closeRecat(); };
+
+  $('#btn-clear-rules').onclick = () => {
+    if (!state.customRules.length) return;
+    if (!confirm('Clear all custom rules?')) return;
+    state.customRules = [];
+    recategoriseAll();
+    render();
+  };
+
+  $('#btn-dismiss-attention').onclick = () => { state.attentionDismissed = true; render(); };
+
+  // Auth + period picker wiring
+  $('#btn-signin').onclick = signIn;
+  $('#btn-signout').onclick = signOut;
+  $('#period-year').onchange = (e) => populateMonthDropdown(e.target.value);
+  $('#btn-load-period').onclick = () => {
+    const y = $('#period-year').value;
+    const m = $('#period-month').value;
+    if (y && m) loadPeriod(y, m);
+  };
+}
+
+async function start() {
+  initEvents();
+  render();
+  const msalOk = await initMsal();
+  if (msalOk && state.account) {
+    log('Resuming previous session...');
+    await onSignedIn();
+  }
+}
+
+start();
+</script>
+</body>
+</html>
