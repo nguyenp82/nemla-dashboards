@@ -1,0 +1,1877 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Ledger · Property</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300..900;1,9..144,300..900&family=Manrope:wght@300..800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.0/chart.umd.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@azure/msal-browser@3/lib/msal-browser.min.js"></script>
+<style>
+  :root {
+    --bg: #F7F4EE;
+    --surface: #FDFBF7;
+    --surface-2: #F1ECE2;
+    --surface-3: #E8E2D4;
+    --border: #E0D9C9;
+    --border-strong: #C9C0AB;
+    --text: #2A2822;
+    --text-dim: #5E574B;
+    --text-faint: #8F897A;
+    --accent: #A07A1F;
+    --accent-dim: #C9A14A;
+    --accent-soft: #F3E9CF;
+    --positive: #5B8C47;
+    --positive-soft: #E5EEDB;
+    --negative: #B85838;
+    --negative-soft: #F3DDD1;
+    --neutral: #3E6A88;
+    --neutral-soft: #DCE6EE;
+    --danger: #A33F3F;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html, body { background: var(--bg); color: var(--text); font-family: 'Manrope', sans-serif; font-size: 14px; line-height: 1.5; -webkit-font-smoothing: antialiased; }
+  body {
+    min-height: 100vh;
+    background-image:
+      radial-gradient(circle at 12% 8%, rgba(160,122,31,0.06) 0%, transparent 45%),
+      radial-gradient(circle at 88% 92%, rgba(62,106,136,0.05) 0%, transparent 50%);
+    background-attachment: fixed;
+  }
+
+  button { font-family: inherit; cursor: pointer; border: none; background: none; color: inherit; }
+  input, select, textarea { font-family: inherit; color: inherit; }
+  .mono { font-family: 'JetBrains Mono', monospace; font-variant-numeric: tabular-nums; }
+  .serif { font-family: 'Fraunces', serif; font-optical-sizing: auto; }
+
+  .app { max-width: 1440px; margin: 0 auto; padding: 32px 40px 80px; }
+  @media (max-width: 720px) { .app { padding: 20px 16px 60px; } }
+
+  .brand { display: flex; align-items: baseline; justify-content: space-between; padding-bottom: 28px; border-bottom: 1px solid var(--border); margin-bottom: 32px; flex-wrap: wrap; gap: 12px; }
+  .brand-title { font-family: 'Fraunces', serif; font-weight: 300; font-size: 38px; letter-spacing: -0.02em; }
+  .brand-title em { font-style: italic; color: var(--accent); font-weight: 400; }
+  .brand-tagline { font-size: 12px; color: var(--text-faint); letter-spacing: 0.08em; text-transform: uppercase; margin-top: 4px; }
+  .brand-meta { font-size: 12px; color: var(--text-faint); letter-spacing: 0.06em; }
+  .brand-meta .dot { color: var(--accent); margin: 0 8px; }
+
+  .landing, .setup { display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 60vh; text-align: center; }
+  .landing[hidden], .setup[hidden] { display: none !important; }
+  .landing h2, .setup h2 { font-family: 'Fraunces', serif; font-weight: 300; font-size: 48px; line-height: 1.1; letter-spacing: -0.025em; max-width: 720px; margin-bottom: 20px; }
+  .landing h2 em, .setup h2 em { color: var(--accent); font-style: italic; }
+  .landing p, .setup p { color: var(--text-dim); max-width: 620px; margin-bottom: 40px; font-size: 15px; }
+  .landing-hint { font-size: 12px; color: var(--text-faint); letter-spacing: 0.04em; margin-top: 16px; max-width: 520px; line-height: 1.6; }
+
+  .btn-signin { padding: 14px 36px; background: var(--accent); color: #FFFFFF; font-size: 13px; letter-spacing: 0.1em; text-transform: uppercase; border-radius: 2px; transition: all 0.2s; font-weight: 500; }
+  .btn-signin:hover { background: #8A6719; transform: translateY(-1px); }
+  .btn-signin:disabled { opacity: 0.5; cursor: not-allowed; }
+
+  .setup-card { background: var(--surface); border: 1px solid var(--border); border-radius: 4px; padding: 32px; max-width: 640px; width: 100%; text-align: left; margin-bottom: 16px; }
+  .setup-step { display: flex; gap: 16px; padding: 16px 0; border-bottom: 1px solid var(--border); }
+  .setup-step:last-child { border-bottom: none; }
+  .setup-num { width: 32px; height: 32px; border-radius: 50%; background: var(--accent); color: #FFFFFF; display: flex; align-items: center; justify-content: center; font-weight: 600; font-size: 14px; flex-shrink: 0; font-family: 'Fraunces', serif; }
+  .setup-body { flex: 1; }
+  .setup-body h4 { font-family: 'Fraunces', serif; font-weight: 400; font-size: 18px; margin-bottom: 4px; }
+  .setup-body p { font-size: 13px; color: var(--text-dim); margin-bottom: 0; max-width: none; }
+  .setup-body code { font-family: 'JetBrains Mono', monospace; font-size: 12px; background: var(--surface-2); padding: 2px 6px; border-radius: 2px; color: var(--accent); }
+  .setup-check { margin-top: 6px; font-size: 11px; letter-spacing: 0.06em; text-transform: uppercase; color: var(--text-faint); }
+  .setup-check.ok { color: var(--positive); }
+  .setup-check.missing { color: var(--negative); }
+
+  .period-picker { display: flex; gap: 12px; align-items: center; padding: 14px 16px; background: var(--surface); border: 1px solid var(--border); border-radius: 2px; margin-bottom: 24px; flex-wrap: wrap; }
+  .period-label { font-size: 11px; letter-spacing: 0.1em; color: var(--text-faint); text-transform: uppercase; }
+  .period-meta { font-size: 12px; color: var(--text-faint); font-family: 'JetBrains Mono', monospace; margin-left: 8px; }
+  .user-chip { display: inline-flex; align-items: center; gap: 8px; padding: 6px 12px; background: var(--surface-2); border: 1px solid var(--border); border-radius: 2px; font-size: 12px; color: var(--text-dim); }
+  .user-chip .initials { width: 20px; height: 20px; border-radius: 50%; background: var(--accent); color: #FFFFFF; display: inline-flex; align-items: center; justify-content: center; font-size: 10px; font-weight: 600; }
+
+  .filters { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; padding: 14px 16px; background: var(--surface); border: 1px solid var(--border); border-radius: 2px; margin-bottom: 24px; }
+  .filter-group { display: flex; align-items: center; gap: 8px; }
+  .filter-label { font-size: 11px; letter-spacing: 0.1em; color: var(--text-faint); text-transform: uppercase; }
+  .filter-select, .filter-input { background: var(--surface-2); border: 1px solid var(--border); color: var(--text); padding: 7px 12px; font-size: 13px; border-radius: 2px; outline: none; min-width: 140px; }
+  .filter-select:focus, .filter-input:focus { border-color: var(--accent); }
+  .spacer { flex: 1; }
+
+  .btn-primary { padding: 9px 16px; background: var(--accent); color: #FFFFFF; font-size: 12px; letter-spacing: 0.08em; text-transform: uppercase; border-radius: 2px; transition: all 0.15s; font-weight: 500; }
+  .btn-primary:hover { background: #8A6719; }
+  .btn-primary:disabled { opacity: 0.4; cursor: not-allowed; }
+  .btn-secondary { padding: 9px 16px; background: var(--surface-2); color: var(--text); border: 1px solid var(--border); font-size: 12px; letter-spacing: 0.06em; text-transform: uppercase; border-radius: 2px; transition: all 0.15s; }
+  .btn-secondary:hover { border-color: var(--accent); color: var(--accent); }
+  .ghost-btn { padding: 7px 14px; background: transparent; border: 1px solid var(--border); color: var(--text-dim); font-size: 12px; letter-spacing: 0.06em; text-transform: uppercase; border-radius: 2px; transition: all 0.15s; }
+  .ghost-btn:hover { border-color: var(--accent); color: var(--accent); }
+
+  .prop-strip { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 1px; background: var(--border); border: 1px solid var(--border); border-radius: 4px; overflow: hidden; margin-bottom: 28px; }
+  .prop-card { background: var(--surface); padding: 18px 20px; text-align: left; transition: background 0.15s; display: flex; flex-direction: column; gap: 8px; cursor: pointer; border: none; width: 100%; }
+  .prop-card:hover { background: var(--surface-2); }
+  .prop-card.active { background: var(--accent-soft); }
+  .prop-name { font-family: 'Fraunces', serif; font-weight: 400; font-size: 19px; letter-spacing: -0.01em; color: var(--text); }
+  .prop-address { font-size: 11px; color: var(--text-faint); letter-spacing: 0.04em; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .prop-net { font-family: 'Fraunces', serif; font-weight: 300; font-size: 22px; letter-spacing: -0.01em; margin-top: 6px; }
+  .prop-net.pos { color: var(--positive); }
+  .prop-net.neg { color: var(--negative); }
+  .prop-net-detail { font-size: 11px; color: var(--text-faint); font-family: 'JetBrains Mono', monospace; }
+  .prop-net-detail .pos { color: var(--positive); }
+  .prop-net-detail .neg { color: var(--negative); }
+
+  .kpi-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 1px; background: var(--border); border: 1px solid var(--border); border-radius: 4px; overflow: hidden; margin-bottom: 28px; box-shadow: 0 1px 2px rgba(42,40,34,0.03); }
+  @media (max-width: 1200px) { .kpi-grid { grid-template-columns: repeat(3, 1fr); } }
+  @media (max-width: 700px) { .kpi-grid { grid-template-columns: repeat(2, 1fr); } }
+  .kpi { background: var(--surface); padding: 20px 20px; }
+  .kpi-label { font-size: 10px; letter-spacing: 0.1em; color: var(--text-faint); text-transform: uppercase; margin-bottom: 10px; display: flex; align-items: center; gap: 6px; }
+  .kpi-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--accent); }
+  .kpi-dot.pos { background: var(--positive); }
+  .kpi-dot.neg { background: var(--negative); }
+  .kpi-dot.net { background: var(--neutral); }
+  .kpi-value { font-family: 'Fraunces', serif; font-weight: 300; font-size: 30px; letter-spacing: -0.02em; line-height: 1; }
+  .kpi-value.pos { color: var(--positive); }
+  .kpi-value.neg { color: var(--negative); }
+  .kpi-sub { font-size: 12px; color: var(--text-faint); margin-top: 8px; font-family: 'JetBrains Mono', monospace; }
+
+  .panel { background: var(--surface); border: 1px solid var(--border); border-radius: 4px; padding: 24px; margin-bottom: 24px; box-shadow: 0 1px 2px rgba(42,40,34,0.03); }
+  .panel-header { display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 20px; padding-bottom: 14px; border-bottom: 1px solid var(--border); flex-wrap: wrap; gap: 12px; }
+  .panel-title { font-family: 'Fraunces', serif; font-weight: 300; font-size: 22px; letter-spacing: -0.01em; }
+  .panel-title em { color: var(--accent); font-style: italic; }
+  .panel-subtitle { font-size: 12px; color: var(--text-faint); letter-spacing: 0.04em; margin-top: 4px; }
+  .panel-meta { font-size: 12px; color: var(--text-faint); font-family: 'JetBrains Mono', monospace; }
+
+  .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; }
+  @media (max-width: 980px) { .two-col { grid-template-columns: 1fr; } }
+
+  .chart-wrap { position: relative; height: 320px; }
+  .chart-wrap.tall { height: 380px; }
+
+  .cat-list { display: flex; flex-direction: column; gap: 1px; background: var(--border); border: 1px solid var(--border); border-radius: 2px; overflow: hidden; }
+  .cat-row { display: grid; grid-template-columns: 16px 1fr auto auto; gap: 14px; align-items: center; padding: 12px 16px; background: var(--surface); transition: background 0.15s; cursor: pointer; width: 100%; text-align: left; border: none; }
+  .cat-row:hover { background: var(--surface-2); }
+  .cat-row.active { background: var(--accent-soft); }
+  .cat-swatch { width: 10px; height: 10px; border-radius: 50%; }
+  .cat-name { font-size: 13px; color: var(--text); }
+  .cat-pct { font-size: 12px; color: var(--text-faint); font-family: 'JetBrains Mono', monospace; min-width: 48px; text-align: right; }
+  .cat-amount { font-family: 'JetBrains Mono', monospace; font-size: 13px; color: var(--text); min-width: 100px; text-align: right; }
+
+  .tx-head { display: grid; grid-template-columns: 100px 1fr 140px 140px 110px 40px; gap: 14px; padding: 12px 16px; background: var(--surface-2); border-bottom: 1px solid var(--border); font-size: 11px; letter-spacing: 0.08em; color: var(--text-faint); text-transform: uppercase; }
+  .tx-row { display: grid; grid-template-columns: 100px 1fr 140px 140px 110px 40px; gap: 14px; padding: 12px 16px; border-bottom: 1px solid var(--border); font-size: 13px; align-items: center; transition: background 0.1s; cursor: pointer; }
+  .tx-row:hover { background: var(--surface-2); }
+  .tx-row:last-child { border-bottom: none; }
+  .tx-date { color: var(--text-dim); font-family: 'JetBrains Mono', monospace; font-size: 12px; }
+  .tx-desc { overflow: hidden; }
+  .tx-desc-main { font-size: 13px; color: var(--text); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .tx-desc-sub { font-size: 11px; color: var(--text-faint); margin-top: 2px; letter-spacing: 0.04em; display: flex; gap: 8px; align-items: center; }
+  .tx-prop { font-size: 12px; color: var(--text-dim); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .tx-cat { font-size: 12px; color: var(--text-dim); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .tx-amount { font-family: 'JetBrains Mono', monospace; text-align: right; font-weight: 500; }
+  .tx-amount.pos { color: var(--positive); }
+  .tx-amount.neg { color: var(--negative); }
+  .tx-clip { font-size: 11px; color: var(--accent); }
+  @media (max-width: 780px) { .hide-sm { display: none; } .tx-head, .tx-row { grid-template-columns: 80px 1fr 100px 40px; } }
+
+  .empty { padding: 48px 24px; text-align: center; color: var(--text-faint); font-family: 'Fraunces', serif; font-style: italic; font-size: 16px; }
+
+  .dialog-backdrop { display: none; position: fixed; inset: 0; background: rgba(42, 40, 34, 0.55); z-index: 100; align-items: center; justify-content: center; padding: 20px; overflow-y: auto; }
+  .dialog-backdrop.open { display: flex; }
+  .dialog { background: var(--surface); border: 1px solid var(--border-strong); border-radius: 4px; padding: 28px; max-width: 1080px; width: 100%; max-height: 95vh; overflow-y: auto; box-shadow: 0 20px 60px rgba(42,40,34,0.25); }
+  .dialog h3 { font-family: 'Fraunces', serif; font-weight: 300; font-size: 26px; letter-spacing: -0.01em; margin-bottom: 6px; }
+  .dialog h3 em { color: var(--accent); font-style: italic; }
+
+  .receipt-preview { border: 1px solid var(--border); border-radius: 2px; overflow: hidden; background: var(--surface-2); margin-top: 14px; }
+  .receipt-preview img { width: 100%; display: block; max-height: 780px; object-fit: contain; background: #FFFFFF; }
+  .receipt-preview embed { width: 100%; height: 780px; display: block; }
+  .detail-row { display: grid; grid-template-columns: 140px 1fr; gap: 14px; padding: 10px 0; border-bottom: 1px solid var(--border); font-size: 13px; }
+  .detail-row:last-child { border-bottom: none; }
+  .detail-row .dt { color: var(--text-faint); font-size: 11px; letter-spacing: 0.08em; text-transform: uppercase; padding-top: 2px; }
+  .detail-row .dd { color: var(--text); }
+  .tag { display: inline-flex; align-items: center; gap: 4px; padding: 2px 8px; font-size: 11px; letter-spacing: 0.06em; border-radius: 10px; text-transform: uppercase; }
+  .tag.income { background: var(--positive-soft); color: var(--positive); }
+  .tag.expense { background: var(--negative-soft); color: var(--negative); }
+
+  .toast { position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%) translateY(20px); background: var(--text); color: var(--surface); padding: 12px 20px; font-size: 13px; border-radius: 2px; opacity: 0; transition: all 0.25s; z-index: 200; box-shadow: 0 10px 30px rgba(42,40,34,0.3); max-width: calc(100vw - 40px); }
+  .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+  .attn-row { padding: 12px 14px; border: 1px solid var(--border); border-radius: 2px; margin-bottom: 8px; background: var(--surface-2); font-size: 13px; }
+  .attn-row:last-child { margin-bottom: 0; }
+
+  ::-webkit-scrollbar { width: 8px; height: 8px; }
+  ::-webkit-scrollbar-track { background: var(--surface); }
+  ::-webkit-scrollbar-thumb { background: var(--border-strong); border-radius: 2px; }
+  ::-webkit-scrollbar-thumb:hover { background: var(--text-faint); }
+
+  .status-log { min-height: 60px; max-width: 620px; width: 100%; background: var(--surface-2); border: 1px solid var(--border); border-radius: 2px; padding: 12px 16px; font-family: 'JetBrains Mono', monospace; font-size: 12px; color: var(--text-dim); text-align: left; white-space: pre-wrap; line-height: 1.6; margin-top: 32px; max-height: 200px; overflow-y: auto; }
+
+  .syncing { display: inline-flex; align-items: center; gap: 6px; color: var(--accent); font-size: 11px; letter-spacing: 0.08em; text-transform: uppercase; }
+  .syncing::before { content: ''; width: 8px; height: 8px; border-radius: 50%; background: var(--accent); animation: pulse 1.2s ease-in-out infinite; }
+  @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.3; } }
+</style>
+</head>
+<body>
+<div class="app">
+  <div class="brand">
+    <div>
+      <div class="brand-title">Ledger<em>.</em></div>
+      <div class="brand-tagline">A quiet window into your property records</div>
+    </div>
+    <div class="brand-meta" id="brand-meta"></div>
+  </div>
+
+  <!-- LANDING (pre sign in + setup instructions) -->
+  <div id="landing" class="landing">
+    <h2>One quick setup, <em>then you're sorted.</em></h2>
+    <p>Drop the starter spreadsheets into your OneDrive, then sign in with Microsoft to load your dashboard.</p>
+
+    <div class="setup-card">
+      <div class="setup-step">
+        <div class="setup-num">1</div>
+        <div class="setup-body">
+          <h4>Upload <code>properties.xlsx</code></h4>
+          <p>Goes at the root: <code>OneDrive / Apps / Property / properties.xlsx</code></p>
+        </div>
+      </div>
+      <div class="setup-step">
+        <div class="setup-num">2</div>
+        <div class="setup-body">
+          <h4>Upload a financial year ledger</h4>
+          <p>Goes inside an FY folder: <code>OneDrive / Apps / Property / FY2025-26 / ledger.xlsx</code></p>
+          <p style="margin-top: 6px;">One tab per property. Folders must be named <code>FY2024-25</code>, <code>FY2025-26</code>, etc.</p>
+        </div>
+      </div>
+      <div class="setup-step">
+        <div class="setup-num">3</div>
+        <div class="setup-body">
+          <h4>Receipts go in the <code>receipts</code> subfolder</h4>
+          <p>Inside each FY folder: <code>FY2025-26 / receipts / council_q1.pdf</code></p>
+          <p style="margin-top: 6px;">Then write just the filename (not the path) in the Receipt column of the spreadsheet.</p>
+        </div>
+      </div>
+    </div>
+
+    <button class="btn-signin" id="btn-signin" style="margin-top: 8px;">Sign in with Microsoft</button>
+    <div class="landing-hint">Reads from your OneDrive folder <code style="font-family: 'JetBrains Mono', monospace; background: var(--surface-2); padding: 2px 6px; border-radius: 2px;">/Apps/Property/</code>. Nothing is written back or sent anywhere else.</div>
+
+    <div class="status-log" id="status-log">Ready. Sign in with Microsoft to load your property records.</div>
+  </div>
+
+  <!-- SETUP (shown when signed in but data missing) -->
+  <div id="setup" class="setup" hidden>
+    <h2>Almost there, <em>just missing some files.</em></h2>
+    <p>You're signed in, but I couldn't find all the required files in OneDrive. Check the status below and refresh once you've uploaded them.</p>
+
+    <div class="setup-card">
+      <div class="setup-step">
+        <div class="setup-num">1</div>
+        <div class="setup-body">
+          <h4>Upload <code>properties.xlsx</code></h4>
+          <p>Goes at the root: <code>OneDrive / Apps / Property / properties.xlsx</code></p>
+          <div class="setup-check" id="check-properties">Checking...</div>
+        </div>
+      </div>
+      <div class="setup-step">
+        <div class="setup-num">2</div>
+        <div class="setup-body">
+          <h4>Upload a financial year ledger</h4>
+          <p>Goes inside an FY folder: <code>OneDrive / Apps / Property / FY2025-26 / ledger.xlsx</code></p>
+          <div class="setup-check" id="check-fy">Checking...</div>
+        </div>
+      </div>
+    </div>
+
+    <div style="display: flex; gap: 10px; margin-top: 10px;">
+      <button class="btn-primary" id="btn-refresh-setup">Refresh, I've uploaded the files</button>
+      <button class="ghost-btn" id="btn-signout-setup">Sign out</button>
+    </div>
+    <div class="status-log" id="status-log-setup"></div>
+  </div>
+
+  <!-- DASHBOARD -->
+  <div id="dashboard" hidden>
+    <div class="period-picker">
+      <div class="period-label">Financial year</div>
+      <select class="filter-select" id="fy-select" style="min-width: 130px;"></select>
+      <div class="period-meta" id="period-meta"></div>
+      <div class="spacer"></div>
+      <button class="ghost-btn" id="btn-refresh">↻ Refresh from OneDrive</button>
+      <button class="ghost-btn" id="btn-export">Export</button>
+      <div class="user-chip" id="user-chip" hidden></div>
+      <button class="ghost-btn" id="btn-signout" hidden>Sign out</button>
+      <span class="syncing" id="syncing" hidden>Loading</span>
+    </div>
+
+    <div id="prop-strip-wrap"></div>
+
+    <div class="filters">
+      <div class="filter-group">
+        <span class="filter-label">Property</span>
+        <select class="filter-select" id="filter-property"><option value="">All properties</option></select>
+      </div>
+      <div class="filter-group">
+        <span class="filter-label">Type</span>
+        <select class="filter-select" id="filter-type">
+          <option value="">All</option>
+          <option value="income">Income</option>
+          <option value="expense">Expenses</option>
+        </select>
+      </div>
+      <div class="filter-group">
+        <span class="filter-label">Category</span>
+        <select class="filter-select" id="filter-category"><option value="">All categories</option></select>
+      </div>
+      <div class="filter-group">
+        <input type="search" class="filter-input" id="filter-search" placeholder="Search vendor, notes...">
+      </div>
+      <div class="spacer"></div>
+    </div>
+
+    <div class="kpi-grid">
+      <div class="kpi">
+        <div class="kpi-label"><span class="kpi-dot pos"></span>Rental income</div>
+        <div class="kpi-value pos mono" id="kpi-income">—</div>
+        <div class="kpi-sub" id="kpi-income-sub"></div>
+      </div>
+      <div class="kpi">
+        <div class="kpi-label"><span class="kpi-dot" style="background: var(--danger)"></span>Mortgage interest</div>
+        <div class="kpi-value mono" id="kpi-interest" style="color: var(--danger)">—</div>
+        <div class="kpi-sub" id="kpi-interest-sub"></div>
+      </div>
+      <div class="kpi">
+        <div class="kpi-label"><span class="kpi-dot neg"></span>Other expenses</div>
+        <div class="kpi-value neg mono" id="kpi-other">—</div>
+        <div class="kpi-sub" id="kpi-other-sub"></div>
+      </div>
+      <div class="kpi">
+        <div class="kpi-label"><span class="kpi-dot net"></span>Net position</div>
+        <div class="kpi-value mono" id="kpi-net">—</div>
+        <div class="kpi-sub" id="kpi-net-sub"></div>
+      </div>
+      <div class="kpi">
+        <div class="kpi-label"><span class="kpi-dot" style="background: var(--accent)"></span>Receipts filed</div>
+        <div class="kpi-value mono" id="kpi-receipts" style="color: var(--accent)">—</div>
+        <div class="kpi-sub" id="kpi-receipts-sub"></div>
+      </div>
+    </div>
+
+    <div class="panel" id="attention-panel" hidden>
+      <div class="panel-header">
+        <div>
+          <div class="panel-title">Before <em>tax time</em></div>
+          <div class="panel-subtitle">Quick things worth chasing up in your spreadsheet</div>
+        </div>
+      </div>
+      <div id="attention-body"></div>
+    </div>
+
+    <div class="panel">
+      <div class="panel-header">
+        <div>
+          <div class="panel-title">Income <em>versus</em> expenses</div>
+          <div class="panel-subtitle">By property, for the selected financial year</div>
+        </div>
+        <div class="panel-meta" id="ie-meta"></div>
+      </div>
+      <div class="chart-wrap tall"><canvas id="chart-ie"></canvas></div>
+    </div>
+
+    <div class="two-col">
+      <div class="panel">
+        <div class="panel-header">
+          <div>
+            <div class="panel-title">Expenses <em>ranked</em></div>
+            <div class="panel-subtitle">Biggest to smallest, so you know where the deductions are</div>
+          </div>
+          <div class="panel-meta" id="cat-meta"></div>
+        </div>
+        <div class="chart-wrap"><canvas id="chart-cat"></canvas></div>
+      </div>
+      <div class="panel">
+        <div class="panel-header">
+          <div>
+            <div class="panel-title">The <em>breakdown</em></div>
+            <div class="panel-subtitle">Click a row to filter the records below</div>
+          </div>
+        </div>
+        <div class="cat-list" id="cat-list"></div>
+      </div>
+    </div>
+
+    <div class="panel" style="padding: 0;">
+      <div class="panel-header" style="padding: 20px 24px; margin: 0;">
+        <div>
+          <div class="panel-title">Records</div>
+          <div class="panel-subtitle" id="tx-subtitle">Every rent received and every expense paid</div>
+        </div>
+        <div class="panel-meta" id="tx-meta"></div>
+      </div>
+      <div class="tx-head">
+        <div>Date</div>
+        <div>Description</div>
+        <div class="hide-sm">Property</div>
+        <div class="hide-sm">Category</div>
+        <div style="text-align:right">Amount</div>
+        <div></div>
+      </div>
+      <div id="tx-body"></div>
+      <div style="padding: 16px 24px; text-align: center;">
+        <button class="ghost-btn" id="btn-show-more" hidden>Show 50 more</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- DIALOG: View record & receipt -->
+<div class="dialog-backdrop" id="dialog-view">
+  <div class="dialog">
+    <div style="display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 12px; margin-bottom: 20px;">
+      <div>
+        <div id="view-type-tag" style="margin-bottom: 8px;"></div>
+        <h3 id="view-title" style="margin-bottom: 0;"></h3>
+        <div style="color: var(--text-dim); font-size: 13px; margin-top: 6px;" id="view-sub"></div>
+      </div>
+      <div class="serif" style="font-weight: 300; font-size: 38px; letter-spacing: -0.02em;" id="view-amount"></div>
+    </div>
+    <div id="view-details"></div>
+    <div id="view-receipt-wrap" hidden>
+      <div style="font-size: 11px; letter-spacing: 0.1em; color: var(--text-faint); text-transform: uppercase; margin: 20px 0 0;">Receipt</div>
+      <div id="view-receipt" class="receipt-preview"></div>
+    </div>
+    <div style="display: flex; gap: 10px; justify-content: flex-end; margin-top: 24px; padding-top: 20px; border-top: 1px solid var(--border);">
+      <button class="ghost-btn" id="view-close">Close</button>
+    </div>
+  </div>
+</div>
+
+<!-- DIALOG: Export -->
+<div class="dialog-backdrop" id="dialog-export">
+  <div class="dialog" style="max-width: 560px;">
+    <h3>Export for <em>tax time</em></h3>
+    <div style="color: var(--text-dim); font-size: 13px; margin-bottom: 20px;">A consolidated summary and a receipt report for your accountant.</div>
+    <div style="display: flex; flex-direction: column; gap: 12px;">
+      <div style="padding: 18px; border: 1px solid var(--border); border-radius: 2px; background: var(--surface-2);">
+        <div class="serif" style="font-size: 18px; margin-bottom: 4px;">Summary spreadsheet</div>
+        <div style="font-size: 13px; color: var(--text-dim); margin-bottom: 14px;">Totals per property and category, plus the flat transaction list.</div>
+        <button class="btn-primary" id="btn-export-xlsx">Download summary</button>
+        <span id="export-xlsx-meta" style="font-size: 11px; color: var(--text-faint); margin-left: 10px;"></span>
+      </div>
+      <div style="padding: 18px; border: 1px solid var(--border); border-radius: 2px; background: var(--surface-2);">
+        <div class="serif" style="font-size: 18px; margin-bottom: 4px;">Receipt report</div>
+        <div style="font-size: 13px; color: var(--text-dim); margin-bottom: 14px;">Single HTML file with every receipt embedded alongside its record. Opens in any browser, prints to PDF.</div>
+        <button class="btn-primary" id="btn-export-receipts">Download receipt report</button>
+        <span id="export-rec-meta" style="font-size: 11px; color: var(--text-faint); margin-left: 10px;"></span>
+      </div>
+    </div>
+    <div style="display: flex; justify-content: flex-end; gap: 10px; margin-top: 20px; padding-top: 20px; border-top: 1px solid var(--border);">
+      <button class="ghost-btn" id="export-close">Close</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+/* ============================================================
+   CONFIG
+   ============================================================ */
+const AZURE_CLIENT_ID = 'f455b7f0-a8ad-4d17-8752-7a8b709607d1';
+const AZURE_TENANT_ID = '91faaa92-6633-43b2-a302-8122e930e674';
+const ONEDRIVE_ROOT = 'Apps/Property';
+const GRAPH_SCOPES = ['Files.ReadWrite', 'User.Read'];
+
+/* ============================================================
+   CATEGORIES
+   ============================================================ */
+const EXPENSE_CATEGORIES = [
+  { id: 'mortgage_interest', label: 'Mortgage interest', color: '#A33F3F' },
+  { id: 'council_rates', label: 'Council rates', color: '#B08840' },
+  { id: 'water_rates', label: 'Water rates', color: '#4B7D9C' },
+  { id: 'land_tax', label: 'Land tax', color: '#6B9D4D' },
+  { id: 'body_corporate', label: 'Body corporate / strata', color: '#8B63A8' },
+  { id: 'insurance', label: 'Insurance', color: '#5E997B' },
+  { id: 'property_management', label: 'Property management fees', color: '#C45F3C' },
+  { id: 'repairs', label: 'Repairs & maintenance', color: '#D17A52' },
+  { id: 'cleaning', label: 'Cleaning', color: '#6BA4B3' },
+  { id: 'gardening', label: 'Gardening & lawn', color: '#6B9D4D' },
+  { id: 'pest_control', label: 'Pest control', color: '#7A6F5D' },
+  { id: 'advertising', label: 'Advertising for tenants', color: '#C99324' },
+  { id: 'accounting', label: 'Accounting / tax agent fees', color: '#5E554A' },
+  { id: 'legal', label: 'Legal fees', color: '#A7649C' },
+  { id: 'bank_fees', label: 'Bank fees', color: '#4A5568' },
+  { id: 'other_expense', label: 'Other expense', color: '#8F897A' }
+];
+
+const INCOME_CATEGORIES = [
+  { id: 'rental_income', label: 'Rental income', color: '#5B8C47' },
+  { id: 'bond_retained', label: 'Bond retained', color: '#3E6A88' },
+  { id: 'other_income', label: 'Other income', color: '#C9A14A' }
+];
+
+const ALL_CATEGORIES = [...EXPENSE_CATEGORIES, ...INCOME_CATEGORIES];
+const CAT_MAP = {};
+ALL_CATEGORIES.forEach(c => CAT_MAP[c.id] = c);
+
+// For mapping from Excel labels back to our internal IDs
+const LABEL_TO_ID = {};
+ALL_CATEGORIES.forEach(c => {
+  LABEL_TO_ID[c.label.toLowerCase().trim()] = c.id;
+});
+// Accept common variations
+LABEL_TO_ID['mortgage'] = 'mortgage_interest';
+LABEL_TO_ID['rates'] = 'council_rates';
+LABEL_TO_ID['water'] = 'water_rates';
+LABEL_TO_ID['strata'] = 'body_corporate';
+LABEL_TO_ID['body corporate'] = 'body_corporate';
+LABEL_TO_ID['management'] = 'property_management';
+LABEL_TO_ID['repairs'] = 'repairs';
+LABEL_TO_ID['maintenance'] = 'repairs';
+
+/* ============================================================
+   STATE
+   ============================================================ */
+const state = {
+  msal: null,
+  account: null,
+  properties: [],
+  transactions: [],      // parsed from currently-loaded FY spreadsheet
+  availableFYs: [],      // FY years found in OneDrive
+  fyStart: null,
+  filters: { property: '', type: '', category: '', search: '' },
+  txShowCount: 50,
+  charts: {},
+  loading: false,
+  receiptCache: {},
+  currentFolderName: '',
+  // Manual upload mode (testing without OneDrive)
+  manualMode: false,
+  manualFiles: {
+    properties: null,           // File object for properties.xlsx
+    ledgers: {},                // { 2025: File, 2024: File }
+    receipts: {}                // { filename: File }
+  },
+  manualReceiptUrls: {}         // { filename: blob url }
+};
+
+/* ============================================================
+   UTILITIES
+   ============================================================ */
+function $(s) { return document.querySelector(s); }
+function $$(s) { return document.querySelectorAll(s); }
+function show(s) { $(s).hidden = false; }
+function hide(s) { $(s).hidden = true; }
+function escapeHtml(s) { return String(s || '').replace(/[&<>"']/g, c => ({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;' })[c]); }
+function slugify(s) { return String(s || '').toLowerCase().replace(/[^a-z0-9]+/g, '_').replace(/^_|_$/g, ''); }
+
+const fmt = {
+  money: (n, showSign = false) => {
+    const v = Number(n) || 0;
+    const abs = Math.abs(v);
+    const s = abs.toLocaleString('en-AU', { style: 'currency', currency: 'AUD', minimumFractionDigits: 2 }).replace('-', '');
+    return (showSign ? (v >= 0 ? '+' : '−') : (v < 0 ? '−' : '')) + s;
+  },
+  moneyShort: (n) => {
+    const v = Number(n) || 0;
+    const abs = Math.abs(v);
+    let out;
+    if (abs >= 1000000) out = (abs/1000000).toFixed(1) + 'M';
+    else if (abs >= 1000) out = (abs/1000).toFixed(1) + 'k';
+    else out = abs.toFixed(0);
+    return (v < 0 ? '−' : '') + '$' + out;
+  },
+  date: (d) => d instanceof Date && !isNaN(d) ? d.toLocaleDateString('en-AU', { day: '2-digit', month: 'short', year: '2-digit' }) : '—',
+  dateLong: (d) => d instanceof Date && !isNaN(d) ? d.toLocaleDateString('en-AU', { day: '2-digit', month: 'short', year: 'numeric' }) : '—'
+};
+
+function getCurrentFY(date = new Date()) {
+  const y = date.getFullYear();
+  return date.getMonth() >= 6 ? y : y - 1;
+}
+
+function fyLabel(fyStart) {
+  return 'FY ' + fyStart + '/' + String(fyStart + 1).slice(2);
+}
+
+function fyFolderName(fyStart) {
+  return 'FY' + fyStart + '-' + String(fyStart + 1).slice(2);
+}
+
+function parseFYFromFolder(name) {
+  const m = name.match(/^FY(\d{4})-(\d{2})$/);
+  if (!m) return null;
+  return parseInt(m[1]);
+}
+
+function parseCellDate(val) {
+  if (!val) return null;
+  if (val instanceof Date && !isNaN(val)) return val;
+  if (typeof val === 'number') {
+    // Excel serial date
+    const d = new Date(Math.round((val - 25569) * 86400 * 1000));
+    return isNaN(d) ? null : d;
+  }
+  const s = String(val).trim();
+  // Try dd/mm/yyyy
+  let m = s.match(/^(\d{1,2})[\/\-](\d{1,2})[\/\-](\d{2,4})$/);
+  if (m) {
+    let y = parseInt(m[3]);
+    if (y < 100) y += y > 50 ? 1900 : 2000;
+    const d = new Date(y, parseInt(m[2]) - 1, parseInt(m[1]));
+    return isNaN(d) ? null : d;
+  }
+  // Try yyyy-mm-dd
+  m = s.match(/^(\d{4})-(\d{1,2})-(\d{1,2})/);
+  if (m) {
+    const d = new Date(parseInt(m[1]), parseInt(m[2]) - 1, parseInt(m[3]));
+    return isNaN(d) ? null : d;
+  }
+  const d = new Date(s);
+  return isNaN(d) ? null : d;
+}
+
+function parseCellNumber(val) {
+  if (val === undefined || val === null || val === '') return null;
+  if (typeof val === 'number') return val;
+  const s = String(val).replace(/[$,\s]/g, '').replace(/^\((.*)\)$/, '-$1');
+  const n = parseFloat(s);
+  return isNaN(n) ? null : n;
+}
+
+function isInFY(d, fyStart) {
+  if (!(d instanceof Date)) return false;
+  const start = new Date(fyStart, 6, 1);
+  const end = new Date(fyStart + 1, 5, 30, 23, 59, 59, 999);
+  return d >= start && d <= end;
+}
+
+function monthKey(d) {
+  return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0');
+}
+
+let toastTimer;
+function toast(msg) {
+  const t = $('#toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => t.classList.remove('show'), 3500);
+}
+
+function log(msg) {
+  const elMain = $('#status-log');
+  const elSetup = $('#status-log-setup');
+  const time = new Date().toLocaleTimeString('en-AU', { hour12: false });
+  const line = `[${time}] ${msg}\n`;
+  [elMain, elSetup].forEach(el => {
+    if (!el) return;
+    el.textContent = line + el.textContent;
+    if (el.textContent.length > 3000) el.textContent = el.textContent.slice(0, 3000);
+  });
+}
+
+function setLoading(on) {
+  state.loading = on;
+  $('#syncing').hidden = !on;
+}
+
+/* ============================================================
+   MSAL / GRAPH
+   ============================================================ */
+async function initMsal() {
+  try {
+    state.msal = new msal.PublicClientApplication({
+      auth: {
+        clientId: AZURE_CLIENT_ID,
+        authority: `https://login.microsoftonline.com/${AZURE_TENANT_ID}`,
+        redirectUri: window.location.origin + window.location.pathname
+      },
+      cache: { cacheLocation: 'sessionStorage', storeAuthStateInCookie: false }
+    });
+    await state.msal.initialize();
+    const resp = await state.msal.handleRedirectPromise();
+    if (resp?.account) {
+      state.msal.setActiveAccount(resp.account);
+      state.account = resp.account;
+    } else {
+      const accounts = state.msal.getAllAccounts();
+      if (accounts.length) {
+        state.msal.setActiveAccount(accounts[0]);
+        state.account = accounts[0];
+      }
+    }
+    log('MSAL ready. ' + (state.account ? 'Signed in as ' + state.account.username : 'Not signed in.'));
+    return true;
+  } catch (e) {
+    log('MSAL init failed: ' + e.message);
+    return false;
+  }
+}
+
+async function signIn() {
+  if (!state.msal) return;
+  try {
+    log('Opening Microsoft sign in...');
+    const resp = await state.msal.loginPopup({ scopes: GRAPH_SCOPES, prompt: 'select_account' });
+    state.msal.setActiveAccount(resp.account);
+    state.account = resp.account;
+    log('Signed in as ' + resp.account.username);
+    await onSignedIn();
+  } catch (e) {
+    if (e.errorCode === 'popup_window_error') {
+      state.msal.loginRedirect({ scopes: GRAPH_SCOPES });
+    } else if (e.errorCode === 'user_cancelled') {
+      log('Sign in cancelled');
+    } else {
+      toast('Sign in failed: ' + e.message);
+      log('Sign in failed: ' + e.message);
+    }
+  }
+}
+
+async function signOut() {
+  if (!state.msal || !state.account) return;
+  await state.msal.logoutPopup({ account: state.account });
+  location.reload();
+}
+
+async function getToken() {
+  const account = state.msal.getActiveAccount();
+  if (!account) throw new Error('Not signed in');
+  try {
+    const r = await state.msal.acquireTokenSilent({ scopes: GRAPH_SCOPES, account });
+    return r.accessToken;
+  } catch (e) {
+    const r = await state.msal.acquireTokenPopup({ scopes: GRAPH_SCOPES });
+    return r.accessToken;
+  }
+}
+
+async function graphFetch(path, options = {}) {
+  const token = await getToken();
+  const res = await fetch('https://graph.microsoft.com/v1.0' + path, {
+    ...options,
+    headers: { 'Authorization': 'Bearer ' + token, ...(options.headers || {}) }
+  });
+  if (!res.ok) {
+    const text = await res.text().catch(() => '');
+    const err = new Error('Graph ' + res.status + ': ' + text.slice(0, 200));
+    err.status = res.status;
+    throw err;
+  }
+  return res;
+}
+
+async function listChildren(folderPath) {
+  const path = folderPath
+    ? `/me/drive/root:/${encodeURIComponent(folderPath)}:/children?$top=500`
+    : '/me/drive/root/children?$top=500';
+  try {
+    const res = await graphFetch(path);
+    const data = await res.json();
+    return data.value || [];
+  } catch (e) {
+    if (e.status === 404) return null;
+    throw e;
+  }
+}
+
+async function ensureFolder(folderPath) {
+  const parts = folderPath.split('/');
+  let current = '';
+  for (const part of parts) {
+    const parent = current;
+    current = current ? current + '/' + part : part;
+    const items = await listChildren(parent);
+    const exists = items?.some(i => i.name === part && i.folder);
+    if (!exists) {
+      const url = parent
+        ? `/me/drive/root:/${encodeURIComponent(parent)}:/children`
+        : '/me/drive/root/children';
+      await graphFetch(url, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ name: part, folder: {}, '@microsoft.graph.conflictBehavior': 'fail' })
+      });
+      log('Created /' + current);
+    }
+  }
+}
+
+async function cloudDownload(filePath) {
+  const res = await graphFetch('/me/drive/root:/' + encodeURIComponent(filePath) + ':/content');
+  return await res.blob();
+}
+
+async function cloudExists(filePath) {
+  try {
+    await graphFetch('/me/drive/root:/' + encodeURIComponent(filePath));
+    return true;
+  } catch (e) {
+    if (e.status === 404) return false;
+    throw e;
+  }
+}
+
+/* ============================================================
+   SIGN IN FLOW
+   ============================================================ */
+async function onSignedIn() {
+  log('Loading data from OneDrive...');
+  setLoading(true);
+  try {
+    await ensureFolder(ONEDRIVE_ROOT);
+    const hasProps = await loadProperties();
+    const fyFolders = await discoverFYFolders();
+
+    // Check setup status
+    if (!hasProps || fyFolders.length === 0) {
+      showSetupScreen(hasProps, fyFolders.length > 0);
+      return;
+    }
+
+    state.availableFYs = fyFolders.map(parseFYFromFolder).filter(y => y != null).sort((a, b) => b - a);
+    const currentFY = getCurrentFY();
+    // Prefer current FY if available, otherwise most recent
+    state.fyStart = state.availableFYs.includes(currentFY) ? currentFY : state.availableFYs[0];
+
+    await loadFYData(state.fyStart);
+
+    hide('#landing');
+    hide('#setup');
+    show('#dashboard');
+    $('#user-chip').hidden = false;
+    $('#btn-signout').hidden = false;
+    updateUserChip();
+    populateFYSelect();
+    render();
+  } catch (e) {
+    log('Load failed: ' + e.message);
+    toast('Could not load from OneDrive: ' + e.message);
+  } finally {
+    setLoading(false);
+  }
+}
+
+function showSetupScreen(hasProps, hasFYs) {
+  hide('#landing');
+  show('#setup');
+  $('#check-properties').textContent = hasProps ? '✓ Found' : '✗ Not found, upload it first';
+  $('#check-properties').className = 'setup-check ' + (hasProps ? 'ok' : 'missing');
+  $('#check-fy').textContent = hasFYs ? '✓ Found at least one FY folder with a ledger file' : '✗ No FY folder with a ledger file found';
+  $('#check-fy').className = 'setup-check ' + (hasFYs ? 'ok' : 'missing');
+}
+
+async function refreshAll() {
+  setLoading(true);
+  state.receiptCache = {};
+  try {
+    const hasProps = await loadProperties();
+    const fyFolders = await discoverFYFolders();
+    if (!hasProps || fyFolders.length === 0) {
+      showSetupScreen(hasProps, fyFolders.length > 0);
+      return;
+    }
+    state.availableFYs = fyFolders.map(parseFYFromFolder).filter(y => y != null).sort((a, b) => b - a);
+    if (!state.availableFYs.includes(state.fyStart)) {
+      state.fyStart = state.availableFYs[0];
+    }
+    await loadFYData(state.fyStart);
+    hide('#setup');
+    show('#dashboard');
+    $('#user-chip').hidden = false;
+    $('#btn-signout').hidden = false;
+    updateUserChip();
+    populateFYSelect();
+    render();
+    toast('Refreshed from OneDrive');
+  } catch (e) {
+    log('Refresh failed: ' + e.message);
+    toast('Refresh failed: ' + e.message);
+  } finally {
+    setLoading(false);
+  }
+}
+
+function updateUserChip() {
+  if (!state.account) return;
+  const chip = $('#user-chip');
+  const name = state.account.name || state.account.username;
+  const initials = name.split(' ').map(s => s[0]).filter(Boolean).slice(0, 2).join('').toUpperCase();
+  chip.innerHTML = `<span class="initials">${escapeHtml(initials)}</span><span>${escapeHtml(state.account.username)}</span>`;
+}
+
+/* ============================================================
+   EXCEL PARSING
+   ============================================================ */
+async function loadProperties() {
+  try {
+    const blob = await cloudDownload(ONEDRIVE_ROOT + '/properties.xlsx');
+    const buffer = await blob.arrayBuffer();
+    const wb = XLSX.read(buffer, { type: 'array', cellDates: true });
+    const sheet = wb.Sheets[wb.SheetNames[0]];
+    const rows = XLSX.utils.sheet_to_json(sheet, { header: 1, defval: null, blankrows: false });
+    const headerRow = findHeaderRow(rows, ['name', 'address']);
+    if (headerRow === -1) {
+      log('properties.xlsx: could not find header row with Name and Address columns');
+      return false;
+    }
+    const headers = rows[headerRow].map(h => String(h || '').toLowerCase().trim());
+    const idx = {
+      name: headers.findIndex(h => h === 'name'),
+      address: headers.findIndex(h => h === 'address'),
+      purchaseDate: headers.findIndex(h => h.includes('purchase date')),
+      purchasePrice: headers.findIndex(h => h.includes('purchase price') || h.includes('price')),
+      notes: headers.findIndex(h => h.includes('note'))
+    };
+    const properties = [];
+    for (let i = headerRow + 1; i < rows.length; i++) {
+      const row = rows[i];
+      if (!row) continue;
+      const name = row[idx.name];
+      if (!name || String(name).toLowerCase().includes('total')) continue;
+      properties.push({
+        id: slugify(name),
+        name: String(name).trim(),
+        address: idx.address >= 0 && row[idx.address] ? String(row[idx.address]).trim() : '',
+        purchaseDate: idx.purchaseDate >= 0 ? parseCellDate(row[idx.purchaseDate]) : null,
+        purchasePrice: idx.purchasePrice >= 0 ? parseCellNumber(row[idx.purchasePrice]) : null,
+        notes: idx.notes >= 0 && row[idx.notes] ? String(row[idx.notes]).trim() : ''
+      });
+    }
+    state.properties = properties;
+    log('Loaded ' + properties.length + ' properties from properties.xlsx');
+    return properties.length > 0;
+  } catch (e) {
+    if (e.status === 404) {
+      log('properties.xlsx not found in ' + ONEDRIVE_ROOT);
+      return false;
+    }
+    log('loadProperties error: ' + e.message);
+    throw e;
+  }
+}
+
+async function discoverFYFolders() {
+  const items = await listChildren(ONEDRIVE_ROOT);
+  if (!items) return [];
+  const folders = items.filter(i => i.folder && /^FY\d{4}-\d{2}$/.test(i.name));
+  // Also check each has a ledger file in it
+  const withLedger = [];
+  for (const f of folders) {
+    const contents = await listChildren(ONEDRIVE_ROOT + '/' + f.name);
+    const xlsx = (contents || []).find(c => c.file && /\.xlsx$/i.test(c.name) && !c.name.startsWith('~'));
+    if (xlsx) {
+      withLedger.push(f.name);
+      log('FY folder: ' + f.name + ' (ledger: ' + xlsx.name + ')');
+    } else {
+      log('FY folder ' + f.name + ' has no .xlsx file, skipping');
+    }
+  }
+  return withLedger;
+}
+
+async function loadFYData(fyStart) {
+  const folderName = fyFolderName(fyStart);
+  state.currentFolderName = folderName;
+  state.transactions = [];
+  try {
+    const contents = await listChildren(ONEDRIVE_ROOT + '/' + folderName);
+    const xlsx = (contents || []).find(c => c.file && /\.xlsx$/i.test(c.name) && !c.name.startsWith('~'));
+    if (!xlsx) { log('No .xlsx in ' + folderName); return; }
+    const blob = await cloudDownload(ONEDRIVE_ROOT + '/' + folderName + '/' + xlsx.name);
+    const buffer = await blob.arrayBuffer();
+    const wb = XLSX.read(buffer, { type: 'array', cellDates: true });
+
+    // Skip these sheet names (they're not property data)
+    const skipSheets = /^(read.?me|categories|instructions|notes|summary|dashboard|lists|help)$/i;
+
+    let totalParsed = 0;
+    for (const sheetName of wb.SheetNames) {
+      if (skipSheets.test(sheetName.trim())) { log('Skipping sheet: ' + sheetName); continue; }
+      const prop = findProperty(sheetName);
+      if (!prop) { log('Sheet "' + sheetName + '" does not match any property, skipping'); continue; }
+      const sheet = wb.Sheets[sheetName];
+      const txs = parsePropertySheet(sheet, prop, fyStart);
+      state.transactions.push(...txs);
+      log('Parsed ' + txs.length + ' records for ' + prop.name);
+      totalParsed += txs.length;
+    }
+
+    log('Total ' + totalParsed + ' records loaded for ' + fyLabel(fyStart));
+  } catch (e) {
+    log('loadFYData error: ' + e.message);
+    throw e;
+  }
+}
+
+function findHeaderRow(rows, requiredColumns) {
+  for (let i = 0; i < Math.min(rows.length, 10); i++) {
+    const row = rows[i];
+    if (!row) continue;
+    const cells = row.map(c => String(c || '').toLowerCase().trim());
+    const allFound = requiredColumns.every(col => cells.some(c => c === col || c.includes(col)));
+    if (allFound) return i;
+  }
+  return -1;
+}
+
+function parsePropertySheet(sheet, prop, fyStart) {
+  const rows = XLSX.utils.sheet_to_json(sheet, { header: 1, defval: null, blankrows: false });
+  const headerRow = findHeaderRow(rows, ['date', 'category', 'amount']);
+  if (headerRow === -1) { log('Sheet ' + prop.name + ': header row (Date/Category/Amount) not found'); return []; }
+  const headers = rows[headerRow].map(h => String(h || '').toLowerCase().trim());
+  const idx = {
+    date: headers.findIndex(h => h === 'date'),
+    category: headers.findIndex(h => h === 'category'),
+    amount: headers.findIndex(h => h === 'amount'),
+    party: headers.findIndex(h => h.includes('party') || h.includes('tenant') || h.includes('vendor') || h.includes('paid to') || h.includes('agent') || h === 'from'),
+    receipt: headers.findIndex(h => h.includes('receipt')),
+    notes: headers.findIndex(h => h.includes('note') || h.includes('description'))
+  };
+  // Fallback date for rows without one: 30 June of the FY close year
+  const fallbackDate = new Date(fyStart + 1, 5, 30);
+  const transactions = [];
+  for (let i = headerRow + 1; i < rows.length; i++) {
+    const row = rows[i];
+    if (!row) continue;
+    const firstCell = String(row[0] || '').toLowerCase().trim();
+    if (firstCell === 'total' || firstCell.startsWith('total')) continue;
+
+    const amount = parseCellNumber(row[idx.amount]);
+    if (!amount) continue;
+
+    const catRaw = idx.category >= 0 ? row[idx.category] : null;
+    const catLabel = String(catRaw || '').toLowerCase().trim();
+    if (!catLabel) { log(prop.name + ' row ' + (i + 1) + ': no category, skipping'); continue; }
+    const catId = LABEL_TO_ID[catLabel];
+    if (!catId) { log(prop.name + ' row ' + (i + 1) + ': unknown category "' + catRaw + '", skipping'); continue; }
+
+    // Date is optional. If missing, assume it belongs to this file's FY.
+    let date = parseCellDate(row[idx.date]);
+    if (!date) {
+      date = fallbackDate;
+    } else if (!isInFY(date, fyStart)) {
+      // Date is present but not in this FY - skip
+      continue;
+    }
+
+    const isIncome = INCOME_CATEGORIES.some(c => c.id === catId);
+
+    transactions.push({
+      id: 't_' + prop.id + '_' + fyStart + '_' + i,
+      type: isIncome ? 'income' : 'expense',
+      category: catId,
+      propertyId: prop.id,
+      date: date,
+      amount: amount,
+      vendor: idx.party >= 0 ? String(row[idx.party] || '').trim() : '',
+      description: idx.notes >= 0 ? String(row[idx.notes] || '').trim() : '',
+      receiptFilename: idx.receipt >= 0 ? (String(row[idx.receipt] || '').trim() || null) : null
+    });
+  }
+  return transactions;
+}
+
+function findProperty(name) {
+  if (!name) return null;
+  const n = name.toLowerCase().trim();
+  // Try exact match first
+  let p = state.properties.find(x => x.name.toLowerCase().trim() === n);
+  if (p) return p;
+  // Then ID/slug match
+  const slug = slugify(name);
+  p = state.properties.find(x => x.id === slug);
+  if (p) return p;
+  // Then contains match (handles abbreviations like "Maud" matching "117 Maud St (house)")
+  p = state.properties.find(x => x.name.toLowerCase().includes(n) || n.includes(x.name.toLowerCase()));
+  return p || null;
+}
+
+/* ============================================================
+   FILTERING / DERIVED
+   ============================================================ */
+function filteredTransactions() {
+  let list = [...state.transactions];
+  if (state.filters.property) list = list.filter(t => t.propertyId === state.filters.property);
+  if (state.filters.type) list = list.filter(t => t.type === state.filters.type);
+  if (state.filters.category) list = list.filter(t => t.category === state.filters.category);
+  if (state.filters.search) {
+    const q = state.filters.search.toLowerCase();
+    list = list.filter(t => {
+      const cat = CAT_MAP[t.category]?.label.toLowerCase() || '';
+      return cat.includes(q)
+        || (t.description || '').toLowerCase().includes(q)
+        || (t.vendor || '').toLowerCase().includes(q);
+    });
+  }
+  return list.sort((a, b) => b.date - a.date);
+}
+
+function totals(list) {
+  let income = 0, expense = 0, interest = 0, other = 0, withReceipt = 0;
+  list.forEach(t => {
+    const a = Number(t.amount) || 0;
+    if (t.type === 'income') income += a;
+    else {
+      expense += a;
+      if (t.category === 'mortgage_interest') interest += a;
+      else other += a;
+    }
+    if (t.receiptFilename) withReceipt++;
+  });
+  return { income, expense, interest, other, net: income - expense, withReceipt, count: list.length };
+}
+
+/* ============================================================
+   RENDER
+   ============================================================ */
+function render() {
+  renderBrandMeta();
+  renderPropStrip();
+  renderKPIs();
+  renderAttention();
+  renderCharts();
+  renderCategoryBreakdown();
+  renderTransactions();
+  populateFilters();
+}
+
+function renderBrandMeta() {
+  const mode = state.manualMode ? 'manual upload mode' : state.currentFolderName;
+  $('#brand-meta').innerHTML = `${state.properties.length} properties <span class="dot">·</span> ${state.transactions.length} records <span class="dot">·</span> ${mode}`;
+  $('#period-meta').textContent = fyLabel(state.fyStart) + ' · 1 Jul ' + state.fyStart + ' → 30 Jun ' + (state.fyStart + 1);
+}
+
+function populateFYSelect() {
+  const sel = $('#fy-select');
+  sel.innerHTML = state.availableFYs.map(y => `<option value="${y}">${fyLabel(y)}</option>`).join('');
+  sel.value = state.fyStart;
+}
+
+function populateFilters() {
+  const propSel = $('#filter-property');
+  propSel.innerHTML = '<option value="">All properties</option>' +
+    state.properties.map(p => `<option value="${p.id}"${state.filters.property === p.id ? ' selected' : ''}>${escapeHtml(p.name)}</option>`).join('');
+
+  const catSel = $('#filter-category');
+  const used = new Set(state.transactions.map(t => t.category));
+  const cats = ALL_CATEGORIES.filter(c => used.has(c.id));
+  catSel.innerHTML = '<option value="">All categories</option>' +
+    cats.map(c => `<option value="${c.id}"${state.filters.category === c.id ? ' selected' : ''}>${escapeHtml(c.label)}</option>`).join('');
+}
+
+function renderPropStrip() {
+  const wrap = $('#prop-strip-wrap');
+  if (!state.properties.length) { wrap.innerHTML = ''; return; }
+  const cards = state.properties.map(p => {
+    const txs = state.transactions.filter(t => t.propertyId === p.id);
+    const tot = totals(txs);
+    return `
+      <button class="prop-card${state.filters.property === p.id ? ' active' : ''}" data-prop="${p.id}">
+        <div class="prop-name">${escapeHtml(p.name)}</div>
+        <div class="prop-address">${escapeHtml(p.address || '')}</div>
+        <div class="prop-net ${tot.net >= 0 ? 'pos' : 'neg'}">${fmt.money(tot.net, true)}</div>
+        <div class="prop-net-detail">
+          <span class="pos">+${fmt.moneyShort(tot.income)}</span>
+          &nbsp;&nbsp;
+          <span class="neg">−${fmt.moneyShort(tot.expense)}</span>
+          &nbsp;·&nbsp; ${tot.count} records
+        </div>
+      </button>`;
+  }).join('');
+  wrap.innerHTML = `<div class="prop-strip">${cards}</div>`;
+  $$('#prop-strip-wrap .prop-card').forEach(el => {
+    el.onclick = () => {
+      const pid = el.dataset.prop;
+      state.filters.property = state.filters.property === pid ? '' : pid;
+      render();
+    };
+  });
+}
+
+function renderKPIs() {
+  const list = filteredTransactions();
+  const t = totals(list);
+  $('#kpi-income').textContent = fmt.money(t.income);
+  $('#kpi-income-sub').textContent = list.filter(x => x.type === 'income').length + ' records';
+  $('#kpi-interest').textContent = fmt.money(t.interest);
+  const mortCount = list.filter(x => x.category === 'mortgage_interest').length;
+  $('#kpi-interest-sub').textContent = mortCount + ' record' + (mortCount === 1 ? '' : 's');
+  $('#kpi-other').textContent = fmt.money(t.other);
+  $('#kpi-other-sub').textContent = (list.filter(x => x.type === 'expense').length - mortCount) + ' records';
+  $('#kpi-net').textContent = fmt.money(t.net, true);
+  $('#kpi-net').style.color = t.net >= 0 ? 'var(--positive)' : 'var(--negative)';
+  $('#kpi-net-sub').textContent = (t.net >= 0 ? 'positive' : 'negative') + ' position';
+  $('#kpi-receipts').textContent = t.withReceipt;
+  $('#kpi-receipts-sub').textContent = 'of ' + t.count + ' records';
+}
+
+function renderAttention() {
+  const panel = $('#attention-panel');
+  const body = $('#attention-body');
+  const items = [];
+  const currentFY = getCurrentFY();
+  if (state.fyStart !== currentFY && state.fyStart !== currentFY - 1) { panel.hidden = true; return; }
+
+  state.properties.forEach(p => {
+    const txs = state.transactions.filter(t => t.propertyId === p.id);
+    const hasInterest = txs.some(t => t.category === 'mortgage_interest');
+    const hasInsurance = txs.some(t => t.category === 'insurance');
+    const hasCouncil = txs.some(t => t.category === 'council_rates');
+    const hasRent = txs.some(t => t.type === 'income');
+    if (!hasRent) items.push({ prop: p.name, msg: 'No rent recorded yet. Is the property tenanted?' });
+    if (!hasInterest) items.push({ prop: p.name, msg: 'No mortgage interest recorded. Your bank issues an annual interest summary around July.' });
+    if (!hasInsurance) items.push({ prop: p.name, msg: 'No landlord insurance recorded.' });
+    if (!hasCouncil) items.push({ prop: p.name, msg: 'No council rates recorded yet for this year.' });
+  });
+
+  const noReceipts = state.transactions.filter(t => t.type === 'expense' && !t.receiptFilename && Number(t.amount) > 100);
+  if (noReceipts.length) items.push({ prop: '', msg: `${noReceipts.length} expense${noReceipts.length === 1 ? '' : 's'} over $100 have no receipt filename in the spreadsheet.` });
+
+  if (!items.length) { panel.hidden = true; return; }
+  panel.hidden = false;
+  body.innerHTML = items.slice(0, 10).map(item => `
+    <div class="attn-row">${item.prop ? `<strong>${escapeHtml(item.prop)}</strong> — ` : ''}${escapeHtml(item.msg)}</div>
+  `).join('');
+}
+
+function renderCharts() {
+  const list = filteredTransactions();
+  renderIncomeExpenseChart(list);
+  renderCategoryChart(list);
+}
+
+function renderIncomeExpenseChart(list) {
+  const canvas = $('#chart-ie');
+  if (!canvas) return;
+
+  // Per-property breakdown: rental income, mortgage interest, other expenses
+  const perProp = state.properties.map(p => {
+    const txs = list.filter(t => t.propertyId === p.id);
+    let income = 0, interest = 0, other = 0;
+    txs.forEach(t => {
+      const a = Number(t.amount) || 0;
+      if (t.type === 'income') income += a;
+      else if (t.category === 'mortgage_interest') interest += a;
+      else other += a;
+    });
+    return { name: p.name, income, interest, other };
+  });
+
+  if (state.charts.ie) state.charts.ie.destroy();
+  state.charts.ie = new Chart(canvas, {
+    type: 'bar',
+    data: {
+      labels: perProp.map(p => p.name),
+      datasets: [
+        { label: 'Rental income', data: perProp.map(p => p.income), backgroundColor: '#5B8C47' },
+        { label: 'Mortgage interest', data: perProp.map(p => p.interest), backgroundColor: '#A33F3F' },
+        { label: 'Other expenses', data: perProp.map(p => p.other), backgroundColor: '#B85838' }
+      ]
+    },
+    options: {
+      indexAxis: 'y',
+      responsive: true, maintainAspectRatio: false,
+      scales: {
+        x: { grid: { color: '#E0D9C9' }, ticks: { color: '#8F897A', font: { family: 'JetBrains Mono', size: 11 }, callback: v => fmt.moneyShort(v) } },
+        y: { grid: { display: false }, ticks: { color: '#2A2822', font: { family: 'Fraunces', size: 13 } } }
+      },
+      plugins: {
+        legend: { position: 'bottom', labels: { color: '#5E574B', font: { family: 'Manrope', size: 12 }, padding: 16, usePointStyle: true, pointStyle: 'circle' } },
+        tooltip: { backgroundColor: '#2A2822', titleFont: { family: 'Manrope' }, bodyFont: { family: 'JetBrains Mono' }, callbacks: { label: c => c.dataset.label + ': ' + fmt.money(c.parsed.x) } }
+      }
+    }
+  });
+
+  const totalIncome = perProp.reduce((a, p) => a + p.income, 0);
+  const totalExpense = perProp.reduce((a, p) => a + p.interest + p.other, 0);
+  $('#ie-meta').textContent = fmt.money(totalIncome) + ' in · ' + fmt.money(totalExpense) + ' out';
+}
+
+function renderCategoryChart(list) {
+  const canvas = $('#chart-cat');
+  if (!canvas) return;
+  const byCat = {};
+  list.filter(t => t.type === 'expense').forEach(t => {
+    if (!byCat[t.category]) byCat[t.category] = 0;
+    byCat[t.category] += Number(t.amount) || 0;
+  });
+  const entries = Object.entries(byCat).sort((a, b) => b[1] - a[1]);
+  if (state.charts.cat) state.charts.cat.destroy();
+  if (!entries.length) {
+    canvas.parentElement.innerHTML = '<div class="empty">No expenses recorded in this period</div>';
+    return;
+  }
+  if (!canvas.isConnected) {
+    canvas.parentElement.innerHTML = '';
+    canvas.parentElement.appendChild(canvas);
+  }
+  state.charts.cat = new Chart(canvas, {
+    type: 'bar',
+    data: {
+      labels: entries.map(e => CAT_MAP[e[0]]?.label || e[0]),
+      datasets: [{
+        data: entries.map(e => e[1]),
+        backgroundColor: entries.map(e => CAT_MAP[e[0]]?.color || '#8F897A'),
+        borderWidth: 0
+      }]
+    },
+    options: {
+      indexAxis: 'y',
+      responsive: true, maintainAspectRatio: false,
+      scales: {
+        x: { grid: { color: '#E0D9C9' }, ticks: { color: '#8F897A', font: { family: 'JetBrains Mono', size: 11 }, callback: v => fmt.moneyShort(v) } },
+        y: { grid: { display: false }, ticks: { color: '#2A2822', font: { family: 'Manrope', size: 12 } } }
+      },
+      plugins: {
+        legend: { display: false },
+        tooltip: { backgroundColor: '#2A2822', titleFont: { family: 'Manrope' }, bodyFont: { family: 'JetBrains Mono' }, callbacks: { label: c => fmt.money(c.parsed.x) } }
+      }
+    }
+  });
+  const total = entries.reduce((a, e) => a + e[1], 0);
+  $('#cat-meta').textContent = fmt.money(total) + ' across ' + entries.length + ' categor' + (entries.length === 1 ? 'y' : 'ies');
+}
+
+function renderCategoryBreakdown() {
+  const list = filteredTransactions().filter(t => t.type === 'expense');
+  const byCat = {};
+  list.forEach(t => {
+    if (!byCat[t.category]) byCat[t.category] = { total: 0, count: 0 };
+    byCat[t.category].total += Number(t.amount) || 0;
+    byCat[t.category].count += 1;
+  });
+  const entries = Object.entries(byCat).sort((a, b) => b[1].total - a[1].total);
+  const total = entries.reduce((a, e) => a + e[1].total, 0);
+  const el = $('#cat-list');
+  if (!entries.length) { el.innerHTML = '<div class="empty">Nothing spent yet</div>'; return; }
+  el.innerHTML = entries.map(([id, v]) => {
+    const pct = total > 0 ? (v.total / total * 100).toFixed(1) : '0';
+    const cat = CAT_MAP[id];
+    const active = state.filters.category === id ? ' active' : '';
+    return `
+      <button class="cat-row${active}" data-cat="${id}">
+        <div class="cat-swatch" style="background: ${cat?.color || '#8F897A'}"></div>
+        <div>
+          <div class="cat-name">${escapeHtml(cat?.label || id)}</div>
+          <div style="font-size: 11px; color: var(--text-faint); margin-top: 2px;">${v.count} record${v.count === 1 ? '' : 's'}</div>
+        </div>
+        <div class="cat-pct">${pct}%</div>
+        <div class="cat-amount">${fmt.money(v.total)}</div>
+      </button>
+    `;
+  }).join('');
+  $$('#cat-list .cat-row').forEach(row => {
+    row.onclick = () => {
+      state.filters.category = state.filters.category === row.dataset.cat ? '' : row.dataset.cat;
+      render();
+    };
+  });
+}
+
+function renderTransactions() {
+  const list = filteredTransactions();
+  const el = $('#tx-body');
+  $('#tx-meta').textContent = list.length + ' record' + (list.length === 1 ? '' : 's');
+  if (!list.length) {
+    el.innerHTML = '<div class="empty">No records match the current filter</div>';
+    $('#btn-show-more').hidden = true;
+    return;
+  }
+  const shown = list.slice(0, state.txShowCount);
+  el.innerHTML = shown.map(t => {
+    const prop = state.properties.find(p => p.id === t.propertyId);
+    const cat = CAT_MAP[t.category];
+    const sign = t.type === 'income' ? '+' : '−';
+    const cls = t.type === 'income' ? 'pos' : 'neg';
+    const title = t.vendor || t.description || cat?.label || t.category;
+    return `
+      <div class="tx-row" data-id="${t.id}">
+        <div class="tx-date">${fmt.date(t.date)}</div>
+        <div class="tx-desc">
+          <div class="tx-desc-main">${escapeHtml(title)}</div>
+          <div class="tx-desc-sub">
+            ${t.receiptFilename ? '<span class="tx-clip">📎 ' + escapeHtml(t.receiptFilename) + '</span>' : ''}
+          </div>
+        </div>
+        <div class="tx-prop hide-sm">${escapeHtml(prop?.name || '—')}</div>
+        <div class="tx-cat hide-sm">${escapeHtml(cat?.label || t.category)}</div>
+        <div class="tx-amount ${cls}">${sign}${fmt.money(Number(t.amount) || 0).replace('−','')}</div>
+        <div></div>
+      </div>
+    `;
+  }).join('');
+  $$('#tx-body .tx-row').forEach(row => {
+    row.onclick = () => openViewDialog(row.dataset.id);
+  });
+  $('#btn-show-more').hidden = list.length <= state.txShowCount;
+}
+
+/* ============================================================
+   VIEW DIALOG
+   ============================================================ */
+async function openViewDialog(id) {
+  const t = state.transactions.find(x => x.id === id);
+  if (!t) return;
+  const prop = state.properties.find(p => p.id === t.propertyId);
+  const cat = CAT_MAP[t.category];
+  const sign = t.type === 'income' ? '+' : '−';
+
+  $('#view-type-tag').innerHTML = `<span class="tag ${t.type}">${t.type}</span>`;
+  $('#view-title').textContent = cat?.label || t.category;
+  $('#view-sub').textContent = prop?.name || '';
+  $('#view-amount').textContent = sign + fmt.money(Number(t.amount) || 0).replace('−', '');
+  $('#view-amount').style.color = t.type === 'income' ? 'var(--positive)' : 'var(--negative)';
+
+  const rows = [];
+  rows.push(['Date', fmt.dateLong(t.date)]);
+  if (t.vendor) rows.push([t.type === 'income' ? 'From' : 'Paid to', escapeHtml(t.vendor)]);
+  if (t.description) rows.push(['Notes', escapeHtml(t.description)]);
+  rows.push(['Receipt', t.receiptFilename ? escapeHtml(t.receiptFilename) : '— none —']);
+  $('#view-details').innerHTML = rows.map(([k, v]) => `
+    <div class="detail-row"><div class="dt">${k}</div><div class="dd">${v}</div></div>
+  `).join('');
+
+  const wrap = $('#view-receipt-wrap');
+  const recEl = $('#view-receipt');
+  if (t.receiptFilename) {
+    wrap.hidden = false;
+    recEl.innerHTML = '<div style="padding: 40px; text-align: center; color: var(--text-faint); font-style: italic; font-family: Fraunces, serif;">Loading receipt...</div>';
+    try {
+      const url = await getReceiptUrl(t.receiptFilename);
+      if (url) {
+        const isPdf = /\.pdf$/i.test(t.receiptFilename);
+        recEl.innerHTML = isPdf
+          ? `<embed src="${url}" type="application/pdf">`
+          : `<img src="${url}" alt="Receipt">`;
+      } else {
+        recEl.innerHTML = '<div style="padding: 40px; text-align: center; color: var(--negative);">Receipt file not found in /' + state.currentFolderName + '/receipts/</div>';
+      }
+    } catch (e) {
+      recEl.innerHTML = '<div style="padding: 40px; text-align: center; color: var(--negative);">Error loading receipt: ' + escapeHtml(e.message) + '</div>';
+    }
+  } else {
+    wrap.hidden = true;
+  }
+  $('#dialog-view').classList.add('open');
+}
+
+async function getReceiptUrl(filename) {
+  if (state.manualMode) {
+    if (state.manualReceiptUrls[filename]) return state.manualReceiptUrls[filename];
+    const file = state.manualFiles.receipts[filename];
+    if (!file) return null;
+    const url = URL.createObjectURL(file);
+    state.manualReceiptUrls[filename] = url;
+    return url;
+  }
+  const key = state.currentFolderName + '/' + filename;
+  if (state.receiptCache[key]) return state.receiptCache[key];
+  const path = ONEDRIVE_ROOT + '/' + state.currentFolderName + '/receipts/' + filename;
+  try {
+    const blob = await cloudDownload(path);
+    const url = URL.createObjectURL(blob);
+    state.receiptCache[key] = url;
+    return url;
+  } catch (e) {
+    if (e.status === 404) return null;
+    throw e;
+  }
+}
+
+/* ============================================================
+   EXPORT
+   ============================================================ */
+function openExportDialog() {
+  const withReceipts = state.transactions.filter(t => t.receiptFilename).length;
+  $('#export-xlsx-meta').textContent = state.transactions.length + ' records in ' + fyLabel(state.fyStart);
+  $('#export-rec-meta').textContent = withReceipts + ' receipt' + (withReceipts === 1 ? '' : 's');
+  $('#btn-export-xlsx').disabled = state.transactions.length === 0;
+  $('#btn-export-receipts').disabled = withReceipts === 0;
+  $('#dialog-export').classList.add('open');
+}
+
+function exportExcel() {
+  const wb = XLSX.utils.book_new();
+  const summaryRows = [
+    ['Property Investment Summary'],
+    [fyLabel(state.fyStart) + '  (1 Jul ' + state.fyStart + ' to 30 Jun ' + (state.fyStart + 1) + ')'],
+    [],
+    ['Property', 'Income', 'Mortgage interest', 'Other expenses', 'Total expenses', 'Net']
+  ];
+  let gi = 0, gm = 0, go = 0;
+  state.properties.forEach(p => {
+    const t = totals(state.transactions.filter(x => x.propertyId === p.id));
+    gi += t.income; gm += t.interest; go += t.other;
+    summaryRows.push([p.name, t.income, t.interest, t.other, t.expense, t.net]);
+  });
+  summaryRows.push([], ['TOTAL', gi, gm, go, gm + go, gi - (gm + go)]);
+  summaryRows.push([], [], ['Category breakdown'], ['Property', 'Category', 'Type', 'Total', 'Count']);
+  state.properties.forEach(p => {
+    const txs = state.transactions.filter(x => x.propertyId === p.id);
+    const byCat = {};
+    txs.forEach(t => {
+      if (!byCat[t.category]) byCat[t.category] = { total: 0, count: 0, type: t.type };
+      byCat[t.category].total += Number(t.amount) || 0;
+      byCat[t.category].count += 1;
+    });
+    Object.entries(byCat).forEach(([k, v]) => {
+      summaryRows.push([p.name, CAT_MAP[k]?.label || k, v.type, v.total, v.count]);
+    });
+  });
+  const summarySheet = XLSX.utils.aoa_to_sheet(summaryRows);
+  summarySheet['!cols'] = [{ wch: 28 }, { wch: 14 }, { wch: 18 }, { wch: 16 }, { wch: 16 }, { wch: 14 }];
+  XLSX.utils.book_append_sheet(wb, summarySheet, 'Summary');
+
+  const txRows = [['Date', 'Property', 'Type', 'Category', 'Amount', 'Paid to / From', 'Notes', 'Receipt']];
+  [...state.transactions].sort((a, b) => a.date - b.date).forEach(t => {
+    txRows.push([
+      fmt.dateLong(t.date),
+      state.properties.find(p => p.id === t.propertyId)?.name || '',
+      t.type,
+      CAT_MAP[t.category]?.label || t.category,
+      Number(t.amount) || 0,
+      t.vendor || '',
+      t.description || '',
+      t.receiptFilename || ''
+    ]);
+  });
+  const txSheet = XLSX.utils.aoa_to_sheet(txRows);
+  txSheet['!cols'] = [{ wch: 14 }, { wch: 24 }, { wch: 10 }, { wch: 26 }, { wch: 12 }, { wch: 22 }, { wch: 32 }, { wch: 22 }];
+  XLSX.utils.book_append_sheet(wb, txSheet, 'Transactions');
+
+  const out = XLSX.write(wb, { bookType: 'xlsx', type: 'array' });
+  const blob = new Blob([out], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+  triggerDownload(blob, 'PropertyLedger_Summary_' + fyLabel(state.fyStart).replace(/[\s\/]/g, '_') + '.xlsx');
+  toast('Summary downloaded');
+}
+
+async function exportReceipts() {
+  const txs = state.transactions.filter(t => t.receiptFilename).sort((a, b) => a.date - b.date);
+  if (!txs.length) { toast('No receipts to export'); return; }
+  $('#btn-export-receipts').disabled = true;
+  $('#btn-export-receipts').textContent = 'Preparing...';
+
+  const byProp = {};
+  for (const t of txs) {
+    try {
+      let blob;
+      if (state.manualMode) {
+        const file = state.manualFiles.receipts[t.receiptFilename];
+        if (!file) { log('Manual: receipt ' + t.receiptFilename + ' not uploaded, skipping'); continue; }
+        blob = file;
+      } else {
+        const path = ONEDRIVE_ROOT + '/' + state.currentFolderName + '/receipts/' + t.receiptFilename;
+        blob = await cloudDownload(path);
+      }
+      const dataUrl = await blobToDataUrl(blob);
+      if (!byProp[t.propertyId]) byProp[t.propertyId] = [];
+      byProp[t.propertyId].push({ t, dataUrl, mimeType: blob.type });
+    } catch (e) {
+      log('Could not fetch ' + t.receiptFilename + ': ' + e.message);
+    }
+  }
+
+  let html = `<!doctype html><html><head><meta charset="utf-8"><title>Receipts ${fyLabel(state.fyStart)}</title>
+<style>
+  body { font-family: Georgia, serif; background: #F7F4EE; color: #2A2822; margin: 0; padding: 40px 20px; }
+  .wrap { max-width: 820px; margin: 0 auto; }
+  h1 { font-weight: normal; font-size: 32px; margin: 0 0 6px; letter-spacing: -0.02em; }
+  .sub { color: #5E574B; margin-bottom: 36px; font-size: 14px; }
+  h2 { font-weight: normal; font-size: 22px; border-bottom: 2px solid #2A2822; padding-bottom: 8px; margin: 40px 0 16px; }
+  .record { background: #FDFBF7; border: 1px solid #E0D9C9; border-radius: 4px; padding: 20px; margin-bottom: 14px; page-break-inside: avoid; }
+  .head { display: flex; justify-content: space-between; gap: 20px; margin-bottom: 12px; }
+  .title { font-size: 17px; font-weight: 500; margin-bottom: 4px; }
+  .meta { color: #5E574B; font-size: 12px; }
+  .amount { font-size: 22px; white-space: nowrap; }
+  .pos { color: #5B8C47; } .neg { color: #B85838; }
+  .notes { margin: 10px 0; padding: 8px 12px; background: #F1ECE2; border-radius: 2px; font-size: 13px; }
+  .receipt-box { border: 1px solid #E0D9C9; border-radius: 2px; overflow: hidden; background: #F1ECE2; margin-top: 10px; }
+  .receipt-box img { width: 100%; display: block; max-height: 700px; object-fit: contain; background: white; }
+  .receipt-box embed { width: 100%; height: 600px; display: block; }
+  .fname { padding: 6px 12px; background: #F1ECE2; font-size: 11px; color: #5E574B; border-bottom: 1px solid #E0D9C9; font-family: monospace; }
+  @media print { body { background: white; padding: 0; } }
+</style></head><body><div class="wrap">
+<h1>Property receipts &amp; records</h1>
+<div class="sub">${fyLabel(state.fyStart)} · 1 July ${state.fyStart} to 30 June ${state.fyStart + 1} · ${txs.length} receipt${txs.length === 1 ? '' : 's'}</div>`;
+
+  state.properties.forEach(p => {
+    const list = byProp[p.id];
+    if (!list?.length) return;
+    html += `<h2>${escapeHtml(p.name)}</h2>`;
+    list.forEach(({ t, dataUrl, mimeType }) => {
+      const sign = t.type === 'income' ? '+' : '−';
+      const cls = t.type === 'income' ? 'pos' : 'neg';
+      html += `<div class="record">
+        <div class="head">
+          <div>
+            <div class="title">${escapeHtml(CAT_MAP[t.category]?.label || t.category)}</div>
+            <div class="meta">${fmt.dateLong(t.date)}${t.vendor ? ' · ' + escapeHtml(t.vendor) : ''}</div>
+          </div>
+          <div class="amount ${cls}">${sign}${fmt.money(Number(t.amount) || 0).replace('−', '')}</div>
+        </div>
+        ${t.description ? `<div class="notes">${escapeHtml(t.description)}</div>` : ''}
+        <div class="receipt-box">
+          <div class="fname">${escapeHtml(t.receiptFilename)}</div>
+          ${mimeType?.includes('pdf') ? `<embed src="${dataUrl}" type="application/pdf">` : `<img src="${dataUrl}" alt="Receipt">`}
+        </div>
+      </div>`;
+    });
+  });
+  html += `</div></body></html>`;
+  const blob = new Blob([html], { type: 'text/html' });
+  triggerDownload(blob, 'PropertyReceipts_' + fyLabel(state.fyStart).replace(/[\s\/]/g, '_') + '.html');
+  $('#btn-export-receipts').disabled = false;
+  $('#btn-export-receipts').textContent = 'Download receipt report';
+  toast('Receipt report downloaded');
+}
+
+function blobToDataUrl(blob) {
+  return new Promise((resolve, reject) => {
+    const r = new FileReader();
+    r.onload = () => resolve(r.result);
+    r.onerror = reject;
+    r.readAsDataURL(blob);
+  });
+}
+
+function triggerDownload(blob, filename) {
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url; a.download = filename;
+  document.body.appendChild(a); a.click();
+  document.body.removeChild(a);
+  setTimeout(() => URL.revokeObjectURL(url), 1000);
+}
+
+/* ============================================================
+   MANUAL UPLOAD MODE (testing without OneDrive)
+   ============================================================ */
+function handleManualFiles(fileList) {
+  const files = Array.from(fileList);
+  if (!files.length) return;
+
+  for (const f of files) {
+    const name = f.name.toLowerCase();
+    if (name === 'properties.xlsx') {
+      state.manualFiles.properties = f;
+      log('Manual: picked up properties.xlsx');
+    } else if (name.endsWith('.xlsx')) {
+      // Try to detect FY from filename (e.g. ledger_FY2025-26.xlsx or FY2025-26.xlsx or ledger.xlsx)
+      const fyMatch = f.name.match(/FY(\d{4})-\d{2}/i);
+      if (fyMatch) {
+        state.manualFiles.ledgers[parseInt(fyMatch[1])] = f;
+        log('Manual: picked up ledger for FY' + fyMatch[1] + '-' + String(parseInt(fyMatch[1])+1).slice(2) + ' (' + f.name + ')');
+      } else {
+        // Default to current FY if no FY in filename
+        const fy = getCurrentFY();
+        state.manualFiles.ledgers[fy] = f;
+        log('Manual: picked up ledger, assumed FY' + fy + '-' + String(fy+1).slice(2) + ' (' + f.name + ')');
+      }
+    } else if (/\.(pdf|jpg|jpeg|png|gif|webp)$/i.test(name)) {
+      state.manualFiles.receipts[f.name] = f;
+      log('Manual: picked up receipt ' + f.name);
+    } else {
+      log('Manual: ignoring unknown file type: ' + f.name);
+    }
+  }
+  updateManualFileList();
+}
+
+function updateManualFileList() {
+  const list = $('#manual-filelist');
+  const body = $('#manual-filelist-body');
+  const lines = [];
+  if (state.manualFiles.properties) {
+    lines.push('✓ properties.xlsx');
+  } else {
+    lines.push('○ properties.xlsx (required)');
+  }
+  const fyKeys = Object.keys(state.manualFiles.ledgers).sort();
+  if (fyKeys.length) {
+    fyKeys.forEach(k => {
+      lines.push('✓ ledger for FY' + k + '-' + String(parseInt(k)+1).slice(2) + ' (' + state.manualFiles.ledgers[k].name + ')');
+    });
+  } else {
+    lines.push('○ at least one ledger.xlsx (required)');
+  }
+  const recCount = Object.keys(state.manualFiles.receipts).length;
+  if (recCount) {
+    lines.push('✓ ' + recCount + ' receipt file' + (recCount === 1 ? '' : 's'));
+  }
+  body.innerHTML = lines.map(escapeHtml).join('<br>');
+  list.style.display = 'block';
+
+  const btn = $('#btn-manual-load');
+  const ready = state.manualFiles.properties && fyKeys.length > 0;
+  btn.disabled = !ready;
+  btn.style.opacity = ready ? 1 : 0.4;
+  btn.textContent = ready ? 'Load dashboard' : 'Need properties.xlsx and at least one ledger file';
+}
+
+async function loadManualMode() {
+  state.manualMode = true;
+  setLoading(true);
+  try {
+    // Parse properties
+    const propBuffer = await state.manualFiles.properties.arrayBuffer();
+    const propWb = XLSX.read(propBuffer, { type: 'array', cellDates: true });
+    await parsePropertiesFromWorkbook(propWb);
+    if (!state.properties.length) throw new Error('No properties found in properties.xlsx');
+
+    // Register available FYs
+    state.availableFYs = Object.keys(state.manualFiles.ledgers).map(k => parseInt(k)).sort((a, b) => b - a);
+    const currentFY = getCurrentFY();
+    state.fyStart = state.availableFYs.includes(currentFY) ? currentFY : state.availableFYs[0];
+
+    // Load current FY
+    await loadFYDataManual(state.fyStart);
+
+    hide('#landing');
+    show('#dashboard');
+    // Hide sign-out and user chip since we're in manual mode
+    $('#user-chip').hidden = true;
+    $('#btn-signout').hidden = true;
+    // Change refresh button to "exit manual mode"
+    $('#btn-refresh').textContent = '← Back';
+    $('#btn-refresh').onclick = exitManualMode;
+    populateFYSelect();
+    render();
+    toast('Loaded ' + state.transactions.length + ' records from uploaded files');
+  } catch (e) {
+    log('Manual load failed: ' + e.message);
+    toast('Failed to load: ' + e.message);
+  } finally {
+    setLoading(false);
+  }
+}
+
+function exitManualMode() {
+  // Reset state
+  state.manualMode = false;
+  state.manualFiles = { properties: null, ledgers: {}, receipts: {} };
+  Object.values(state.manualReceiptUrls).forEach(url => URL.revokeObjectURL(url));
+  state.manualReceiptUrls = {};
+  state.properties = [];
+  state.transactions = [];
+  state.availableFYs = [];
+  state.fyStart = null;
+
+  // Restore normal refresh button
+  $('#btn-refresh').textContent = '↻ Refresh from OneDrive';
+  $('#btn-refresh').onclick = refreshAll;
+
+  hide('#dashboard');
+  show('#landing');
+  updateManualFileList();
+}
+
+async function parsePropertiesFromWorkbook(wb) {
+  const sheet = wb.Sheets[wb.SheetNames[0]];
+  const rows = XLSX.utils.sheet_to_json(sheet, { header: 1, defval: null, blankrows: false });
+  const headerRow = findHeaderRow(rows, ['name', 'address']);
+  if (headerRow === -1) throw new Error('properties.xlsx: could not find Name/Address header row');
+  const headers = rows[headerRow].map(h => String(h || '').toLowerCase().trim());
+  const idx = {
+    name: headers.findIndex(h => h === 'name'),
+    address: headers.findIndex(h => h === 'address'),
+    purchaseDate: headers.findIndex(h => h.includes('purchase date')),
+    purchasePrice: headers.findIndex(h => h.includes('purchase price') || h.includes('price')),
+    notes: headers.findIndex(h => h.includes('note'))
+  };
+  const properties = [];
+  for (let i = headerRow + 1; i < rows.length; i++) {
+    const row = rows[i];
+    if (!row) continue;
+    const name = row[idx.name];
+    if (!name || String(name).toLowerCase().includes('total')) continue;
+    properties.push({
+      id: slugify(name),
+      name: String(name).trim(),
+      address: idx.address >= 0 && row[idx.address] ? String(row[idx.address]).trim() : '',
+      purchaseDate: idx.purchaseDate >= 0 ? parseCellDate(row[idx.purchaseDate]) : null,
+      purchasePrice: idx.purchasePrice >= 0 ? parseCellNumber(row[idx.purchasePrice]) : null,
+      notes: idx.notes >= 0 && row[idx.notes] ? String(row[idx.notes]).trim() : ''
+    });
+  }
+  state.properties = properties;
+  log('Loaded ' + properties.length + ' properties from properties.xlsx');
+}
+
+async function loadFYDataManual(fyStart) {
+  const file = state.manualFiles.ledgers[fyStart];
+  if (!file) { log('No ledger file for FY' + fyStart); return; }
+  state.currentFolderName = fyFolderName(fyStart);
+  state.transactions = [];
+  const buffer = await file.arrayBuffer();
+  const wb = XLSX.read(buffer, { type: 'array', cellDates: true });
+
+  const skipSheets = /^(read.?me|categories|instructions|notes|summary|dashboard|lists|help)$/i;
+  let totalParsed = 0;
+  for (const sheetName of wb.SheetNames) {
+    if (skipSheets.test(sheetName.trim())) { log('Skipping sheet: ' + sheetName); continue; }
+    const prop = findProperty(sheetName);
+    if (!prop) { log('Sheet "' + sheetName + '" does not match any property, skipping'); continue; }
+    const sheet = wb.Sheets[sheetName];
+    const txs = parsePropertySheet(sheet, prop, fyStart);
+    state.transactions.push(...txs);
+    log('Parsed ' + txs.length + ' records for ' + prop.name);
+    totalParsed += txs.length;
+  }
+  log('Total ' + totalParsed + ' records loaded for ' + fyLabel(fyStart));
+}
+
+/* ============================================================
+   EVENTS / INIT
+   ============================================================ */
+function initEvents() {
+  window.addEventListener('error', (e) => log('JS ERROR: ' + (e.message || 'unknown')));
+  window.addEventListener('unhandledrejection', (e) => log('PROMISE ERROR: ' + (e.reason?.message || e.reason)));
+
+  $('#btn-signin').onclick = signIn;
+  $('#btn-signout').onclick = signOut;
+  $('#btn-signout-setup').onclick = signOut;
+  $('#btn-refresh-setup').onclick = refreshAll;
+  $('#btn-refresh').onclick = refreshAll;
+
+  $('#fy-select').onchange = async (e) => {
+    state.fyStart = parseInt(e.target.value);
+    state.filters.category = '';
+    state.txShowCount = 50;
+    setLoading(true);
+    try {
+      if (state.manualMode) await loadFYDataManual(state.fyStart);
+      else await loadFYData(state.fyStart);
+      render();
+    } catch (err) { toast('Failed to load ' + fyLabel(state.fyStart)); }
+    finally { setLoading(false); }
+  };
+
+  $('#btn-export').onclick = openExportDialog;
+  $('#filter-property').onchange = (e) => { state.filters.property = e.target.value; state.txShowCount = 50; render(); };
+  $('#filter-type').onchange = (e) => { state.filters.type = e.target.value; state.txShowCount = 50; render(); };
+  $('#filter-category').onchange = (e) => { state.filters.category = e.target.value; state.txShowCount = 50; render(); };
+  $('#filter-search').oninput = (e) => { state.filters.search = e.target.value; state.txShowCount = 50; render(); };
+  $('#btn-show-more').onclick = () => { state.txShowCount += 50; render(); };
+
+  $('#view-close').onclick = () => $('#dialog-view').classList.remove('open');
+  $('#dialog-view').onclick = (e) => { if (e.target.id === 'dialog-view') $('#dialog-view').classList.remove('open'); };
+  $('#export-close').onclick = () => $('#dialog-export').classList.remove('open');
+  $('#dialog-export').onclick = (e) => { if (e.target.id === 'dialog-export') $('#dialog-export').classList.remove('open'); };
+  $('#btn-export-xlsx').onclick = exportExcel;
+  $('#btn-export-receipts').onclick = exportReceipts;
+
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') $$('.dialog-backdrop.open').forEach(d => d.classList.remove('open'));
+  });
+}
+
+async function start() {
+  initEvents();
+  log('Libraries: Chart=' + (typeof Chart) + ', XLSX=' + (typeof XLSX) + ', MSAL=' + (typeof msal));
+  if (typeof XLSX === 'undefined') toast('Excel library failed to load');
+  const msalOk = await initMsal();
+  if (msalOk && state.account) {
+    log('Resuming previous session...');
+    await onSignedIn();
+  }
+}
+
+start();
+</script>
+</body>
+</html>
