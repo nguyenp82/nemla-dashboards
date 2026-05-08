@@ -829,7 +829,9 @@ function encodePath(p) {
 }
 
 async function listChildren(folderPath) {
-  const path = `/me/drive/root:/${encodePath(folderPath)}:/children?$top=200`;
+  const path = folderPath
+    ? `/me/drive/root:/${encodePath(folderPath)}:/children?$top=200`
+    : '/me/drive/root/children?$top=200';
   try {
     const res = await graphFetch(path);
     const data = await res.json();
