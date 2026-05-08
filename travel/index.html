@@ -330,6 +330,109 @@
   }
   .pill.trip { background: var(--travel-soft); color: var(--travel); }
 
+  .receipt-link {
+    color: var(--travel);
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    font-size: 12px;
+    text-decoration: none;
+  }
+  .receipt-link:hover { text-decoration: underline; }
+  .receipt-link svg { width: 12px; height: 12px; }
+  .no-receipt { color: var(--text-faint); font-size: 12px; }
+
+  /* ---------- modal ---------- */
+  .modal-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(42, 40, 34, 0.55);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 999;
+    padding: 2rem;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.15s;
+  }
+  .modal-overlay.show { opacity: 1; pointer-events: auto; }
+  .modal {
+    background: var(--surface);
+    border-radius: 14px;
+    max-width: 900px;
+    width: 100%;
+    max-height: 90vh;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    box-shadow: 0 24px 48px rgba(0,0,0,0.18);
+  }
+  .modal-head {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1.25rem 1.5rem;
+    border-bottom: 1px solid var(--border);
+  }
+  .modal-head h3 {
+    font-family: 'Fraunces', Georgia, serif;
+    font-size: 18px;
+    font-weight: 500;
+  }
+  .modal-close {
+    background: none;
+    border: none;
+    color: var(--text-faint);
+    cursor: pointer;
+    padding: 4px;
+    border-radius: 4px;
+    font-size: 20px;
+    line-height: 1;
+  }
+  .modal-close:hover { background: var(--surface-2); color: var(--text); }
+  .modal-body {
+    padding: 1.5rem;
+    overflow-y: auto;
+    flex: 1;
+  }
+  .modal-meta {
+    display: grid;
+    grid-template-columns: max-content 1fr;
+    gap: 8px 16px;
+    margin-bottom: 1.5rem;
+    font-size: 13px;
+  }
+  .modal-meta dt {
+    color: var(--text-faint);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    font-size: 11px;
+    padding-top: 3px;
+  }
+  .modal-meta dd { color: var(--text); }
+  .receipt-preview {
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    overflow: hidden;
+    background: var(--surface-2);
+    min-height: 200px;
+  }
+  .receipt-preview img { width: 100%; display: block; max-height: 600px; object-fit: contain; background: #FFFFFF; }
+  .receipt-preview embed { width: 100%; height: 600px; display: block; }
+  .receipt-loading, .receipt-missing {
+    padding: 2rem;
+    text-align: center;
+    color: var(--text-faint);
+    font-size: 13px;
+  }
+  .receipt-missing { color: var(--danger); }
+
+  tr.tx-row { cursor: default; }
+  tr.tx-row.has-receipt { cursor: pointer; }
+  tr.tx-row.has-receipt:hover { background: var(--surface-2); }
+
   /* ---------- empty state ---------- */
   .empty {
     text-align: center;
@@ -515,6 +618,7 @@
                 <th>Vendor</th>
                 <th>Notes</th>
                 <th class="amount">Amount</th>
+                <th>Receipt</th>
               </tr>
             </thead>
             <tbody id="tx-body"></tbody>
@@ -534,6 +638,23 @@
 </div>
 
 <div id="toast" class="toast"></div>
+
+<!-- ============ RECEIPT MODAL ============ -->
+<div id="modal" class="modal-overlay" onclick="closeModalIfOverlay(event)">
+  <div class="modal">
+    <div class="modal-head">
+      <h3 id="modal-title">Transaction</h3>
+      <button class="modal-close" onclick="closeModal()" aria-label="Close">×</button>
+    </div>
+    <div class="modal-body">
+      <dl class="modal-meta" id="modal-meta"></dl>
+      <div id="modal-receipt-wrap" hidden>
+        <div style="font-size: 11px; letter-spacing: 1px; color: var(--text-faint); text-transform: uppercase; margin-bottom: 8px;">Receipt</div>
+        <div id="modal-receipt" class="receipt-preview"></div>
+      </div>
+    </div>
+  </div>
+</div>
 
 <script>
 /* ============================================================
@@ -556,8 +677,9 @@ const state = {
   account: null,
   years: [],          // ['2024', '2025']
   currentYear: null,
-  transactions: [],   // [{ date, category, amount, trip, vendor, notes }]
-  charts: { category: null, trip: null }
+  transactions: [],   // [{ date, category, amount, trip, vendor, notes, receipt }]
+  charts: { category: null, trip: null },
+  receiptCache: {}    // { 'year/filename': blobUrl }
 };
 
 const $ = (q) => document.querySelector(q);
@@ -768,6 +890,7 @@ async function discoverYears() {
 async function loadYear(year) {
   showLoading(true);
   state.currentYear = year;
+  state.receiptCache = {};
   renderYearPicker();
   $('#hero-title').textContent = year + ' travels';
 
@@ -819,6 +942,7 @@ function parseLedger(wb, year) {
     const idxTrip     = colIdx('trip');
     const idxVendor   = headers.findIndex(h => h === 'vendor' || h === 'party' || h === 'party (vendor)' || h.startsWith('party'));
     const idxNotes    = colIdx('notes');
+    const idxReceipt  = headers.findIndex(h => h.includes('receipt'));
 
     for (let i = headerIdx + 1; i < rows.length; i++) {
       const r = rows[i] || [];
@@ -844,7 +968,8 @@ function parseLedger(wb, year) {
         amount: amt,
         trip: idxTrip >= 0 ? (r[idxTrip] || '').toString().trim() : '',
         vendor: idxVendor >= 0 ? (r[idxVendor] || '').toString().trim() : '',
-        notes: idxNotes >= 0 ? (r[idxNotes] || '').toString().trim() : ''
+        notes: idxNotes >= 0 ? (r[idxNotes] || '').toString().trim() : '',
+        receipt: idxReceipt >= 0 ? (r[idxReceipt] || '').toString().trim() : ''
       });
     }
   }
@@ -1007,19 +1132,27 @@ function renderTable() {
 
   const body = $('#tx-body');
   if (!filtered.length) {
-    body.innerHTML = '<tr><td colspan="6" style="text-align:center;color:var(--text-faint);padding:2rem;">No matching transactions</td></tr>';
+    body.innerHTML = '<tr><td colspan="7" style="text-align:center;color:var(--text-faint);padding:2rem;">No matching transactions</td></tr>';
     return;
   }
-  body.innerHTML = filtered.map(t => `
-    <tr>
+  body.innerHTML = filtered.map((t, i) => {
+    const idx = state.transactions.indexOf(t);
+    const hasReceipt = !!t.receipt;
+    return `
+    <tr class="tx-row ${hasReceipt ? 'has-receipt' : ''}" ${hasReceipt ? `onclick="openTxModal(${idx})"` : ''}>
       <td>${formatDate(t.date)}</td>
       <td>${t.trip ? `<span class="pill trip">${escapeHtml(t.trip)}</span>` : '<span style="color:var(--text-faint);">—</span>'}</td>
       <td><span class="pill">${escapeHtml(t.category)}</span></td>
       <td>${escapeHtml(t.vendor) || '<span style="color:var(--text-faint);">—</span>'}</td>
       <td>${escapeHtml(t.notes) || '<span style="color:var(--text-faint);">—</span>'}</td>
       <td class="amount">${AUD2.format(t.amount)}</td>
+      <td>${hasReceipt
+        ? `<span class="receipt-link"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m21.44 11.05-9.19 9.19a6 6 0 0 1-8.49-8.49l8.57-8.57A4 4 0 1 1 17.93 8.8l-8.57 8.57a2 2 0 0 1-2.83-2.83l8.49-8.49"/></svg>${escapeHtml(t.receipt)}</span>`
+        : '<span class="no-receipt">—</span>'
+      }</td>
     </tr>
-  `).join('');
+  `;
+  }).join('');
 }
 window.renderTable = renderTable;
 
@@ -1033,6 +1166,85 @@ function escapeHtml(s) {
   return (s || '').toString()
     .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
     .replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+}
+
+/* ============================================================
+   RECEIPT MODAL
+   ============================================================ */
+async function openTxModal(idx) {
+  const t = state.transactions[idx];
+  if (!t) return;
+
+  $('#modal-title').textContent = `${formatDate(t.date)} · ${AUD2.format(t.amount)}`;
+
+  const meta = [
+    ['Date', formatDate(t.date)],
+    ['Trip', t.trip || '—'],
+    ['Category', t.category],
+    ['Vendor', t.vendor || '—'],
+    ['Amount', AUD2.format(t.amount)],
+    ['Notes', t.notes || '—'],
+    ['Receipt file', t.receipt || '—']
+  ];
+  $('#modal-meta').innerHTML = meta.map(([k, v]) => `<dt>${k}</dt><dd>${escapeHtml(v)}</dd>`).join('');
+
+  const wrap = $('#modal-receipt-wrap');
+  const recEl = $('#modal-receipt');
+
+  $('#modal').classList.add('show');
+
+  if (!t.receipt) {
+    wrap.hidden = true;
+    return;
+  }
+
+  wrap.hidden = false;
+  recEl.innerHTML = '<div class="receipt-loading">Loading receipt...</div>';
+
+  try {
+    const url = await getReceiptUrl(t.receipt);
+    if (!url) {
+      recEl.innerHTML = `<div class="receipt-missing">Receipt file not found in <code>${ONEDRIVE_ROOT}/${state.currentYear}/receipts/</code></div>`;
+      return;
+    }
+    const isPdf = /\.pdf$/i.test(t.receipt);
+    recEl.innerHTML = isPdf
+      ? `<embed src="${url}" type="application/pdf">`
+      : `<img src="${url}" alt="Receipt">`;
+  } catch (e) {
+    recEl.innerHTML = `<div class="receipt-missing">Could not load receipt: ${escapeHtml(e.message)}</div>`;
+  }
+}
+window.openTxModal = openTxModal;
+
+function closeModal() {
+  $('#modal').classList.remove('show');
+}
+window.closeModal = closeModal;
+
+function closeModalIfOverlay(event) {
+  if (event.target.id === 'modal') closeModal();
+}
+window.closeModalIfOverlay = closeModalIfOverlay;
+
+document.addEventListener('keydown', (e) => {
+  if (e.key === 'Escape') closeModal();
+});
+
+async function getReceiptUrl(filename) {
+  const key = state.currentYear + '/' + filename;
+  if (state.receiptCache[key]) return state.receiptCache[key];
+  const path = `${ONEDRIVE_ROOT}/${state.currentYear}/receipts/${filename}`;
+  try {
+    const res = await graphFetch(`/me/drive/root:/${encodePath(path)}:/content`);
+    const blob = await res.blob();
+    const url = URL.createObjectURL(blob);
+    state.receiptCache[key] = url;
+    return url;
+  } catch (e) {
+    if (e.status === 404) return null;
+    throw e;
+  }
 }
 
 /* ============================================================
