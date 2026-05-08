@@ -1,0 +1,1076 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>nemla · Travel</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300..900;1,9..144,300..900&family=Manrope:wght@300..800&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@azure/msal-browser@3/lib/msal-browser.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<style>
+  :root {
+    --bg: #F7F4EE;
+    --surface: #FDFBF7;
+    --surface-2: #F1ECE2;
+    --border: #E0D9C9;
+    --border-strong: #C9C0AB;
+    --text: #2A2822;
+    --text-dim: #5E574B;
+    --text-faint: #8F897A;
+    --travel: #B86842;
+    --travel-dim: #D08862;
+    --travel-soft: #F5DCD0;
+    --accent: #A07A1F;
+    --accent-soft: #F3E9CF;
+    --danger: #A33F3F;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html, body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Manrope', system-ui, sans-serif;
+    font-size: 14px;
+    line-height: 1.5;
+    -webkit-font-smoothing: antialiased;
+  }
+  body {
+    min-height: 100vh;
+    background-image:
+      radial-gradient(circle at 12% 8%, rgba(184,104,66,0.07) 0%, transparent 45%),
+      radial-gradient(circle at 88% 92%, rgba(160,122,31,0.05) 0%, transparent 50%);
+    background-attachment: fixed;
+  }
+
+  button { font-family: inherit; cursor: pointer; border: none; background: none; color: inherit; }
+  a { color: inherit; text-decoration: none; }
+  .serif { font-family: 'Fraunces', Georgia, serif; font-optical-sizing: auto; }
+
+  .shell {
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: 2rem 2rem 4rem;
+  }
+
+  /* ---------- top bar ---------- */
+  .topbar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 2.5rem;
+  }
+  .brand-link {
+    display: flex;
+    flex-direction: column;
+    text-decoration: none;
+    color: inherit;
+  }
+  .brand-mark { font-family: 'Fraunces', Georgia, serif; font-size: 22px; font-weight: 500; letter-spacing: 0.2px; }
+  .brand-tag { font-size: 11px; color: var(--text-faint); margin-top: 2px; text-transform: uppercase; letter-spacing: 1.5px; }
+
+  .user-chip {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 13px;
+    color: var(--text-dim);
+  }
+  .user-avatar {
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    background: var(--travel-soft);
+    color: var(--travel);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 500;
+    font-size: 12px;
+  }
+  .icon-btn {
+    background: none;
+    border: none;
+    color: var(--text-faint);
+    font-size: 12px;
+    cursor: pointer;
+    padding: 4px 8px;
+    border-radius: 4px;
+  }
+  .icon-btn:hover { color: var(--text); background: var(--surface-2); }
+
+  /* ---------- pre sign in ---------- */
+  .signin-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 3rem 2.5rem;
+    max-width: 460px;
+    margin: 4rem auto 0;
+    text-align: center;
+  }
+  .signin-card .lock {
+    width: 56px;
+    height: 56px;
+    margin: 0 auto 1.5rem;
+    background: var(--travel-soft);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--travel);
+  }
+  .signin-card h2 {
+    font-family: 'Fraunces', Georgia, serif;
+    font-size: 26px;
+    font-weight: 500;
+    margin-bottom: 8px;
+  }
+  .signin-card p {
+    color: var(--text-dim);
+    font-size: 13px;
+    margin-bottom: 2rem;
+    line-height: 1.6;
+  }
+  .signin-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    width: 100%;
+    padding: 12px 20px;
+    background: var(--text);
+    color: var(--surface);
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: 500;
+    transition: background 0.15s;
+  }
+  .signin-btn:hover { background: #1a1814; }
+  .signin-btn:disabled { opacity: 0.6; cursor: wait; }
+  .ms-logo { width: 16px; height: 16px; display: grid; grid-template-columns: 1fr 1fr; gap: 1px; }
+  .ms-logo span { display: block; }
+  .ms-logo span:nth-child(1) { background: #F25022; }
+  .ms-logo span:nth-child(2) { background: #7FBA00; }
+  .ms-logo span:nth-child(3) { background: #00A4EF; }
+  .ms-logo span:nth-child(4) { background: #FFB900; }
+
+  /* ---------- dashboard ---------- */
+  .hero {
+    margin-bottom: 1.5rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+    flex-wrap: wrap;
+    gap: 1rem;
+  }
+  .hero h1 {
+    font-family: 'Fraunces', Georgia, serif;
+    font-size: 34px;
+    font-weight: 400;
+    line-height: 1.15;
+  }
+  .hero p {
+    font-size: 13px;
+    color: var(--text-dim);
+    margin-top: 6px;
+  }
+
+  .year-picker {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 6px;
+  }
+  .year-btn {
+    padding: 6px 14px;
+    border-radius: 6px;
+    font-size: 13px;
+    color: var(--text-dim);
+    transition: background 0.12s, color 0.12s;
+  }
+  .year-btn:hover { background: var(--surface-2); }
+  .year-btn.active {
+    background: var(--travel);
+    color: var(--surface);
+    font-weight: 500;
+  }
+
+  .summary {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 14px;
+    margin-bottom: 1.5rem;
+  }
+  @media (max-width: 800px) {
+    .summary { grid-template-columns: repeat(2, 1fr); }
+    .hero h1 { font-size: 26px; }
+  }
+  .stat {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 1.25rem 1.25rem;
+  }
+  .stat-label {
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 1.2px;
+    color: var(--text-faint);
+    margin-bottom: 8px;
+  }
+  .stat-value {
+    font-family: 'Fraunces', Georgia, serif;
+    font-size: 26px;
+    font-weight: 500;
+  }
+  .stat-sub {
+    font-size: 12px;
+    color: var(--text-dim);
+    margin-top: 4px;
+  }
+
+  .charts {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 14px;
+    margin-bottom: 1.5rem;
+  }
+  @media (max-width: 800px) {
+    .charts { grid-template-columns: 1fr; }
+  }
+  .panel {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 1.5rem;
+  }
+  .panel h3 {
+    font-family: 'Fraunces', Georgia, serif;
+    font-size: 17px;
+    font-weight: 500;
+    margin-bottom: 1rem;
+  }
+  .chart-wrap {
+    position: relative;
+    height: 280px;
+  }
+
+  /* ---------- transactions table ---------- */
+  .table-wrap {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 1.5rem;
+  }
+  .table-head-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1rem;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+  }
+  .table-head-row h3 {
+    font-family: 'Fraunces', Georgia, serif;
+    font-size: 17px;
+    font-weight: 500;
+  }
+  .filter-bar {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+    flex-wrap: wrap;
+  }
+  .filter-bar select, .filter-bar input {
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 6px 10px;
+    font-size: 12px;
+    color: var(--text);
+    font-family: inherit;
+  }
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 13px;
+  }
+  th {
+    text-align: left;
+    font-weight: 500;
+    text-transform: uppercase;
+    font-size: 11px;
+    letter-spacing: 1px;
+    color: var(--text-faint);
+    padding: 10px 12px;
+    border-bottom: 1px solid var(--border);
+  }
+  td {
+    padding: 10px 12px;
+    border-bottom: 1px solid var(--surface-2);
+    color: var(--text-dim);
+  }
+  tr:last-child td { border-bottom: none; }
+  td.amount { text-align: right; font-variant-numeric: tabular-nums; color: var(--text); }
+  th.amount { text-align: right; }
+  .pill {
+    display: inline-block;
+    background: var(--surface-2);
+    color: var(--text-dim);
+    padding: 2px 8px;
+    border-radius: 10px;
+    font-size: 11px;
+    white-space: nowrap;
+  }
+  .pill.trip { background: var(--travel-soft); color: var(--travel); }
+
+  /* ---------- empty state ---------- */
+  .empty {
+    text-align: center;
+    padding: 3rem 1rem;
+    color: var(--text-faint);
+  }
+  .empty h3 { font-family: 'Fraunces', Georgia, serif; font-size: 20px; color: var(--text); margin-bottom: 8px; }
+  .empty p { font-size: 13px; max-width: 380px; margin: 0 auto; line-height: 1.6; }
+  .empty code {
+    background: var(--surface-2);
+    padding: 2px 6px;
+    border-radius: 4px;
+    font-size: 12px;
+    color: var(--text);
+  }
+
+  /* ---------- footer / status ---------- */
+  .footer {
+    margin-top: 3rem;
+    padding-top: 1.5rem;
+    border-top: 1px solid var(--border);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 12px;
+    color: var(--text-faint);
+  }
+
+  /* ---------- toast ---------- */
+  .toast {
+    position: fixed;
+    bottom: 24px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: var(--text);
+    color: var(--surface);
+    padding: 10px 18px;
+    border-radius: 8px;
+    font-size: 13px;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.2s;
+    z-index: 1000;
+  }
+  .toast.show { opacity: 1; }
+
+  [hidden] { display: none !important; }
+
+  .spinner {
+    width: 20px; height: 20px;
+    border: 2px solid var(--surface-2);
+    border-top-color: var(--travel);
+    border-radius: 50%;
+    animation: spin 0.7s linear infinite;
+    display: inline-block;
+    vertical-align: middle;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+</style>
+</head>
+<body>
+
+<div class="shell">
+
+  <!-- ============ TOP BAR ============ -->
+  <div class="topbar">
+    <a href="../" class="brand-link">
+      <div class="brand-mark">nemla</div>
+      <div class="brand-tag">travel</div>
+    </a>
+    <div id="user-chip" class="user-chip" hidden>
+      <div id="user-avatar" class="user-avatar">N</div>
+      <span id="user-email"></span>
+      <button class="icon-btn" onclick="signOut()">Sign out</button>
+    </div>
+  </div>
+
+  <!-- ============ PRE SIGN IN ============ -->
+  <section id="signin-view" hidden>
+    <div class="signin-card">
+      <div class="lock">
+        <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M17.8 19.2 16 11l3.5-3.5C21 6 21.5 4 21 3c-1-.5-3 0-4.5 1.5L13 8 4.8 6.2c-.5-.1-.9.1-1.1.5l-.3.5c-.2.5-.1 1 .3 1.3L9 12l-2 3H4l-1 1 3 2 2 3 1-1v-3l3-2 3.5 5.3c.3.4.8.5 1.3.3l.5-.2c.4-.3.6-.7.5-1.2z"/>
+        </svg>
+      </div>
+      <h2 class="serif">Travel</h2>
+      <p>Track holiday spending across years. Drop your ledger.xlsx into OneDrive and sign in to see where the money went.</p>
+      <button id="signin-btn" class="signin-btn" onclick="signIn()">
+        <span class="ms-logo" aria-hidden="true"><span></span><span></span><span></span><span></span></span>
+        Sign in with Microsoft
+      </button>
+    </div>
+  </section>
+
+  <!-- ============ DASHBOARD ============ -->
+  <section id="dashboard-view" hidden>
+
+    <div class="hero">
+      <div>
+        <h1 class="serif" id="hero-title">Your travels</h1>
+        <p id="hero-sub">Choose a year to explore.</p>
+      </div>
+      <div id="year-picker" class="year-picker"></div>
+    </div>
+
+    <!-- Empty state when no data -->
+    <div id="empty-state" class="panel" hidden>
+      <div class="empty">
+        <h3>No ledger found</h3>
+        <p id="empty-msg">Add a <code>ledger.xlsx</code> file to <code>OneDrive/Apps/Travel/&lt;year&gt;/</code> to get started.</p>
+      </div>
+    </div>
+
+    <!-- Loading state -->
+    <div id="loading-state" class="panel" hidden>
+      <div class="empty">
+        <div class="spinner"></div>
+        <p style="margin-top: 12px;">Loading your travel data...</p>
+      </div>
+    </div>
+
+    <!-- Data view -->
+    <div id="data-view" hidden>
+
+      <div class="summary">
+        <div class="stat">
+          <div class="stat-label">Total spent</div>
+          <div class="stat-value" id="stat-total">$0</div>
+          <div class="stat-sub" id="stat-total-sub"></div>
+        </div>
+        <div class="stat">
+          <div class="stat-label">Trips</div>
+          <div class="stat-value" id="stat-trips">0</div>
+          <div class="stat-sub" id="stat-trips-sub"></div>
+        </div>
+        <div class="stat">
+          <div class="stat-label">Average per trip</div>
+          <div class="stat-value" id="stat-avg">$0</div>
+          <div class="stat-sub"></div>
+        </div>
+        <div class="stat">
+          <div class="stat-label">Top category</div>
+          <div class="stat-value" id="stat-top-cat" style="font-size: 18px;">—</div>
+          <div class="stat-sub" id="stat-top-cat-sub"></div>
+        </div>
+      </div>
+
+      <div class="charts">
+        <div class="panel">
+          <h3>By category</h3>
+          <div class="chart-wrap">
+            <canvas id="chart-category"></canvas>
+          </div>
+        </div>
+        <div class="panel">
+          <h3>By trip</h3>
+          <div class="chart-wrap">
+            <canvas id="chart-trip"></canvas>
+          </div>
+        </div>
+      </div>
+
+      <div class="table-wrap">
+        <div class="table-head-row">
+          <h3>Transactions</h3>
+          <div class="filter-bar">
+            <select id="filter-trip" onchange="renderTable()">
+              <option value="">All trips</option>
+            </select>
+            <select id="filter-category" onchange="renderTable()">
+              <option value="">All categories</option>
+            </select>
+            <input type="text" id="filter-search" placeholder="Search..." oninput="renderTable()">
+          </div>
+        </div>
+        <div style="overflow-x: auto;">
+          <table>
+            <thead>
+              <tr>
+                <th>Date</th>
+                <th>Trip</th>
+                <th>Category</th>
+                <th>Vendor</th>
+                <th>Notes</th>
+                <th class="amount">Amount</th>
+              </tr>
+            </thead>
+            <tbody id="tx-body"></tbody>
+          </table>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ============ FOOTER ============ -->
+  <div class="footer">
+    <span>dash.nemla.com.au/travel</span>
+    <span id="status">Initialising</span>
+  </div>
+
+</div>
+
+<div id="toast" class="toast"></div>
+
+<script>
+/* ============================================================
+   CONFIG
+   ============================================================ */
+const AZURE_CLIENT_ID = 'f455b7f0-a8ad-4d17-8752-7a8b709607d1';
+const AZURE_TENANT_ID = '91faaa92-6633-43b2-a302-8122e930e674';
+const GRAPH_SCOPES    = ['Files.ReadWrite', 'User.Read'];
+const ONEDRIVE_ROOT   = 'Apps/Travel';
+
+const COLORS = ['#B86842','#A07A1F','#3E6A88','#5B8C47','#8B5A8C','#C9A14A','#6B8E8E','#D08862','#7A8B5F','#A0526B'];
+const AUD = new Intl.NumberFormat('en-AU', { style: 'currency', currency: 'AUD', maximumFractionDigits: 0 });
+const AUD2 = new Intl.NumberFormat('en-AU', { style: 'currency', currency: 'AUD', minimumFractionDigits: 2, maximumFractionDigits: 2 });
+
+/* ============================================================
+   STATE
+   ============================================================ */
+const state = {
+  msal: null,
+  account: null,
+  years: [],          // ['2024', '2025']
+  currentYear: null,
+  transactions: [],   // [{ date, category, amount, trip, vendor, notes }]
+  charts: { category: null, trip: null }
+};
+
+const $ = (q) => document.querySelector(q);
+const $$ = (q) => document.querySelectorAll(q);
+
+function setStatus(text) { $('#status').textContent = text; }
+function toast(msg, ms = 2400) {
+  const t = $('#toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  clearTimeout(toast._t);
+  toast._t = setTimeout(() => t.classList.remove('show'), ms);
+}
+
+/* ============================================================
+   VIEW SWITCHING
+   ============================================================ */
+function showSignIn() {
+  $('#signin-view').hidden = false;
+  $('#dashboard-view').hidden = true;
+  $('#user-chip').hidden = true;
+  setStatus('Not signed in');
+}
+function showDashboard(account) {
+  $('#signin-view').hidden = true;
+  $('#dashboard-view').hidden = false;
+  $('#user-chip').hidden = false;
+  $('#user-email').textContent = account.username;
+  $('#user-avatar').textContent = (account.name || account.username).charAt(0).toUpperCase();
+  setStatus('Signed in');
+}
+function showLoading(yes) {
+  $('#loading-state').hidden = !yes;
+  if (yes) {
+    $('#empty-state').hidden = true;
+    $('#data-view').hidden = true;
+  }
+}
+function showEmpty(msg) {
+  $('#loading-state').hidden = true;
+  $('#data-view').hidden = true;
+  $('#empty-state').hidden = false;
+  if (msg) $('#empty-msg').innerHTML = msg;
+}
+function showData() {
+  $('#loading-state').hidden = true;
+  $('#empty-state').hidden = true;
+  $('#data-view').hidden = false;
+}
+
+/* ============================================================
+   MSAL
+   ============================================================ */
+async function initMsal() {
+  try {
+    state.msal = new msal.PublicClientApplication({
+      auth: {
+        clientId: AZURE_CLIENT_ID,
+        authority: `https://login.microsoftonline.com/${AZURE_TENANT_ID}`,
+        redirectUri: window.location.origin + window.location.pathname
+      },
+      cache: { cacheLocation: 'sessionStorage', storeAuthStateInCookie: false }
+    });
+    await state.msal.initialize();
+    const resp = await state.msal.handleRedirectPromise();
+    if (resp?.account) {
+      state.msal.setActiveAccount(resp.account);
+      state.account = resp.account;
+    } else {
+      const accounts = state.msal.getAllAccounts();
+      if (accounts.length) {
+        state.msal.setActiveAccount(accounts[0]);
+        state.account = accounts[0];
+      }
+    }
+    return true;
+  } catch (e) {
+    console.error('MSAL init failed', e);
+    toast('Sign in service failed to load');
+    return false;
+  }
+}
+
+async function signIn() {
+  if (!state.msal) return;
+  const btn = $('#signin-btn');
+  btn.disabled = true;
+  try {
+    const resp = await state.msal.loginPopup({ scopes: GRAPH_SCOPES, prompt: 'select_account' });
+    state.msal.setActiveAccount(resp.account);
+    state.account = resp.account;
+    showDashboard(resp.account);
+    await onSignedIn();
+  } catch (e) {
+    if (e.errorCode === 'popup_window_error') {
+      state.msal.loginRedirect({ scopes: GRAPH_SCOPES });
+      return;
+    } else if (e.errorCode !== 'user_cancelled') {
+      toast('Sign in failed: ' + (e.message || e.errorCode));
+    }
+    btn.disabled = false;
+  }
+}
+
+async function signOut() {
+  if (!state.msal || !state.account) return;
+  await state.msal.logoutPopup({ account: state.account });
+  state.account = null;
+  location.reload();
+}
+
+window.signIn = signIn;
+window.signOut = signOut;
+
+/* ============================================================
+   GRAPH API
+   ============================================================ */
+async function getToken() {
+  const account = state.msal.getActiveAccount();
+  if (!account) throw new Error('Not signed in');
+  try {
+    const r = await state.msal.acquireTokenSilent({ scopes: GRAPH_SCOPES, account });
+    return r.accessToken;
+  } catch (e) {
+    const r = await state.msal.acquireTokenPopup({ scopes: GRAPH_SCOPES });
+    return r.accessToken;
+  }
+}
+
+async function graphFetch(path, options = {}) {
+  const token = await getToken();
+  const res = await fetch('https://graph.microsoft.com/v1.0' + path, {
+    ...options,
+    headers: { 'Authorization': 'Bearer ' + token, ...(options.headers || {}) }
+  });
+  if (!res.ok) {
+    const text = await res.text().catch(() => '');
+    const err = new Error('Graph ' + res.status + ': ' + text.slice(0, 200));
+    err.status = res.status;
+    throw err;
+  }
+  return res;
+}
+
+function encodePath(p) {
+  return p.split('/').map(encodeURIComponent).join('/');
+}
+
+async function listChildren(folderPath) {
+  const path = `/me/drive/root:/${encodePath(folderPath)}:/children?$top=200`;
+  try {
+    const res = await graphFetch(path);
+    const data = await res.json();
+    return data.value || [];
+  } catch (e) {
+    if (e.status === 404) return null;
+    throw e;
+  }
+}
+
+async function downloadFile(filePath) {
+  const path = `/me/drive/root:/${encodePath(filePath)}:/content`;
+  const res = await graphFetch(path);
+  return await res.arrayBuffer();
+}
+
+async function ensureRootFolder() {
+  const segments = ONEDRIVE_ROOT.split('/').filter(Boolean);
+  let currentPath = '';
+  for (const seg of segments) {
+    const parentPath = currentPath;
+    currentPath = currentPath ? currentPath + '/' + seg : seg;
+    const items = await listChildren(parentPath);
+    if (items === null) {
+      // parent doesn't exist, create it
+      await createFolder(parentPath, seg);
+    } else if (!items.find(i => i.name === seg && i.folder)) {
+      await createFolder(parentPath, seg);
+    }
+  }
+}
+
+async function createFolder(parentPath, name) {
+  const path = parentPath
+    ? `/me/drive/root:/${encodePath(parentPath)}:/children`
+    : `/me/drive/root/children`;
+  await graphFetch(path, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ name, folder: {}, '@microsoft.graph.conflictBehavior': 'fail' })
+  });
+}
+
+/* ============================================================
+   YEAR DISCOVERY + LEDGER PARSING
+   ============================================================ */
+async function discoverYears() {
+  await ensureRootFolder();
+  const items = await listChildren(ONEDRIVE_ROOT);
+  if (!items) return [];
+  return items
+    .filter(i => i.folder && /^\d{4}$/.test(i.name))
+    .map(i => i.name)
+    .sort()
+    .reverse();
+}
+
+async function loadYear(year) {
+  showLoading(true);
+  state.currentYear = year;
+  renderYearPicker();
+  $('#hero-title').textContent = year + ' travels';
+
+  try {
+    const buf = await downloadFile(`${ONEDRIVE_ROOT}/${year}/ledger.xlsx`);
+    const wb = XLSX.read(buf, { type: 'array', cellDates: true });
+    state.transactions = parseLedger(wb, year);
+    if (state.transactions.length === 0) {
+      showEmpty(`No transactions found in <code>${year}/ledger.xlsx</code>. Add some rows and refresh.`);
+      return;
+    }
+    renderAll();
+    showData();
+  } catch (e) {
+    if (e.status === 404) {
+      showEmpty(`No <code>ledger.xlsx</code> found for ${year}. Create one in <code>OneDrive/Apps/Travel/${year}/</code>.`);
+    } else {
+      showEmpty(`Could not load ${year}: ${e.message}`);
+    }
+  }
+}
+
+function parseLedger(wb, year) {
+  const txs = [];
+  // Read every sheet that isn't "Read me" or "Categories"
+  for (const sheetName of wb.SheetNames) {
+    if (/^(read ?me|categories)$/i.test(sheetName)) continue;
+    const sheet = wb.Sheets[sheetName];
+    const rows = XLSX.utils.sheet_to_json(sheet, { header: 1, defval: null, raw: false });
+
+    // Find the header row (row containing "Date" and "Category" and "Amount")
+    let headerIdx = -1;
+    for (let i = 0; i < Math.min(rows.length, 30); i++) {
+      const r = rows[i] || [];
+      const lower = r.map(c => (c || '').toString().trim().toLowerCase());
+      if (lower.includes('date') && lower.includes('category') && lower.includes('amount')) {
+        headerIdx = i;
+        break;
+      }
+    }
+    if (headerIdx === -1) continue;
+
+    const headers = rows[headerIdx].map(h => (h || '').toString().trim().toLowerCase());
+    const colIdx = (name) => headers.indexOf(name);
+
+    const idxDate     = colIdx('date');
+    const idxCategory = colIdx('category');
+    const idxAmount   = colIdx('amount');
+    const idxTrip     = colIdx('trip');
+    const idxVendor   = headers.findIndex(h => h === 'vendor' || h === 'party' || h === 'party (vendor)' || h.startsWith('party'));
+    const idxNotes    = colIdx('notes');
+
+    for (let i = headerIdx + 1; i < rows.length; i++) {
+      const r = rows[i] || [];
+      if (r.every(c => c === null || c === '')) continue;
+      const amt = parseFloat(r[idxAmount]);
+      if (!isFinite(amt) || amt === 0) continue;
+
+      let date = r[idxDate];
+      if (date instanceof Date) {
+        date = date;
+      } else if (typeof date === 'string' && date.trim()) {
+        const d = new Date(date);
+        date = isNaN(d) ? null : d;
+      } else {
+        date = null;
+      }
+      // If no date, default to 31 Dec of the year (calendar year close)
+      if (!date) date = new Date(parseInt(year, 10), 11, 31);
+
+      txs.push({
+        date,
+        category: (r[idxCategory] || 'Other').toString().trim() || 'Other',
+        amount: amt,
+        trip: idxTrip >= 0 ? (r[idxTrip] || '').toString().trim() : '',
+        vendor: idxVendor >= 0 ? (r[idxVendor] || '').toString().trim() : '',
+        notes: idxNotes >= 0 ? (r[idxNotes] || '').toString().trim() : ''
+      });
+    }
+  }
+  // Sort newest first
+  txs.sort((a, b) => b.date - a.date);
+  return txs;
+}
+
+/* ============================================================
+   RENDERING
+   ============================================================ */
+function renderYearPicker() {
+  const c = $('#year-picker');
+  if (!state.years.length) {
+    c.innerHTML = '<span style="font-size:12px;color:var(--text-faint);padding:0 8px;">No years yet</span>';
+    return;
+  }
+  c.innerHTML = state.years.map(y =>
+    `<button class="year-btn ${y === state.currentYear ? 'active' : ''}" onclick="loadYear('${y}')">${y}</button>`
+  ).join('');
+}
+window.loadYear = loadYear;
+
+function renderAll() {
+  renderSummary();
+  renderCategoryChart();
+  renderTripChart();
+  populateFilters();
+  renderTable();
+}
+
+function renderSummary() {
+  const txs = state.transactions;
+  const total = txs.reduce((s, t) => s + t.amount, 0);
+  const trips = [...new Set(txs.map(t => t.trip).filter(Boolean))];
+
+  // category totals
+  const byCat = {};
+  txs.forEach(t => { byCat[t.category] = (byCat[t.category] || 0) + t.amount; });
+  const topCat = Object.entries(byCat).sort((a, b) => b[1] - a[1])[0];
+
+  $('#stat-total').textContent = AUD.format(total);
+  $('#stat-total-sub').textContent = `${txs.length} transaction${txs.length === 1 ? '' : 's'}`;
+  $('#stat-trips').textContent = trips.length || '—';
+  $('#stat-trips-sub').textContent = trips.length ? trips.slice(0, 2).join(', ') + (trips.length > 2 ? '...' : '') : 'No trip labels';
+  $('#stat-avg').textContent = trips.length ? AUD.format(total / trips.length) : AUD.format(total);
+  $('#stat-top-cat').textContent = topCat ? topCat[0] : '—';
+  $('#stat-top-cat-sub').textContent = topCat ? AUD.format(topCat[1]) + ` · ${Math.round(topCat[1] / total * 100)}%` : '';
+}
+
+function renderCategoryChart() {
+  const txs = state.transactions;
+  const byCat = {};
+  txs.forEach(t => { byCat[t.category] = (byCat[t.category] || 0) + t.amount; });
+  const entries = Object.entries(byCat).sort((a, b) => b[1] - a[1]);
+
+  if (state.charts.category) state.charts.category.destroy();
+  const ctx = document.getElementById('chart-category').getContext('2d');
+  state.charts.category = new Chart(ctx, {
+    type: 'doughnut',
+    data: {
+      labels: entries.map(e => e[0]),
+      datasets: [{
+        data: entries.map(e => e[1]),
+        backgroundColor: entries.map((_, i) => COLORS[i % COLORS.length]),
+        borderWidth: 2,
+        borderColor: '#FDFBF7'
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      cutout: '62%',
+      plugins: {
+        legend: {
+          position: 'right',
+          labels: { font: { family: 'Manrope', size: 12 }, color: '#5E574B', boxWidth: 10, padding: 10 }
+        },
+        tooltip: {
+          callbacks: { label: (ctx) => ctx.label + ': ' + AUD.format(ctx.parsed) }
+        }
+      }
+    }
+  });
+}
+
+function renderTripChart() {
+  const txs = state.transactions;
+  const byTrip = {};
+  txs.forEach(t => {
+    const key = t.trip || '(no trip)';
+    byTrip[key] = (byTrip[key] || 0) + t.amount;
+  });
+  const entries = Object.entries(byTrip).sort((a, b) => b[1] - a[1]);
+
+  if (state.charts.trip) state.charts.trip.destroy();
+  const ctx = document.getElementById('chart-trip').getContext('2d');
+  state.charts.trip = new Chart(ctx, {
+    type: 'bar',
+    data: {
+      labels: entries.map(e => e[0]),
+      datasets: [{
+        data: entries.map(e => e[1]),
+        backgroundColor: '#B86842',
+        borderRadius: 6,
+        borderSkipped: false
+      }]
+    },
+    options: {
+      indexAxis: 'y',
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: {
+        legend: { display: false },
+        tooltip: {
+          callbacks: { label: (ctx) => AUD.format(ctx.parsed.x) }
+        }
+      },
+      scales: {
+        x: {
+          grid: { color: '#F1ECE2' },
+          ticks: {
+            font: { family: 'Manrope', size: 11 },
+            color: '#8F897A',
+            callback: (v) => AUD.format(v)
+          }
+        },
+        y: {
+          grid: { display: false },
+          ticks: { font: { family: 'Manrope', size: 12 }, color: '#5E574B' }
+        }
+      }
+    }
+  });
+}
+
+function populateFilters() {
+  const trips = [...new Set(state.transactions.map(t => t.trip).filter(Boolean))].sort();
+  const cats = [...new Set(state.transactions.map(t => t.category))].sort();
+  $('#filter-trip').innerHTML = '<option value="">All trips</option>' +
+    trips.map(t => `<option value="${t}">${t}</option>`).join('');
+  $('#filter-category').innerHTML = '<option value="">All categories</option>' +
+    cats.map(c => `<option value="${c}">${c}</option>`).join('');
+}
+
+function renderTable() {
+  const fTrip = $('#filter-trip').value;
+  const fCat = $('#filter-category').value;
+  const fSearch = $('#filter-search').value.trim().toLowerCase();
+
+  const filtered = state.transactions.filter(t => {
+    if (fTrip && t.trip !== fTrip) return false;
+    if (fCat && t.category !== fCat) return false;
+    if (fSearch) {
+      const blob = (t.vendor + ' ' + t.notes + ' ' + t.category + ' ' + t.trip).toLowerCase();
+      if (!blob.includes(fSearch)) return false;
+    }
+    return true;
+  });
+
+  const body = $('#tx-body');
+  if (!filtered.length) {
+    body.innerHTML = '<tr><td colspan="6" style="text-align:center;color:var(--text-faint);padding:2rem;">No matching transactions</td></tr>';
+    return;
+  }
+  body.innerHTML = filtered.map(t => `
+    <tr>
+      <td>${formatDate(t.date)}</td>
+      <td>${t.trip ? `<span class="pill trip">${escapeHtml(t.trip)}</span>` : '<span style="color:var(--text-faint);">—</span>'}</td>
+      <td><span class="pill">${escapeHtml(t.category)}</span></td>
+      <td>${escapeHtml(t.vendor) || '<span style="color:var(--text-faint);">—</span>'}</td>
+      <td>${escapeHtml(t.notes) || '<span style="color:var(--text-faint);">—</span>'}</td>
+      <td class="amount">${AUD2.format(t.amount)}</td>
+    </tr>
+  `).join('');
+}
+window.renderTable = renderTable;
+
+function formatDate(d) {
+  if (!(d instanceof Date) || isNaN(d)) return '';
+  const opts = { day: '2-digit', month: 'short', year: 'numeric' };
+  return d.toLocaleDateString('en-AU', opts);
+}
+
+function escapeHtml(s) {
+  return (s || '').toString()
+    .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+}
+
+/* ============================================================
+   POST SIGN IN
+   ============================================================ */
+async function onSignedIn() {
+  showLoading(true);
+  try {
+    state.years = await discoverYears();
+    if (state.years.length === 0) {
+      renderYearPicker();
+      showEmpty(`No year folders found. Create <code>OneDrive/Apps/Travel/2025/</code> with a <code>ledger.xlsx</code> inside.`);
+      return;
+    }
+    await loadYear(state.years[0]);
+  } catch (e) {
+    showEmpty(`Could not load travel data: ${e.message}`);
+  }
+}
+
+/* ============================================================
+   BOOT
+   ============================================================ */
+async function start() {
+  const ok = await initMsal();
+  if (!ok) {
+    showSignIn();
+    return;
+  }
+  if (state.account) {
+    showDashboard(state.account);
+    await onSignedIn();
+  } else {
+    showSignIn();
+  }
+}
+start();
+</script>
+
+</body>
+</html>
