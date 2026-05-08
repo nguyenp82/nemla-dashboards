@@ -921,7 +921,7 @@ function parseLedger(wb, year) {
   for (const sheetName of wb.SheetNames) {
     if (/^(read ?me|categories)$/i.test(sheetName)) continue;
     const sheet = wb.Sheets[sheetName];
-    const rows = XLSX.utils.sheet_to_json(sheet, { header: 1, defval: null, raw: false });
+    const rows = XLSX.utils.sheet_to_json(sheet, { header: 1, defval: null, raw: true });
 
     // Find the header row (row containing "Date" and "Category" and "Amount")
     let headerIdx = -1;
@@ -949,12 +949,23 @@ function parseLedger(wb, year) {
     for (let i = headerIdx + 1; i < rows.length; i++) {
       const r = rows[i] || [];
       if (r.every(c => c === null || c === '')) continue;
-      const amt = parseFloat(r[idxAmount]);
+
+      // Parse amount - handle numbers, strings with $/commas, etc
+      let amt = r[idxAmount];
+      if (typeof amt === 'string') {
+        amt = parseFloat(amt.replace(/[$,\s]/g, ''));
+      } else {
+        amt = parseFloat(amt);
+      }
       if (!isFinite(amt) || amt === 0) continue;
 
+      // Parse date - handle Date objects, Excel serial numbers, and strings
       let date = r[idxDate];
       if (date instanceof Date) {
-        date = date;
+        // already a date
+      } else if (typeof date === 'number') {
+        // Excel serial date: days since 1899-12-30
+        date = new Date((date - 25569) * 86400 * 1000);
       } else if (typeof date === 'string' && date.trim()) {
         const d = new Date(date);
         date = isNaN(d) ? null : d;
