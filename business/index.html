@@ -1,0 +1,2215 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Ledger Business · Nemla Pty Ltd</title>
+<link rel="icon" type="image/png" href="data:image/png;base64,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">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300..900;1,9..144,300..900&family=Manrope:wght@300..800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.0/chart.umd.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@azure/msal-browser@3/lib/msal-browser.min.js"></script>
+<style>
+  :root {
+    --bg: #F7F4EE;
+    --surface: #FDFBF7;
+    --surface-2: #F1ECE2;
+    --surface-3: #E8E2D4;
+    --border: #E0D9C9;
+    --border-strong: #C9C0AB;
+    --text: #2A2822;
+    --text-dim: #5E574B;
+    --text-faint: #8F897A;
+    --accent: #A07A1F;
+    --accent-dim: #C9A14A;
+    --accent-soft: #F3E9CF;
+    --nemla: #1F2785;
+    --nemla-soft: #DDE0F2;
+    --positive: #5B8C47;
+    --positive-soft: #E5EEDB;
+    --negative: #B85838;
+    --negative-soft: #F3DDD1;
+    --neutral: #3E6A88;
+    --neutral-soft: #DCE6EE;
+    --danger: #A33F3F;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html, body { background: var(--bg); color: var(--text); font-family: 'Manrope', sans-serif; font-size: 14px; line-height: 1.5; -webkit-font-smoothing: antialiased; }
+  body {
+    min-height: 100vh;
+    background-image:
+      radial-gradient(circle at 12% 8%, rgba(31,39,133,0.05) 0%, transparent 45%),
+      radial-gradient(circle at 88% 92%, rgba(160,122,31,0.04) 0%, transparent 50%);
+    background-attachment: fixed;
+  }
+
+  button { font-family: inherit; cursor: pointer; border: none; background: none; color: inherit; }
+  input, select { font-family: inherit; color: inherit; }
+  .mono { font-family: 'JetBrains Mono', monospace; font-variant-numeric: tabular-nums; }
+  .serif { font-family: 'Fraunces', serif; font-optical-sizing: auto; }
+  .italic { font-style: italic; }
+
+  /* Layout */
+  .app { max-width: 1440px; margin: 0 auto; padding: 32px 40px 80px; }
+  @media (max-width: 720px) { .app { padding: 20px 16px 60px; } }
+
+  /* Header */
+  .brand { display: flex; align-items: center; justify-content: space-between; padding-bottom: 28px; border-bottom: 1px solid var(--border); margin-bottom: 32px; flex-wrap: wrap; gap: 16px; }
+  .brand-left { display: flex; align-items: center; gap: 18px; }
+  .brand-logo { width: 54px; height: 54px; flex-shrink: 0; }
+  .brand-title { font-family: 'Fraunces', serif; font-weight: 300; font-size: 38px; letter-spacing: -0.02em; line-height: 1; }
+  .brand-title em { font-style: italic; color: var(--accent); font-weight: 400; }
+  .brand-tagline { font-size: 11px; color: var(--nemla); letter-spacing: 0.1em; text-transform: uppercase; margin-top: 6px; font-weight: 500; }
+  .brand-meta { font-size: 12px; color: var(--text-faint); letter-spacing: 0.06em; }
+  .brand-meta .dot { color: var(--accent); margin: 0 8px; }
+  @media (max-width: 600px) { .brand-logo { width: 44px; height: 44px; } .brand-title { font-size: 30px; } }
+
+  /* Landing (upload) */
+  .landing { display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 60vh; text-align: center; }
+  .landing h2 { font-family: 'Fraunces', serif; font-weight: 300; font-size: 52px; line-height: 1.1; letter-spacing: -0.025em; max-width: 680px; margin-bottom: 20px; }
+  .landing h2 em { color: var(--accent); font-style: italic; }
+  .landing p { color: var(--text-dim); max-width: 520px; margin-bottom: 40px; font-size: 15px; }
+
+  /* Setup instructions panel on landing */
+  .setup-panel { width: 100%; max-width: 640px; background: var(--surface); border: 1px solid var(--border); border-radius: 4px; padding: 30px 32px; margin-bottom: 40px; text-align: left; box-shadow: 0 1px 2px rgba(42,40,34,0.03); }
+  .setup-step { display: flex; gap: 18px; padding: 18px 0; border-bottom: 1px solid var(--border); }
+  .setup-step:first-child { padding-top: 0; }
+  .setup-step:last-child { padding-bottom: 0; border-bottom: none; }
+  .setup-num { width: 30px; height: 30px; border-radius: 50%; background: var(--accent); color: #FFFFFF; flex-shrink: 0; display: flex; align-items: center; justify-content: center; font-family: 'Fraunces', serif; font-size: 15px; font-weight: 500; }
+  .setup-body { flex: 1; min-width: 0; }
+  .setup-title { font-family: 'Fraunces', serif; font-size: 17px; font-weight: 400; color: var(--text); margin-bottom: 6px; letter-spacing: -0.01em; }
+  .setup-desc { font-size: 13px; color: var(--text-dim); line-height: 1.55; margin-bottom: 4px; }
+  .setup-note { font-size: 12px; color: var(--text-faint); font-style: italic; line-height: 1.5; }
+  .setup-body code { font-family: 'JetBrains Mono', monospace; font-size: 11.5px; background: var(--accent-soft); color: var(--accent); padding: 2px 6px; border-radius: 2px; letter-spacing: 0; font-style: normal; }
+  .drop-zone { display: block; width: 100%; max-width: 560px; border: 1px dashed var(--border-strong); border-radius: 2px; padding: 48px 32px; transition: all 0.2s; background: var(--surface); cursor: pointer; text-align: center; }
+  .drop-zone.drag { border-color: var(--accent); background: var(--surface-2); }
+  .drop-zone-label { font-family: 'Fraunces', serif; font-style: italic; font-size: 20px; color: var(--text-dim); margin-bottom: 8px; }
+  .drop-zone-hint { font-size: 13px; color: var(--text-faint); letter-spacing: 0.04em; }
+  .drop-zone-button { display: inline-block; margin-top: 20px; padding: 10px 24px; border: 1px solid var(--accent); color: var(--accent); font-size: 13px; letter-spacing: 0.08em; text-transform: uppercase; border-radius: 2px; transition: all 0.2s; }
+  .drop-zone-button:hover { background: var(--accent); color: #FFFFFF; }
+  .supported { display: flex; gap: 16px; margin-top: 32px; color: var(--text-faint); font-size: 12px; letter-spacing: 0.05em; flex-wrap: wrap; justify-content: center; }
+  .supported span { padding: 4px 10px; border: 1px solid var(--border); border-radius: 2px; }
+
+  /* Filters bar */
+  .filters { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; padding: 14px 16px; background: var(--surface); border: 1px solid var(--border); border-radius: 2px; margin-bottom: 24px; }
+  .filter-group { display: flex; align-items: center; gap: 8px; }
+  .filter-label { font-size: 11px; letter-spacing: 0.1em; color: var(--text-faint); text-transform: uppercase; }
+  .filter-select, .filter-input { background: var(--surface-2); border: 1px solid var(--border); color: var(--text); padding: 7px 12px; font-size: 13px; border-radius: 2px; outline: none; min-width: 140px; }
+  .filter-select:focus, .filter-input:focus { border-color: var(--accent); }
+  .filter-toggle { display: flex; align-items: center; gap: 8px; padding: 7px 12px; background: var(--surface-2); border: 1px solid var(--border); border-radius: 2px; font-size: 12px; }
+  .filter-toggle input { accent-color: var(--accent); }
+  .spacer { flex: 1; }
+  .ghost-btn { padding: 7px 14px; background: transparent; border: 1px solid var(--border); color: var(--text-dim); font-size: 12px; letter-spacing: 0.06em; text-transform: uppercase; border-radius: 2px; transition: all 0.15s; }
+  .ghost-btn:hover { border-color: var(--accent); color: var(--accent); }
+
+  /* KPIs */
+  .kpi-grid { display: grid; grid-template-columns: repeat(6, 1fr); gap: 1px; background: var(--border); border: 1px solid var(--border); border-radius: 4px; overflow: hidden; margin-bottom: 28px; box-shadow: 0 1px 2px rgba(42,40,34,0.03); }
+  @media (max-width: 1300px) { .kpi-grid { grid-template-columns: repeat(3, 1fr); } }
+  @media (max-width: 700px) { .kpi-grid { grid-template-columns: repeat(2, 1fr); } }
+  .kpi { background: var(--surface); padding: 20px 20px; }
+  .kpi-label { font-size: 10px; letter-spacing: 0.1em; color: var(--text-faint); text-transform: uppercase; margin-bottom: 10px; display: flex; align-items: center; gap: 6px; }
+  .kpi-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--accent); }
+  .kpi-dot.pos { background: var(--positive); }
+  .kpi-dot.neg { background: var(--negative); }
+  .kpi-dot.net { background: var(--neutral); }
+  .kpi-value { font-family: 'Fraunces', serif; font-weight: 300; font-size: 30px; letter-spacing: -0.02em; line-height: 1; }
+  .kpi-value.pos { color: var(--positive); }
+  .kpi-value.neg { color: var(--negative); }
+  .kpi-sub { font-size: 12px; color: var(--text-faint); margin-top: 8px; font-family: 'JetBrains Mono', monospace; }
+
+  /* Panels */
+  .panel { background: var(--surface); border: 1px solid var(--border); border-radius: 4px; padding: 24px; margin-bottom: 24px; box-shadow: 0 1px 2px rgba(42,40,34,0.03); }
+  .panel-header { display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 20px; padding-bottom: 14px; border-bottom: 1px solid var(--border); flex-wrap: wrap; gap: 12px; }
+  .panel-title { font-family: 'Fraunces', serif; font-weight: 300; font-size: 22px; letter-spacing: -0.01em; }
+  .panel-title em { color: var(--accent); font-style: italic; }
+  .panel-subtitle { font-size: 12px; color: var(--text-faint); letter-spacing: 0.04em; margin-top: 4px; }
+  .panel-meta { font-size: 12px; color: var(--text-faint); font-family: 'JetBrains Mono', monospace; }
+
+  /* Grid */
+  .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; }
+  @media (max-width: 980px) { .two-col { grid-template-columns: 1fr; } }
+
+  .chart-wrap { position: relative; height: 320px; }
+  .chart-wrap.tall { height: 380px; }
+
+  /* Category list */
+  .cat-list { display: flex; flex-direction: column; gap: 1px; background: var(--border); border: 1px solid var(--border); border-radius: 2px; overflow: hidden; }
+  .cat-row { display: grid; grid-template-columns: 16px 1fr auto auto; gap: 14px; align-items: center; padding: 12px 16px; background: var(--surface); transition: background 0.15s; }
+  .cat-row:hover { background: var(--surface-2); }
+  .cat-swatch { width: 10px; height: 10px; border-radius: 50%; }
+  .cat-name { font-size: 13px; color: var(--text); }
+  .cat-pct { font-size: 12px; color: var(--text-faint); font-family: 'JetBrains Mono', monospace; min-width: 48px; text-align: right; }
+  .cat-amount { font-family: 'JetBrains Mono', monospace; font-size: 13px; color: var(--text); min-width: 100px; text-align: right; }
+  .cat-bar-wrap { grid-column: 1 / -1; height: 3px; background: var(--surface-3); border-radius: 2px; overflow: hidden; margin-top: 8px; }
+  .cat-bar { height: 100%; background: var(--accent); }
+
+  /* Transactions */
+  .tx-head { display: grid; grid-template-columns: 90px 1fr 120px 140px 110px 40px; gap: 14px; padding: 12px 16px; background: var(--surface-2); border-bottom: 1px solid var(--border); font-size: 11px; letter-spacing: 0.08em; color: var(--text-faint); text-transform: uppercase; }
+  .tx-sort { cursor: pointer; user-select: none; transition: color 0.1s; display: inline-flex; align-items: center; gap: 4px; }
+  .tx-head > .tx-sort[style*="text-align:right"] { justify-content: flex-end; }
+  .tx-sort:hover { color: var(--text); }
+  .tx-sort.active { color: var(--text); }
+  .tx-sort-arrow { font-size: 9px; opacity: 0.6; min-width: 8px; }
+  .tx-row { display: grid; grid-template-columns: 90px 1fr 120px 140px 110px 40px; gap: 14px; padding: 12px 16px; border-bottom: 1px solid var(--border); font-size: 13px; align-items: center; transition: background 0.1s; }
+  .tx-row:hover { background: var(--surface-2); }
+  .tx-row:last-child { border-bottom: none; }
+  .tx-date { color: var(--text-dim); font-family: 'JetBrains Mono', monospace; font-size: 12px; }
+  .tx-desc { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .tx-desc-sub { font-size: 11px; color: var(--text-faint); margin-top: 2px; letter-spacing: 0.04em; }
+  .tx-source { font-size: 11px; color: var(--text-faint); letter-spacing: 0.04em; text-transform: uppercase; }
+  .tx-cat { font-size: 12px; }
+  .tx-cat select { background: transparent; border: 1px solid transparent; padding: 4px 8px; font-size: 12px; cursor: pointer; border-radius: 2px; width: 100%; transition: all 0.15s; }
+  .tx-cat select:hover, .tx-cat select:focus { border-color: var(--border-strong); background: var(--surface-2); }
+  .tx-amount { font-family: 'JetBrains Mono', monospace; text-align: right; font-weight: 500; }
+  .tx-amount.pos { color: var(--positive); }
+  .tx-amount.neg { color: var(--negative); }
+  .tx-menu-btn { color: var(--text-faint); padding: 4px 8px; border-radius: 2px; }
+  .tx-menu-btn:hover { color: var(--text); background: var(--surface-3); }
+  @media (max-width: 880px) {
+    .tx-head, .tx-row { grid-template-columns: 70px 1fr 100px 50px; }
+    .tx-head .hide-sm, .tx-row .hide-sm { display: none; }
+  }
+
+  /* Rules */
+  .rules-list { display: flex; flex-wrap: wrap; gap: 6px; }
+  .rule-chip { display: inline-flex; align-items: center; gap: 6px; padding: 5px 10px; background: var(--surface-2); border: 1px solid var(--border); border-radius: 2px; font-size: 12px; font-family: 'JetBrains Mono', monospace; }
+  .rule-chip .x { color: var(--text-faint); cursor: pointer; font-size: 14px; line-height: 1; }
+  .rule-chip .x:hover { color: var(--danger); }
+  .rule-chip .arrow { color: var(--text-faint); }
+  .rule-chip .cat { color: var(--accent); }
+
+  /* Dialogs */
+  .dialog-backdrop { position: fixed; inset: 0; background: rgba(0,0,0,0.6); display: none; align-items: center; justify-content: center; z-index: 100; padding: 20px; }
+  .dialog-backdrop.open { display: flex; }
+  .dialog { background: var(--surface); border: 1px solid var(--border-strong); border-radius: 2px; padding: 28px; max-width: 480px; width: 100%; }
+  .dialog h3 { font-family: 'Fraunces', serif; font-weight: 300; font-size: 24px; margin-bottom: 16px; letter-spacing: -0.01em; }
+  .dialog p { color: var(--text-dim); margin-bottom: 16px; font-size: 13px; }
+  .dialog-body { margin-bottom: 20px; }
+  .form-row { display: flex; flex-direction: column; gap: 6px; margin-bottom: 14px; }
+  .form-row label { font-size: 11px; letter-spacing: 0.1em; color: var(--text-faint); text-transform: uppercase; }
+  .dialog-actions { display: flex; gap: 10px; justify-content: flex-end; }
+  .btn-primary { padding: 9px 20px; background: var(--accent); color: #FFFFFF; font-size: 12px; letter-spacing: 0.08em; text-transform: uppercase; border-radius: 2px; font-weight: 600; }
+  .btn-primary:hover { background: #8C6A1A; }
+  .btn-secondary { padding: 9px 20px; border: 1px solid var(--border-strong); color: var(--text-dim); font-size: 12px; letter-spacing: 0.08em; text-transform: uppercase; border-radius: 2px; }
+  .btn-secondary:hover { border-color: var(--text-dim); color: var(--text); }
+
+  /* Empty states */
+  .empty { padding: 40px 20px; text-align: center; color: var(--text-faint); font-family: 'Fraunces', serif; font-style: italic; font-size: 16px; }
+
+  /* Toast */
+  .toast { position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%); background: var(--surface-2); border: 1px solid var(--border-strong); padding: 12px 20px; border-radius: 2px; font-size: 13px; z-index: 200; opacity: 0; transition: opacity 0.2s; pointer-events: none; }
+  .toast.show { opacity: 1; }
+
+  /* Source chips */
+  .source-chips { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 20px; }
+  .source-chip { display: inline-flex; align-items: center; gap: 8px; padding: 6px 12px; background: var(--surface-2); border: 1px solid var(--border); border-radius: 2px; font-size: 12px; }
+  .source-chip .name { color: var(--text); font-family: 'JetBrains Mono', monospace; }
+  .source-chip .count { color: var(--text-faint); }
+  .source-chip .type-badge { font-size: 10px; padding: 2px 6px; border-radius: 2px; letter-spacing: 0.06em; text-transform: uppercase; }
+  .source-chip .type-badge.bank { background: rgba(122,158,184,0.15); color: var(--neutral); }
+  .source-chip .type-badge.card { background: rgba(212,168,75,0.15); color: var(--accent); }
+  .source-chip .rm { color: var(--text-faint); cursor: pointer; margin-left: 4px; }
+  .source-chip .rm:hover { color: var(--danger); }
+
+  /* BAS summary */
+  .bas-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; }
+  @media (max-width: 700px) { .bas-grid { grid-template-columns: 1fr; } }
+  .bas-row { display: grid; grid-template-columns: 60px 1fr auto; gap: 14px; align-items: baseline; padding: 12px 16px; background: var(--surface-2); border: 1px solid var(--border); border-radius: 3px; }
+  .bas-code { font-family: 'JetBrains Mono', monospace; font-size: 11px; color: var(--accent); letter-spacing: 0.08em; font-weight: 600; }
+  .bas-label { font-size: 13px; color: var(--text); }
+  .bas-label .desc { font-size: 11px; color: var(--text-faint); display: block; margin-top: 2px; }
+  .bas-value { font-family: 'JetBrains Mono', monospace; font-size: 15px; font-weight: 500; color: var(--text); }
+
+  /* Sign in */
+  .btn-signin { margin-top: 20px; padding: 14px 32px; background: var(--accent); color: #FFFFFF; font-size: 13px; letter-spacing: 0.1em; text-transform: uppercase; border-radius: 2px; font-weight: 600; cursor: pointer; transition: all 0.15s; border: none; font-family: inherit; box-shadow: 0 1px 0 rgba(0,0,0,0.04); }
+  .btn-signin:hover { background: #8C6A1A; transform: translateY(-1px); }
+  .btn-signin:disabled { opacity: 0.5; cursor: not-allowed; }
+  .landing-hint { margin-top: 14px; color: var(--text-faint); font-size: 12px; letter-spacing: 0.04em; max-width: 420px; text-align: center; }
+
+  /* Fallback upload */
+  .fallback-upload { margin-top: 40px; max-width: 560px; width: 100%; }
+  .fallback-upload summary { cursor: pointer; font-family: 'Fraunces', serif; font-style: italic; font-size: 14px; color: var(--text-faint); padding: 14px 0; border-top: 1px solid var(--border); text-align: center; list-style: none; }
+  .fallback-upload summary::-webkit-details-marker { display: none; }
+  .fallback-upload summary:hover { color: var(--text-dim); }
+  .fallback-upload[open] summary { color: var(--text-dim); border-color: var(--border-strong); }
+
+  /* Period picker */
+  .period-picker { display: flex; gap: 12px; align-items: center; flex-wrap: wrap; padding: 16px 20px; background: var(--surface); border: 1px solid var(--border-strong); border-radius: 2px; margin-bottom: 24px; }
+  .period-label { font-family: 'Fraunces', serif; font-style: italic; font-size: 16px; color: var(--text-dim); }
+  .period-meta { font-size: 12px; color: var(--text-faint); font-family: 'JetBrains Mono', monospace; letter-spacing: 0.04em; margin-left: 8px; }
+  .period-mode { display: inline-flex; border: 1px solid var(--border); border-radius: 3px; overflow: hidden; background: var(--surface-2); }
+  .period-mode-btn { padding: 7px 14px; background: transparent; border: none; color: var(--text-dim); font-size: 12px; letter-spacing: 0.04em; cursor: pointer; font-family: inherit; transition: all 0.15s; }
+  .period-mode-btn:hover { color: var(--text); background: var(--surface-3); }
+  .period-mode-btn.active { background: var(--accent); color: #FFFFFF; }
+  .user-chip { display: flex; align-items: center; gap: 8px; padding: 6px 12px; background: var(--surface-2); border: 1px solid var(--border); border-radius: 2px; font-size: 12px; color: var(--text-dim); }
+  .user-chip .initials { width: 22px; height: 22px; border-radius: 50%; background: var(--accent); color: #FFFFFF; font-weight: 600; display: flex; align-items: center; justify-content: center; font-size: 11px; }
+
+  /* Attention rows */
+  .attn-row { display: grid; grid-template-columns: 1fr auto 180px; gap: 16px; align-items: center; padding: 14px 16px; border: 1px solid var(--border); border-radius: 2px; margin-bottom: 8px; background: var(--surface-2); }
+  .attn-row:last-child { margin-bottom: 0; }
+  .attn-desc { font-size: 14px; color: var(--text); margin-bottom: 4px; }
+  .attn-meta { font-size: 11px; color: var(--text-faint); letter-spacing: 0.04em; }
+  .attn-amount { font-size: 16px; font-weight: 500; }
+  .attn-amount.pos { color: var(--positive); }
+  .attn-amount.neg { color: var(--negative); }
+  @media (max-width: 720px) { .attn-row { grid-template-columns: 1fr auto; } .attn-row select { grid-column: 1 / -1; } }
+
+  /* Headings accent */
+  .rule { height: 1px; background: var(--border); margin: 48px 0 32px; position: relative; }
+  .rule::after { content: ''; position: absolute; left: 0; top: -1px; width: 40px; height: 3px; background: var(--accent); }
+
+  .footnote { font-size: 11px; color: var(--text-faint); font-style: italic; margin-top: 8px; font-family: 'Fraunces', serif; }
+
+  ::-webkit-scrollbar { width: 8px; height: 8px; }
+  ::-webkit-scrollbar-track { background: var(--surface); }
+  ::-webkit-scrollbar-thumb { background: var(--border-strong); border-radius: 2px; }
+  ::-webkit-scrollbar-thumb:hover { background: var(--text-faint); }
+</style>
+</head>
+<body>
+<div class="app">
+  <div class="brand">
+    <div class="brand-left">
+      <img class="brand-logo" src="data:image/png;base64,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" alt="Nemla">
+      <div>
+        <div class="brand-title">Ledger Business<em>.</em></div>
+        <div class="brand-tagline" id="tagline">Nemla Pty Ltd · cash basis P&amp;L</div>
+      </div>
+    </div>
+    <div class="brand-meta" id="brand-meta"></div>
+  </div>
+
+  <div id="landing" class="landing">
+    <h2>One quick setup, <em>then you're sorted.</em></h2>
+    <p>Drop your business CSVs into OneDrive, then sign in with Microsoft to load your dashboard.</p>
+
+    <div class="setup-panel">
+      <div class="setup-step">
+        <div class="setup-num">1</div>
+        <div class="setup-body">
+          <div class="setup-title">Create the folder structure</div>
+          <div class="setup-desc">In your Nemla OneDrive, the app uses: <code>OneDrive / Apps / Business / 2026 / 03</code></div>
+          <div class="setup-note">Folders are <code>YYYY</code> for year and <code>MM</code> for month (zero-padded). Create as many months as you need.</div>
+        </div>
+      </div>
+      <div class="setup-step">
+        <div class="setup-num">2</div>
+        <div class="setup-body">
+          <div class="setup-title">Drop your CSVs each month</div>
+          <div class="setup-desc">Goes into the monthly folder: <code>OneDrive / Apps / Business / 2026 / 03 / cba-bank.csv</code></div>
+          <div class="setup-note">Main bank and both credit cards for that month. Any filename works. CBA, ANZ, and most AU banks are auto-detected.</div>
+        </div>
+      </div>
+      <div class="setup-step">
+        <div class="setup-num">3</div>
+        <div class="setup-body">
+          <div class="setup-title">Pick month or quarter view</div>
+          <div class="setup-desc">After sign in, toggle between <strong>Month</strong> and <strong>Quarter</strong> at the top of the dashboard.</div>
+          <div class="setup-note">Quarter view aggregates three months at once and is ideal for BAS lodgement prep.</div>
+        </div>
+      </div>
+    </div>
+
+    <button class="btn-signin" id="btn-signin">Sign in with Microsoft</button>
+    <div class="landing-hint">Uses your Nemla work account. Statements stay in your OneDrive. Nothing is copied anywhere else.</div>
+
+    <details class="fallback-upload">
+      <summary>or analyse a single CSV without signing in</summary>
+      <label class="drop-zone" id="drop-zone" for="file-input" style="margin-top: 16px;">
+        <div class="drop-zone-label">Drop CSV files here</div>
+        <div class="drop-zone-hint">One off analysis, rules are not saved between sessions</div>
+      </label>
+      <div style="margin-top: 14px; display: flex; flex-direction: column; align-items: center; gap: 10px;">
+        <input type="file" id="file-input" accept="*/*" multiple style="background: var(--surface-2); color: var(--text); padding: 10px; border: 1px solid var(--border-strong); border-radius: 2px; font-family: inherit; font-size: 13px; max-width: 100%;">
+      </div>
+    </details>
+
+    <div id="status-log" style="margin-top: 32px; min-height: 60px; max-width: 640px; width: 100%; background: var(--surface-2); border: 1px solid var(--border); border-radius: 2px; padding: 12px 16px; font-family: 'JetBrains Mono', monospace; font-size: 12px; color: var(--text-dim); text-align: left; white-space: pre-wrap; line-height: 1.6;">Ready. Sign in or upload a CSV to begin.</div>
+  </div>
+
+  <div id="dashboard" hidden>
+    <div class="period-picker" id="period-picker" hidden>
+      <div class="period-label">Viewing</div>
+      <div class="period-mode" id="period-mode">
+        <button class="period-mode-btn active" data-mode="month">Month</button>
+        <button class="period-mode-btn" data-mode="quarter">Quarter</button>
+      </div>
+      <select class="filter-select" id="period-year" style="min-width: 110px;"></select>
+      <select class="filter-select" id="period-month" style="min-width: 140px;"></select>
+      <select class="filter-select" id="period-quarter" style="min-width: 160px; display: none;"></select>
+      <button class="ghost-btn" id="btn-load-period" style="border-color: var(--accent); color: var(--accent);">Load</button>
+      <div class="period-meta" id="period-meta"></div>
+      <div class="spacer"></div>
+      <div class="user-chip" id="user-chip" hidden></div>
+      <button class="ghost-btn" id="btn-signout" hidden>Sign out</button>
+    </div>
+
+    <div class="source-chips" id="source-chips"></div>
+
+    <div class="filters">
+      <div class="filter-group">
+        <span class="filter-label">Range</span>
+        <select class="filter-select" id="filter-range">
+          <option value="3m">Last 3 months</option>
+          <option value="6m">Last 6 months</option>
+          <option value="12m">Last 12 months</option>
+          <option value="ytd">Year to date</option>
+          <option value="all">All time</option>
+          <option value="custom">Custom</option>
+        </select>
+      </div>
+      <div class="filter-group" id="custom-range-wrap" style="display:none">
+        <input type="date" class="filter-input" id="filter-from">
+        <input type="date" class="filter-input" id="filter-to">
+      </div>
+      <label class="filter-toggle">
+        <input type="checkbox" id="filter-exclude-cc" checked>
+        Exclude card payments from expense total
+      </label>
+      <div class="spacer"></div>
+      <label class="ghost-btn" for="file-input" style="cursor:pointer">+ Add CSV</label>
+      <button class="ghost-btn" id="btn-reset">Reset</button>
+    </div>
+
+    <div class="kpi-grid">
+      <div class="kpi">
+        <div class="kpi-label"><span class="kpi-dot pos"></span>Revenue <span style="color: var(--text-faint); font-size: 9px; margin-left: 4px;">ex-GST</span></div>
+        <div class="kpi-value pos mono" id="kpi-revenue">—</div>
+        <div class="kpi-sub" id="kpi-revenue-sub"></div>
+      </div>
+      <div class="kpi">
+        <div class="kpi-label"><span class="kpi-dot neg"></span>Expenses <span style="color: var(--text-faint); font-size: 9px; margin-left: 4px;">ex-GST</span></div>
+        <div class="kpi-value neg mono" id="kpi-expenses">—</div>
+        <div class="kpi-sub" id="kpi-expenses-sub"></div>
+      </div>
+      <div class="kpi">
+        <div class="kpi-label"><span class="kpi-dot net"></span>Gross profit</div>
+        <div class="kpi-value mono" id="kpi-profit">—</div>
+        <div class="kpi-sub" id="kpi-profit-sub"></div>
+      </div>
+      <div class="kpi">
+        <div class="kpi-label"><span class="kpi-dot" style="background: var(--accent)"></span>Margin</div>
+        <div class="kpi-value mono" id="kpi-margin" style="color: var(--accent)">—</div>
+        <div class="kpi-sub" id="kpi-margin-sub"></div>
+      </div>
+      <div class="kpi">
+        <div class="kpi-label"><span class="kpi-dot" style="background: #5B8C47"></span>GST collected</div>
+        <div class="kpi-value mono" id="kpi-gst-coll" style="color: #5B8C47">—</div>
+        <div class="kpi-sub" id="kpi-gst-coll-sub"></div>
+      </div>
+      <div class="kpi">
+        <div class="kpi-label"><span class="kpi-dot" style="background: #B85838"></span>GST owed to ATO</div>
+        <div class="kpi-value mono" id="kpi-gst-owed" style="color: #B85838">—</div>
+        <div class="kpi-sub" id="kpi-gst-owed-sub"></div>
+      </div>
+    </div>
+
+    <div class="panel" id="attention-panel" hidden>
+      <div class="panel-header">
+        <div>
+          <div class="panel-title">Needs <em>a second look</em></div>
+          <div class="panel-subtitle">Big inflows tagged as transfers, or large uncategorised items. Click to retag.</div>
+        </div>
+        <button class="ghost-btn" id="btn-dismiss-attention">Dismiss</button>
+      </div>
+      <div id="attention-body"></div>
+    </div>
+
+    <div class="panel" id="bas-panel">
+      <div class="panel-header">
+        <div>
+          <div class="panel-title">BAS <em>summary</em></div>
+          <div class="panel-subtitle">Cash-basis view for the selected period. Cross-check against Xero before lodgement.</div>
+        </div>
+        <div class="panel-meta" id="bas-meta"></div>
+      </div>
+      <div class="bas-grid" id="bas-grid"></div>
+    </div>
+
+    <div class="panel">
+      <div class="panel-header">
+        <div>
+          <div class="panel-title">Sales <em>by client</em></div>
+          <div class="panel-subtitle">Who paid you this period, ranked biggest first. GST-exclusive.</div>
+        </div>
+        <div class="panel-meta" id="ie-meta"></div>
+      </div>
+      <div class="chart-wrap tall"><canvas id="chart-ie"></canvas></div>
+    </div>
+
+    <div class="two-col">
+      <div class="panel">
+        <div class="panel-header">
+          <div>
+            <div class="panel-title">Expenses <em>ranked</em></div>
+            <div class="panel-subtitle">Biggest to smallest, so you know where the deductions are</div>
+          </div>
+          <div class="panel-meta" id="cat-meta"></div>
+        </div>
+        <div class="chart-wrap tall"><canvas id="chart-cat"></canvas></div>
+      </div>
+      <div class="panel">
+        <div class="panel-header">
+          <div>
+            <div class="panel-title">The <em>breakdown</em></div>
+            <div class="panel-subtitle">Click a category to filter transactions</div>
+          </div>
+        </div>
+        <div class="cat-list" id="cat-list"></div>
+      </div>
+    </div>
+
+    <div class="panel">
+      <div class="panel-header">
+        <div>
+          <div class="panel-title">Custom <em>rules</em></div>
+          <div class="panel-subtitle">Overrides you set this session. Click any transaction category below to add one.</div>
+        </div>
+        <button class="ghost-btn" id="btn-clear-rules">Clear all</button>
+      </div>
+      <div class="rules-list" id="rules-list"></div>
+      <div class="empty" id="rules-empty">No custom rules yet</div>
+    </div>
+
+    <div class="panel" style="padding: 0;">
+      <div class="panel-header" style="padding: 20px 24px; margin: 0;">
+        <div>
+          <div class="panel-title">Transactions</div>
+          <div class="panel-subtitle" id="tx-subtitle">Showing transactions in the selected period</div>
+        </div>
+        <div class="filter-group">
+          <input type="search" class="filter-input" id="tx-search" placeholder="Search description...">
+          <select class="filter-select" id="tx-cat-filter">
+            <option value="">All categories</option>
+          </select>
+        </div>
+      </div>
+      <div class="tx-head">
+        <div class="tx-sort" data-sort="date">Date<span class="tx-sort-arrow" data-arrow="date"></span></div>
+        <div>Description</div>
+        <div class="hide-sm">Source</div>
+        <div class="hide-sm">Category</div>
+        <div class="tx-sort" data-sort="amount" style="text-align:right">Amount<span class="tx-sort-arrow" data-arrow="amount"></span></div>
+        <div></div>
+      </div>
+      <div id="tx-body"></div>
+      <div style="padding: 16px 24px; text-align: center;">
+        <button class="ghost-btn" id="btn-show-more" hidden>Show 50 more</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="dialog-backdrop" id="dialog-recat">
+  <div class="dialog">
+    <h3>Recategorise</h3>
+    <p id="recat-body"></p>
+    <div class="dialog-body">
+      <div class="form-row">
+        <label>New category</label>
+        <select class="filter-select" id="recat-category" style="width:100%"></select>
+      </div>
+      <label class="filter-toggle">
+        <input type="checkbox" id="recat-save-rule" checked>
+        Save as a rule for transactions matching this pattern
+      </label>
+      <div class="form-row" id="recat-pattern-wrap">
+        <label>Match pattern (any transaction containing this text)</label>
+        <input type="text" class="filter-input" id="recat-pattern" style="width:100%">
+      </div>
+    </div>
+    <div class="dialog-actions">
+      <button class="btn-secondary" id="recat-cancel">Cancel</button>
+      <button class="btn-primary" id="recat-apply">Apply</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+/* ============================================================
+   CONFIGURATION — Replace placeholders after app registration
+   See README.md for step by step setup
+   ============================================================ */
+const AZURE_CLIENT_ID = 'f455b7f0-a8ad-4d17-8752-7a8b709607d1';
+const AZURE_TENANT_ID = '91faaa92-6633-43b2-a302-8122e930e674';
+const ONEDRIVE_ROOT = 'Apps/Business';  // folder path in OneDrive root
+
+/* ============================================================
+   STATE
+   ============================================================ */
+const state = {
+  files: [],           // [{ name, type: 'bank'|'card', count, id }]
+  transactions: [],    // all parsed
+  customRules: [],     // [{ pattern, category }]
+  clientRules: [],     // [{ pattern, client }]  for Revenue transactions
+  attentionDismissed: false,
+  // Auth and cloud state
+  msal: null,          // MSAL instance
+  account: null,       // signed in account
+  connected: false,    // true once signed in and loaded from OneDrive
+  currentPeriod: null, // { year: '2026', month: '04' } or { year: '2026', quarter: 'Q3' }
+  periodMode: 'month', // 'month' or 'quarter'
+  availableYears: [],
+  availableMonths: {}, // { '2026': ['01','02','03'] }
+  filters: {
+    range: '3m',
+    from: null,
+    to: null,
+    excludeCC: true,
+    category: '',
+    search: ''
+  },
+  // Sort for the transactions table. Default mirrors the previous behaviour
+  // (newest first). Clicking a sortable header cycles asc -> desc.
+  sort: { column: 'date', direction: 'desc' },
+  txShowCount: 50,
+  charts: {}
+};
+
+const CATEGORY_COLORS = {
+  'Revenue':                '#5B8C47',
+  'Software & Subscriptions':'#4B7D9C',
+  'Professional Fees':      '#8B63A8',
+  'Travel':                 '#C99324',
+  'Hardware & Equipment':   '#B08840',
+  'Marketing & Advertising':'#D17A52',
+  'Office & Admin':         '#6BA4B3',
+  'Telecom & Internet':     '#5E997B',
+  'Training & Education':   '#C45F3C',
+  'Vehicle & Transport':    '#6B9D4D',
+  'Food & Entertainment':   '#D19E4A',
+  'Insurance':              '#7A6F5D',
+  'Bank Fees & Interest':   '#5E554A',
+  'Wages & Super':          '#A7649C',
+  'ATO & Tax':              '#A33F3F',
+  'Owner Drawings':         '#A07A1F',
+  'Transfers':              '#4A5568',
+  'Credit Card Payment':    '#A07A1F',
+  'Uncategorised':          '#8F897A'
+};
+
+// GST treatment per category.
+// 'gst'     = 10% GST included (most standard business expenses)
+// 'free'    = GST-free (wages, bank fees, ATO payments, international services without ABN)
+// 'mixed'   = may or may not include GST (software subs - some overseas providers don't charge AU GST)
+const GST_TREATMENT = {
+  'Revenue':                 'gst',
+  'Software & Subscriptions':'mixed',
+  'Professional Fees':       'gst',
+  'Travel':                  'gst',
+  'Hardware & Equipment':    'gst',
+  'Marketing & Advertising': 'gst',
+  'Office & Admin':          'gst',
+  'Telecom & Internet':      'gst',
+  'Training & Education':    'gst',
+  'Vehicle & Transport':     'gst',
+  'Food & Entertainment':    'gst',
+  'Insurance':               'gst',
+  'Bank Fees & Interest':    'free',
+  'Wages & Super':           'free',
+  'ATO & Tax':               'free',
+  'Owner Drawings':          'free',
+  'Transfers':               'free',
+  'Credit Card Payment':     'free',
+  'Uncategorised':           'mixed'
+};
+
+// Order matters: earlier rules win. Put specific, high-confidence rules first.
+const DEFAULT_RULES = {
+  'Credit Card Payment':[
+    'credit card payment','cba cc','commbank cc','anz cc','anz credit','anz cards','cba cards',
+    'mastercard payment','visa payment','qantas money','qantas card','qantas visa','qantas credit','qantascc',
+    'amex payment','card payment to','payment received','credit card direct',
+    'cba cr card','cr card autopay','card autopay','autopay pmnt','cards commbank'
+  ],
+  'ATO & Tax':              ['ato ','atopay','tax office','taxation','bas payment','paygw','gst paymt','australian taxation'],
+  'Owner Drawings':         ['owner draw','drawings','director loan','directors loan','owners draw'],
+  'Wages & Super':          ['wages','salary','payroll','pay run','superannuation','super guarantee','super contribution','rest super','australiansuper','hostplus','hesta','unisuper','aware super','contractor pay','subcontractor','netbankpay','26pay','25pay','27pay','28pay',' pay ','netbank my','netbank nguyen','netbank pay'],
+  'Revenue':                ['invoice','inv ','consulting','professional services','deposit','payment received','direct credit','services rendered','stripe payout','wise transfer','customer payment'],
+  'Software & Subscriptions':['microsoft','office 365','azure','aws ','amazon web','google workspace','google one','dropbox','icloud','adobe','canva','notion','figma','github','openai','chatgpt','anthropic','claude','jetbrains','atlassian','jira','slack','zoom','linkedin','datadog','cloudflare','domain ','.com.au','godaddy','namecheap','ventraip','crazy domains','netregistry','xero','myob','quickbooks','1password','lastpass','bitwarden','digitalocean'],
+  'Professional Fees':      ['accountant','bookkeeper','lawyer','legal','solicitor','accounting fee','consulting fee inbound','audit fee','financial advice','advisory fee'],
+  'Vehicle & Transport':    ['bp ','shell ','caltex','ampol','7-eleven','united pet','metro petroleum','mobil ','liberty ','toll ','linkt','e-toll','etoll','rego','registration','service nsw','vicroads','car service','auto service','goget','uber trip','uber*','didi ','opal card','cabcharge','taxi ','13cabs','parking ','wilson parking','secure parking'],
+  'Travel':                 ['qantas airw','qantas flight','jetstar','virgin aus','tiger air','rex airlines','airbnb','booking.com','expedia','agoda','hotels.com','flight','airline','hotel','accor','ibis','hilton','marriott','intercontinental','crown hotel','webjet','trivago'],
+  'Hardware & Equipment':   ['jb hi-fi','jb hifi','harvey norman','officeworks','apple store','apple.com','dell','hp store','lenovo','scorptec','pccasegear','mwave','centrecom','umart'],
+  'Marketing & Advertising':['facebook ads','fb ads','google ads','adwords','linkedin ads','instagram','mailchimp','hubspot','activecampaign','constant contact','buffer','hootsuite','semrush','ahrefs','squarespace','wix','wordpress','shopify'],
+  'Office & Admin':         ['winc','complete office','staples','post office','australia post','auspost','mailplus','kmart ','big w ','target '],
+  'Telecom & Internet':     ['telstra','optus','vodafone','tpg','belong','aussie broadband','iinet','more telecom','amaysim','superloop','internode','dodo','exetel'],
+  'Bank Fees & Interest':   ['bank fee','interest charge','account fee','international txn fee','currency conversion','overseas transaction','monthly fee','merchant fee','transaction fee','stripe fee','square fee'],
+  'Insurance':              ['professional indemnity','public liability','business insurance','cyber insurance','insurance premium','qbe ','allianz','chu insurance','bizcover','icare'],
+  'Training & Education':   ['udemy','coursera','pluralsight','linkedin learning','plural sight','skillshare','masterclass','conference','workshop','training','a cloud guru','acloudguru','microsoft learn','certification','exam voucher','pearson vue'],
+  'Food & Entertainment':   ['mcdonald','kfc','subway','hungry jack','guzman','nando','uber eats','menulog','deliveroo','doordash','pizza','sushi','cafe ','restaurant','bakery','starbucks','gloria jean','boost juice','chatime','gongcha','pub ','bar ','bistro','brewery','winery','movies','cinema','hoyts','event cinemas','village cinemas','netflix','spotify','foxtel','stan ','disney','kayo','binge','audible','ticketek','eventbrite','moshtix','concert','theatre','musical'],
+  'Transfers':              ['transfer to','transfer from','osko','bpay','internet transfer','direct debit','fast transfer','beem ','payid']
+};
+
+/* ============================================================
+   UTILITIES
+   ============================================================ */
+const fmt = {
+  money: (n, showSign = false) => {
+    const abs = Math.abs(n);
+    const s = abs.toLocaleString('en-AU', { style: 'currency', currency: 'AUD', minimumFractionDigits: 2 });
+    return (showSign ? (n >= 0 ? '+' : '−') : (n < 0 ? '−' : '')) + s.replace('-','');
+  },
+  moneyShort: (n) => {
+    const abs = Math.abs(n);
+    let out;
+    if (abs >= 1000000) out = (abs/1000000).toFixed(1) + 'M';
+    else if (abs >= 1000) out = (abs/1000).toFixed(1) + 'k';
+    else out = abs.toFixed(0);
+    return (n < 0 ? '−' : '') + '$' + out;
+  },
+  date: (d) => d.toLocaleDateString('en-AU', { day: '2-digit', month: 'short' }),
+  dateLong: (d) => d.toLocaleDateString('en-AU', { day: '2-digit', month: 'short', year: 'numeric' }),
+  monthKey: (d) => d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0'),
+  monthLabel: (key) => {
+    const [y,m] = key.split('-');
+    return new Date(y, m-1, 1).toLocaleDateString('en-AU', { month: 'short', year: '2-digit' });
+  }
+};
+
+function parseDate(v) {
+  if (!v) return null;
+  const s = v.toString().trim();
+  // DD/MM/YYYY or DD-MM-YYYY
+  let m = s.match(/^(\d{1,2})[\/\-](\d{1,2})[\/\-](\d{2,4})$/);
+  if (m) {
+    let [_, d, mo, y] = m;
+    if (y.length === 2) y = (parseInt(y) > 50 ? '19' : '20') + y;
+    const date = new Date(parseInt(y), parseInt(mo)-1, parseInt(d));
+    if (!isNaN(date)) return date;
+  }
+  // DD Mon YY / DD Month YYYY
+  m = s.match(/^(\d{1,2})\s+([A-Za-z]{3,9})\s+(\d{2,4})$/);
+  if (m) {
+    const date = new Date(m[1] + ' ' + m[2] + ' ' + m[3]);
+    if (!isNaN(date)) return date;
+  }
+  // YYYY-MM-DD
+  m = s.match(/^(\d{4})[\/\-](\d{1,2})[\/\-](\d{1,2})/);
+  if (m) {
+    const date = new Date(parseInt(m[1]), parseInt(m[2])-1, parseInt(m[3]));
+    if (!isNaN(date)) return date;
+  }
+  return null;
+}
+
+function parseAmount(v) {
+  if (v === undefined || v === null || v === '') return null;
+  const s = v.toString().replace(/[\$,\s]/g,'').replace(/^\((.*)\)$/, '-$1');
+  const n = parseFloat(s);
+  return isNaN(n) ? null : n;
+}
+
+function isNumericStr(v) { return parseAmount(v) !== null; }
+
+function cleanDesc(s) {
+  return s.toString().replace(/\s+/g,' ').trim();
+}
+
+/* ============================================================
+   CSV PARSING
+   ============================================================ */
+function parseCSVContent(text, fileName) {
+  if (!text || !text.length) throw new Error('File is empty');
+  const results = Papa.parse(text.trim(), { skipEmptyLines: true });
+  if (results.errors && results.errors.length && results.data.length === 0) {
+    throw new Error('CSV parse error: ' + results.errors[0].message);
+  }
+  return extractTransactions(results.data, fileName);
+}
+
+function parseCSVFile(file) {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      try { resolve(parseCSVContent(e.target.result, file.name)); }
+      catch (err) { reject(err); }
+    };
+    reader.onerror = () => reject(new Error('Could not read file'));
+    reader.readAsText(file);
+  });
+}
+
+function extractTransactions(rows, fileName) {
+  if (!rows.length) return [];
+
+  // Detect header row
+  const headerKeywords = /date|amount|description|narrat|detail|transaction|debit|credit|balance|particulars/i;
+  const firstRow = rows[0].map(c => (c||'').toString().toLowerCase());
+  const hasHeader = firstRow.filter(c => headerKeywords.test(c)).length >= 2;
+
+  const header = hasHeader ? firstRow : null;
+  const dataRows = hasHeader ? rows.slice(1) : rows;
+
+  if (!dataRows.length) return [];
+
+  // Determine columns
+  let idx = { date: -1, amount: -1, desc: -1, debit: -1, credit: -1 };
+
+  if (hasHeader) {
+    header.forEach((c, i) => {
+      if (/^date|transaction date|posted|process date/.test(c) && idx.date === -1) idx.date = i;
+      else if (/^amount$|^amt$|transaction amount/.test(c) && idx.amount === -1) idx.amount = i;
+      else if (/debit|withdrawal/.test(c) && idx.debit === -1) idx.debit = i;
+      else if (/credit|deposit/.test(c) && idx.credit === -1) idx.credit = i;
+      else if (/desc|narrat|detail|particulars|merchant/.test(c) && idx.desc === -1) idx.desc = i;
+    });
+  }
+
+  // Autodetect if still missing (typical for CBA, ANZ no-header CSVs)
+  if (idx.date === -1 || idx.desc === -1 || (idx.amount === -1 && (idx.debit === -1 || idx.credit === -1))) {
+    const sample = dataRows.find(r => r.some(c => c && c.toString().trim())) || dataRows[0];
+    const colInfo = sample.map((v, i) => ({
+      i,
+      isDate: parseDate(v) !== null,
+      isNum: isNumericStr(v) && !/^\d{1,2}[\/\-]\d/.test(v.toString()),
+      isText: v && v.toString().length > 3 && !isNumericStr(v) && parseDate(v) === null,
+      val: v
+    }));
+
+    if (idx.date === -1) {
+      const c = colInfo.find(c => c.isDate);
+      if (c) idx.date = c.i;
+    }
+    // Find description: longest non-numeric non-date text column
+    if (idx.desc === -1) {
+      let best = null;
+      colInfo.forEach(c => {
+        if (c.isText && (!best || c.val.toString().length > best.val.toString().length)) best = c;
+      });
+      if (best) idx.desc = best.i;
+    }
+    // Find amount: numeric column that isn't the balance
+    if (idx.amount === -1) {
+      // Look across multiple rows to find which numeric column varies (amount) vs runs sequentially (balance)
+      const numCols = colInfo.filter(c => c.isNum).map(c => c.i);
+      if (numCols.length === 1) idx.amount = numCols[0];
+      else if (numCols.length >= 2) {
+        // Balance column tends to be monotonic-ish and always positive/large; amount has negatives
+        let bestAmount = numCols[0];
+        let maxNegatives = -1;
+        numCols.forEach(ci => {
+          const negs = dataRows.slice(0, 20).filter(r => {
+            const n = parseAmount(r[ci]);
+            return n !== null && n < 0;
+          }).length;
+          if (negs > maxNegatives) { maxNegatives = negs; bestAmount = ci; }
+        });
+        idx.amount = bestAmount;
+      }
+    }
+  }
+
+  if (idx.date === -1 || idx.desc === -1) return [];
+
+  const transactions = [];
+  dataRows.forEach((row, ri) => {
+    const d = parseDate(row[idx.date]);
+    if (!d) return;
+    let amount = null;
+    if (idx.amount !== -1) {
+      amount = parseAmount(row[idx.amount]);
+    } else if (idx.debit !== -1 || idx.credit !== -1) {
+      const deb = idx.debit !== -1 ? parseAmount(row[idx.debit]) : null;
+      const cre = idx.credit !== -1 ? parseAmount(row[idx.credit]) : null;
+      if (cre !== null && cre !== 0) amount = Math.abs(cre);
+      else if (deb !== null && deb !== 0) amount = -Math.abs(deb);
+    }
+    if (amount === null) return;
+    const desc = cleanDesc(row[idx.desc] || '');
+    if (!desc) return;
+    transactions.push({
+      id: fileName + '-' + ri + '-' + Math.random().toString(36).slice(2,8),
+      date: d,
+      amount,
+      description: desc,
+      source: fileName,
+      category: null
+    });
+  });
+  return transactions;
+}
+
+/* ============================================================
+   CATEGORISATION
+   ============================================================ */
+// Categories that only make sense as outflows (negative amounts) on a bank account.
+// Positive (incoming) amounts should never be matched against these keyword sets,
+// otherwise descriptions like "Direct Credit ... NTT AU Wages 482" get mistakenly
+// tagged as Wages & Super instead of Revenue.
+const EXPENSE_ONLY_CATEGORIES = new Set([
+  'Wages & Super',
+  'Software & Subscriptions',
+  'Professional Fees',
+  'Vehicle & Transport',
+  'Travel',
+  'Hardware & Equipment',
+  'Marketing & Advertising',
+  'Office & Admin',
+  'Telecom & Internet',
+  'Bank Fees & Interest',
+  'Insurance',
+  'Training & Education',
+  'Food & Entertainment'
+]);
+
+function autoCategorise(desc, amount) {
+  const d = desc.toLowerCase();
+  const isInflow = typeof amount === 'number' && amount > 0;
+  // Custom rules first (user overrides always win, regardless of sign)
+  for (const rule of state.customRules) {
+    if (d.includes(rule.pattern.toLowerCase())) return rule.category;
+  }
+  // Default rules. Skip expense only categories on positive amounts so income
+  // does not get mislabelled because of a stray keyword in the payer's name.
+  for (const [cat, keywords] of Object.entries(DEFAULT_RULES)) {
+    if (isInflow && EXPENSE_ONLY_CATEGORIES.has(cat)) continue;
+    for (const k of keywords) {
+      if (d.includes(k)) return cat;
+    }
+  }
+  // Positive amounts that did not match anything default to Revenue rather than
+  // Uncategorised, since a credit landing in the business account is income by default.
+  if (isInflow) return 'Revenue';
+  return 'Uncategorised';
+}
+
+function recategoriseAll() {
+  // Build a map of filename -> source type for quick lookup
+  const fileTypes = {};
+  state.files.forEach(f => { fileTypes[f.name] = f.type; });
+
+  state.transactions.forEach(t => {
+    t.category = autoCategorise(t.description, t.amount);
+    // Override: positive entries on credit card files are card payments received,
+    // not real income. Tag them as Credit Card Payment so they don't inflate income.
+    if (fileTypes[t.source] === 'card' && t.amount > 0) {
+      t.category = 'Credit Card Payment';
+    }
+    // Tag client name on Revenue transactions for the by-client chart
+    t.client = (t.category === 'Revenue') ? extractClient(t.description) : null;
+  });
+}
+
+// Extract a likely client name from a Revenue transaction description.
+// First checks user-saved clientRules, then tries to pick up the payer from common Aussie bank patterns.
+// Canonicalises to the first 1-2 meaningful words (so "Onset Group PTY Onset Inv-0031" becomes "Onset").
+function extractClient(desc) {
+  const d = desc.toLowerCase();
+  // User overrides first
+  for (const rule of state.clientRules) {
+    if (d.includes(rule.pattern.toLowerCase())) return rule.client;
+  }
+  const patterns = [
+    /fast transfer from\s+(.+?)(?:\s+to\s|$)/i,
+    /transfer from\s+(?:xx\d+\s+)?(.+?)(?:\s+(?:ref|to)\s|$)/i,
+    /osko(?:\s+payment)?\s+from\s+(.+?)(?:\s+ref|$)/i,
+    /deposit from\s+(.+?)$/i,
+    /(?:payment|paid)\s+from\s+(.+?)(?:\s+ref|$)/i,
+    /direct credit\s+\d+\s+(.+?)(?:\s+(?:refu|ref|inc|pay)|$)/i,
+    /\binv\s+\d+\s+(.+?)$/i,
+    /from\s+(.+?)$/i
+  ];
+  let raw = null;
+  for (const pat of patterns) {
+    const m = desc.match(pat);
+    if (m && m[1] && m[1].trim().length > 2) { raw = m[1]; break; }
+  }
+  if (!raw) {
+    const capsMatch = desc.match(/\b([A-Z][A-Z0-9& ]{3,40}(?:PTY LTD|LTD|PTY|INC|LLC|LIMITED)?)\b/);
+    if (capsMatch && capsMatch[1]) raw = capsMatch[1].trim();
+  }
+  if (!raw) return 'Unknown client';
+  return canonicaliseClientName(raw);
+}
+
+// Collapse "Onset Group PTY Onset Inv-0031" → "Onset"
+// "Data#3 Limited Data#3" → "Data#3"
+// "Aarconsultinggro Aar" → "Aarconsultinggro"
+// Strategy: tokenise, drop noise tokens, take the first distinctive token(s).
+function canonicaliseClientName(raw) {
+  // Strip common trailing noise first
+  let s = raw
+    .replace(/\s+(?:ref|inc|ptr|pymt|payment|ind|cmt)\b.*$/i, '')
+    .replace(/\s+inv[\s-]*\d+.*$/i, '')
+    .replace(/\s+[a-z]+\d{4,}.*$/i, '')
+    .replace(/\s+\d{4,}.*$/i, '')
+    .replace(/[,.]$/, '')
+    .trim();
+
+  // Tokenise
+  const noiseTokens = new Set(['pty','ltd','limited','inc','llc','co','group','the','services','consulting','holdings']);
+  const tokens = s.split(/\s+/).filter(t => t.length > 0);
+  if (!tokens.length) return titleCase(raw);
+
+  // Find the first "distinctive" token (non-noise, len >= 3)
+  const firstIdx = tokens.findIndex(t => !noiseTokens.has(t.toLowerCase()) && t.length >= 3);
+  const startIdx = firstIdx >= 0 ? firstIdx : 0;
+
+  // Take 1 or 2 tokens as the canonical name. If second token is noise, stop at 1.
+  const first = tokens[startIdx];
+  const second = tokens[startIdx + 1];
+  let canonical;
+  if (second && !noiseTokens.has(second.toLowerCase()) && !/^inv/i.test(second) && !/^\d/.test(second)) {
+    // Check if second token is a repeat / prefix of first (handles "Onset ... Onset ..." case)
+    const firstLc = first.toLowerCase();
+    const secondLc = second.toLowerCase();
+    if (firstLc === secondLc || firstLc.startsWith(secondLc) || secondLc.startsWith(firstLc)) {
+      canonical = first;
+    } else {
+      canonical = first + ' ' + second;
+    }
+  } else {
+    canonical = first;
+  }
+  return titleCase(canonical);
+}
+
+function titleCase(s) {
+  return s.toLowerCase().split(/\s+/).map(w => {
+    if (/^(pty|ltd|inc|llc|co)$/i.test(w)) return w.toUpperCase();
+    return w.charAt(0).toUpperCase() + w.slice(1);
+  }).join(' ');
+}
+
+/* ============================================================
+   FILE DETECTION
+   ============================================================ */
+function detectFileType(transactions, fileName) {
+  // Credit card files: most transactions negative, description contains common merchants
+  // Bank files: mix of positive and negative, may contain CC payment patterns
+  const n = fileName.toLowerCase();
+  if (/credit|card|visa|master|amex|qantas/.test(n)) return 'card';
+  if (/savings|transact|cheque|debit|account/.test(n)) return 'bank';
+  // Heuristic: if >90% of non-trivial amounts are negative, likely a card
+  const amts = transactions.map(t => t.amount).filter(a => Math.abs(a) > 1);
+  if (!amts.length) return 'bank';
+  const negRatio = amts.filter(a => a < 0).length / amts.length;
+  if (negRatio > 0.85) return 'card';
+  return 'bank';
+}
+
+/* ============================================================
+   FILTERING
+   ============================================================ */
+function getDateRange() {
+  const now = new Date();
+  const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+  const r = state.filters.range;
+  if (r === 'custom' && state.filters.from && state.filters.to) {
+    return { from: new Date(state.filters.from), to: new Date(state.filters.to) };
+  }
+  const to = today;
+  let from;
+  if (r === '3m') from = new Date(today.getFullYear(), today.getMonth()-3, today.getDate());
+  else if (r === '6m') from = new Date(today.getFullYear(), today.getMonth()-6, today.getDate());
+  else if (r === '12m') from = new Date(today.getFullYear(), today.getMonth()-12, today.getDate());
+  else if (r === 'ytd') from = new Date(today.getFullYear(), 0, 1);
+  else if (r === 'all') from = new Date(2000, 0, 1);
+  else from = new Date(today.getFullYear(), today.getMonth()-3, today.getDate());
+  return { from, to };
+}
+
+function isBankToCardPayment(tx) {
+  const file = state.files.find(f => f.name === tx.source);
+  if (!file || file.type !== 'bank') return false;
+  return tx.category === 'Credit Card Payment';
+}
+
+function isCardPaymentReceived(tx) {
+  const file = state.files.find(f => f.name === tx.source);
+  if (!file || file.type !== 'card') return false;
+  return tx.category === 'Credit Card Payment';
+}
+
+function getFilteredTransactions() {
+  const { from, to } = getDateRange();
+  // Only apply date range. CC payments stay visible for transparency;
+  // they are excluded from money math inside aggregate() based on the toggle.
+  return state.transactions.filter(t => {
+    if (t.date < from || t.date > to) return false;
+    return true;
+  });
+}
+
+/* ============================================================
+   AGGREGATION
+   ============================================================ */
+function aggregate(transactions) {
+  const agg = {
+    // Ex-GST P&L numbers (the ones the dashboard primarily shows)
+    revenue: 0,              // ex-GST revenue
+    expenses: 0,             // ex-GST total expenses
+    grossProfit: 0,          // revenue - expenses (ex-GST)
+    profitMargin: 0,         // grossProfit / revenue
+
+    // Inc-GST (raw cashflow) numbers
+    revenueIncGst: 0,
+    expensesIncGst: 0,
+
+    // GST tracking (BAS components)
+    gstCollected: 0,         // GST on revenue (1A on BAS)
+    gstPaid: 0,              // GST on purchases (1B on BAS)
+    gstOwed: 0,              // gstCollected - gstPaid (owed to ATO if positive)
+
+    // Misc tracking
+    cardPayments: 0,
+    cardPaymentList: [],
+    byMonth: {},             // { 'YYYY-MM': { revenue, expenses, gstCollected, gstPaid } }  ex-GST
+    byCategory: {},          // { cat: { incGst, exGst, gst, count } }
+    byClient: {}             // { client: { exGst, gst, count } }  ex-GST revenue per client
+  };
+
+  transactions.forEach(t => {
+    const mk = fmt.monthKey(t.date);
+    if (!agg.byMonth[mk]) agg.byMonth[mk] = { revenue: 0, expenses: 0, gstCollected: 0, gstPaid: 0 };
+
+    // Mirror-side CC payments - visible but not counted
+    if (isCardPaymentReceived(t)) {
+      agg.cardPaymentList.push(t);
+      return;
+    }
+
+    // Bank-side CC payments - track separately, exclude from P&L
+    if (isBankToCardPayment(t)) {
+      agg.cardPayments += Math.abs(t.amount);
+      agg.cardPaymentList.push(t);
+      if (state.filters.excludeCC) return;
+    }
+
+    const gstTreatment = GST_TREATMENT[t.category] || 'mixed';
+    const includesGst = gstTreatment === 'gst' || gstTreatment === 'mixed';
+    const amt = Math.abs(t.amount);
+    const amtEx = includesGst ? amt / 1.1 : amt;
+    const amtGst = includesGst ? amt - (amt / 1.1) : 0;
+
+    // Revenue: positive amounts that map to Revenue category
+    if (t.amount > 0 && t.category === 'Revenue') {
+      agg.revenueIncGst += amt;
+      agg.revenue += amtEx;
+      agg.gstCollected += amtGst;
+      agg.byMonth[mk].revenue += amtEx;
+      agg.byMonth[mk].gstCollected += amtGst;
+      agg.byCategory[t.category] = agg.byCategory[t.category] || { incGst: 0, exGst: 0, gst: 0, count: 0 };
+      agg.byCategory[t.category].incGst += amt;
+      agg.byCategory[t.category].exGst += amtEx;
+      agg.byCategory[t.category].gst += amtGst;
+      agg.byCategory[t.category].count += 1;
+      // Per-client revenue tracking
+      const clientName = t.client || 'Unknown client';
+      agg.byClient[clientName] = agg.byClient[clientName] || { exGst: 0, gst: 0, count: 0 };
+      agg.byClient[clientName].exGst += amtEx;
+      agg.byClient[clientName].gst += amtGst;
+      agg.byClient[clientName].count += 1;
+      return;
+    }
+
+    // Expenses: negative amounts (excluding the special categories already handled above)
+    if (t.amount < 0) {
+      // Skip non-business outflows from P&L entirely but keep visible
+      if (t.category === 'Owner Drawings' || t.category === 'Transfers') return;
+
+      agg.expensesIncGst += amt;
+      agg.expenses += amtEx;
+      agg.gstPaid += amtGst;
+      agg.byMonth[mk].expenses += amtEx;
+      agg.byMonth[mk].gstPaid += amtGst;
+      agg.byCategory[t.category] = agg.byCategory[t.category] || { incGst: 0, exGst: 0, gst: 0, count: 0 };
+      agg.byCategory[t.category].incGst += amt;
+      agg.byCategory[t.category].exGst += amtEx;
+      agg.byCategory[t.category].gst += amtGst;
+      agg.byCategory[t.category].count += 1;
+    }
+  });
+
+  agg.grossProfit = agg.revenue - agg.expenses;
+  agg.profitMargin = agg.revenue > 0 ? (agg.grossProfit / agg.revenue) : 0;
+  agg.gstOwed = agg.gstCollected - agg.gstPaid;
+  return agg;
+}
+
+/* ============================================================
+   RENDERING
+   ============================================================ */
+function render() {
+  if (!state.transactions.length) {
+    show('#landing'); hide('#dashboard');
+    return;
+  }
+  hide('#landing'); show('#dashboard');
+
+  renderSources();
+  renderRules();
+  const filtered = getFilteredTransactions();
+  const agg = aggregate(filtered);
+  renderKPIs(agg, filtered);
+  renderBAS(agg);
+  renderAttention(filtered);
+  renderIncomeExpenses(agg);
+  renderCategoryChart(agg);
+  renderCategoryList(agg);
+  renderCategoryFilter();
+  renderTransactions(filtered);
+  renderBrandMeta();
+}
+
+function renderAttention(filtered) {
+  if (state.attentionDismissed) { $('#attention-panel').hidden = true; return; }
+  // Business context: surface large deposits (likely Revenue), uncategorised items, and large cash outflows
+  const items = filtered.filter(t => {
+    // Large inflow tagged as Transfers or Uncategorised is likely client payment (Revenue)
+    if (t.amount > 500 && (t.category === 'Transfers' || t.category === 'Uncategorised')) return true;
+    // Any uncategorised outflow over $100 deserves a look
+    if (t.amount < -100 && t.category === 'Uncategorised') return true;
+    return false;
+  }).sort((a,b) => Math.abs(b.amount) - Math.abs(a.amount)).slice(0, 8);
+
+  if (!items.length) { $('#attention-panel').hidden = true; return; }
+  $('#attention-panel').hidden = false;
+
+  const cats = Object.keys(CATEGORY_COLORS);
+  $('#attention-body').innerHTML = items.map(t => `
+    <div class="attn-row">
+      <div class="attn-main">
+        <div class="attn-desc">${escapeHtml(t.description)}</div>
+        <div class="attn-meta">${fmt.date(t.date)} · ${escapeHtml(t.source.replace(/\.csv$/i,''))} · currently ${escapeHtml(t.category)}</div>
+      </div>
+      <div class="attn-amount ${t.amount >= 0 ? 'pos' : 'neg'} mono">${fmt.money(t.amount, true)}</div>
+      <select class="filter-select" data-attncat="${t.id}">
+        <option value="">Retag as...</option>
+        ${cats.filter(c => c !== t.category).map(c => `<option value="${escapeHtml(c)}">${escapeHtml(c)}</option>`).join('')}
+      </select>
+    </div>
+  `).join('');
+
+  $('#attention-body').querySelectorAll('[data-attncat]').forEach(s => {
+    s.onchange = (e) => { if (e.target.value) quickRecat(s.dataset.attncat, e.target.value); };
+  });
+}
+
+function renderBAS(agg) {
+  const rows = [
+    { code: 'G1',  label: 'Total sales', desc: 'revenue including GST', value: agg.revenueIncGst },
+    { code: '1A',  label: 'GST on sales', desc: 'collected from clients', value: agg.gstCollected },
+    { code: 'G11', label: 'Non-capital purchases', desc: 'expenses including GST', value: agg.expensesIncGst },
+    { code: '1B',  label: 'GST on purchases', desc: 'paid to suppliers', value: agg.gstPaid },
+    { code: '',    label: 'Net GST payable', desc: 'owed to ATO if positive', value: agg.gstOwed, highlight: true },
+    { code: '',    label: 'Gross profit ex-GST', desc: 'revenue minus expenses, ex-GST', value: agg.grossProfit, highlight: true }
+  ];
+  $('#bas-grid').innerHTML = rows.map(r => `
+    <div class="bas-row"${r.highlight ? ' style="background: var(--accent-soft); border-color: var(--accent)"' : ''}>
+      <div class="bas-code">${r.code || ''}</div>
+      <div class="bas-label">${escapeHtml(r.label)}<span class="desc">${escapeHtml(r.desc)}</span></div>
+      <div class="bas-value">${fmt.money(r.value, r.highlight)}</div>
+    </div>
+  `).join('');
+  $('#bas-meta').textContent = agg.revenueIncGst > 0 || agg.expensesIncGst > 0 ? 'cash basis' : 'no transactions';
+}
+
+function renderBrandMeta() {
+  const { from, to } = getDateRange();
+  $('#brand-meta').textContent = `${fmt.dateLong(from)} — ${fmt.dateLong(to)}`;
+}
+
+function renderSources() {
+  const el = $('#source-chips');
+  el.innerHTML = state.files.map(f => `
+    <span class="source-chip">
+      <span class="name">${escapeHtml(f.name)}</span>
+      <span class="count">${f.count} tx</span>
+      <span class="type-badge ${f.type === 'card' ? 'card' : 'bank'}">${f.type === 'card' ? 'Credit card' : 'Bank'}</span>
+      <span class="rm" data-rm="${f.id}" title="Remove">×</span>
+    </span>
+  `).join('');
+  el.querySelectorAll('[data-rm]').forEach(b => b.onclick = () => removeFile(b.dataset.rm));
+}
+
+function renderKPIs(agg, filtered) {
+  $('#kpi-revenue').textContent = fmt.money(agg.revenue);
+  $('#kpi-expenses').textContent = fmt.money(agg.expenses);
+  $('#kpi-profit').textContent = fmt.money(agg.grossProfit, true);
+  $('#kpi-profit').className = 'kpi-value mono ' + (agg.grossProfit >= 0 ? 'pos' : 'neg');
+  const margin = agg.profitMargin * 100;
+  $('#kpi-margin').textContent = isFinite(margin) && agg.revenue > 0 ? margin.toFixed(1) + '%' : '—';
+  $('#kpi-gst-coll').textContent = agg.gstCollected > 0 ? fmt.money(agg.gstCollected) : '—';
+  $('#kpi-gst-owed').textContent = fmt.money(agg.gstOwed, true);
+
+  const months = Object.keys(agg.byMonth).length || 1;
+  $('#kpi-revenue-sub').textContent = months > 1 ? `avg ${fmt.money(agg.revenue/months)} / mo` : `${filtered.filter(t=>t.amount>0 && t.category==='Revenue').length} invoice(s)`;
+  $('#kpi-expenses-sub').textContent = months > 1 ? `avg ${fmt.money(agg.expenses/months)} / mo` : `across ${Object.keys(agg.byCategory).length} categories`;
+  $('#kpi-profit-sub').textContent = `inc-GST: ${fmt.money(agg.revenueIncGst - agg.expensesIncGst, true)}`;
+  $('#kpi-margin-sub').textContent = agg.grossProfit >= 0 ? 'you kept ' + margin.toFixed(0) + 'c per dollar' : 'operating at a loss';
+  $('#kpi-gst-coll-sub').textContent = 'paid: ' + fmt.money(agg.gstPaid);
+  $('#kpi-gst-owed-sub').textContent = agg.gstOwed >= 0 ? 'payable this period' : 'ATO owes you';
+}
+
+function renderIncomeExpenses(agg) {
+  // Horizontal bar chart: one row per client showing their share of revenue
+  const entries = Object.entries(agg.byClient)
+    .sort((a,b) => b[1].exGst - a[1].exGst);
+  const totalIn = entries.reduce((s, [_,v]) => s + v.exGst, 0);
+  $('#ie-meta').textContent = entries.length
+    ? entries.length + ' client(s) · ' + fmt.money(totalIn) + ' total'
+    : 'no revenue this period';
+
+  destroyChart('ie');
+  if (!entries.length) { $('#chart-ie').getContext('2d').clearRect(0,0,9999,9999); return; }
+
+  const labels = entries.map(e => e[0]);
+  const amounts = entries.map(e => e[1].exGst);
+  const palette = ['#5B8C47', '#3E6A88', '#6B9D4D', '#4B7D9C', '#8B63A8', '#5E997B', '#A07A1F', '#C45F3C'];
+  const colours = entries.map((_, i) => palette[i % palette.length]);
+
+  state.charts.ie = new Chart($('#chart-ie'), {
+    type: 'bar',
+    data: {
+      labels,
+      datasets: [
+        { label: 'Revenue', data: amounts, backgroundColor: colours, borderRadius: 2, barPercentage: 0.7, categoryPercentage: 0.7 }
+      ]
+    },
+    options: {
+      indexAxis: 'y',
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: {
+        legend: { display: false },
+        tooltip: tooltipStyle(true)
+      },
+      scales: {
+        x: {
+          grid: { color: '#E8E2D4', drawBorder: false },
+          ticks: {
+            color: '#8F897A',
+            font: { family: 'JetBrains Mono', size: 11 },
+            callback: (v) => fmt.moneyShort(v)
+          }
+        },
+        y: {
+          grid: { display: false, drawBorder: false },
+          ticks: { color: '#2A2822', font: { family: 'Manrope', size: 12 } }
+        }
+      }
+    }
+  });
+}
+
+function renderCategoryChart(agg) {
+  // Only show expense categories (exclude Revenue which is a positive/income category)
+  const entries = Object.entries(agg.byCategory)
+    .filter(([cat, _]) => cat !== 'Revenue')
+    .map(([cat, v]) => [cat, v.exGst])
+    .sort((a,b) => b[1]-a[1]);
+  const total = entries.reduce((s, [_,v]) => s + v, 0);
+  $('#cat-meta').textContent = entries.length
+    ? fmt.money(total) + ' across ' + entries.length + ' categories'
+    : 'no expenses this period';
+
+  destroyChart('cat');
+  if (!entries.length) { $('#chart-cat').getContext('2d').clearRect(0,0,9999,9999); return; }
+
+  state.charts.cat = new Chart($('#chart-cat'), {
+    type: 'bar',
+    data: {
+      labels: entries.map(e => e[0]),
+      datasets: [{
+        label: 'Amount',
+        data: entries.map(e => e[1]),
+        backgroundColor: entries.map(e => CATEGORY_COLORS[e[0]] || '#8B7D6B'),
+        borderRadius: 2,
+        barPercentage: 0.7,
+        categoryPercentage: 0.7
+      }]
+    },
+    options: {
+      indexAxis: 'y',
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: {
+        legend: { display: false },
+        tooltip: tooltipStyle(true)
+      },
+      scales: {
+        x: {
+          grid: { color: '#E8E2D4', drawBorder: false },
+          ticks: {
+            color: '#8F897A',
+            font: { family: 'JetBrains Mono', size: 11 },
+            callback: (v) => fmt.moneyShort(v)
+          }
+        },
+        y: {
+          grid: { display: false, drawBorder: false },
+          ticks: { color: '#2A2822', font: { family: 'Manrope', size: 12 } }
+        }
+      }
+    }
+  });
+}
+
+function renderCategoryList(agg) {
+  const entries = Object.entries(agg.byCategory)
+    .filter(([cat, _]) => cat !== 'Revenue')
+    .map(([cat, v]) => [cat, v.exGst, v.count])
+    .sort((a,b) => b[1]-a[1]);
+  const total = entries.reduce((s, e) => s + e[1], 0);
+  const el = $('#cat-list');
+  if (!entries.length) { el.innerHTML = '<div class="empty">No expenses in this period</div>'; return; }
+  el.innerHTML = entries.map(([cat, amt, count]) => {
+    const pct = total > 0 ? (amt/total*100) : 0;
+    return `
+      <div class="cat-row" data-cat-filter="${escapeHtml(cat)}" style="cursor:pointer">
+        <span class="cat-swatch" style="background:${CATEGORY_COLORS[cat]||'#8B7D6B'}"></span>
+        <span class="cat-name">${escapeHtml(cat)} <span style="color: var(--text-faint); font-size: 11px; margin-left: 4px;">${count}</span></span>
+        <span class="cat-pct">${pct.toFixed(1)}%</span>
+        <span class="cat-amount">${fmt.money(amt)}</span>
+        <div class="cat-bar-wrap"><div class="cat-bar" style="width:${pct}%;background:${CATEGORY_COLORS[cat]||'#8B7D6B'}"></div></div>
+      </div>
+    `;
+  }).join('');
+  el.querySelectorAll('[data-cat-filter]').forEach(r => {
+    r.onclick = () => {
+      state.filters.category = r.dataset.catFilter;
+      $('#tx-cat-filter').value = state.filters.category;
+      render();
+      document.querySelector('.panel .tx-head')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    };
+  });
+}
+
+function renderCategoryFilter() {
+  const cats = [...new Set(state.transactions.map(t => t.category).filter(Boolean))].sort();
+  const sel = $('#tx-cat-filter');
+  const current = state.filters.category;
+  sel.innerHTML = '<option value="">All categories</option>' + cats.map(c => `<option value="${escapeHtml(c)}">${escapeHtml(c)}</option>`).join('');
+  sel.value = current;
+}
+
+function renderTransactions(filtered) {
+  let list = filtered.slice();
+  if (state.filters.category) list = list.filter(t => t.category === state.filters.category);
+  if (state.filters.search) {
+    const q = state.filters.search.toLowerCase();
+    list = list.filter(t => t.description.toLowerCase().includes(q));
+  }
+  // Apply user chosen sort. Date sorts on the underlying Date object,
+  // amount sorts on the signed numeric value.
+  const dir = state.sort.direction === 'asc' ? 1 : -1;
+  if (state.sort.column === 'amount') {
+    list.sort((a, b) => (a.amount - b.amount) * dir);
+  } else {
+    list.sort((a, b) => (a.date - b.date) * dir);
+  }
+
+  $('#tx-subtitle').textContent = `${list.length} transactions${state.filters.category ? ' · ' + state.filters.category : ''}`;
+
+  // Update header active state and arrow indicators
+  document.querySelectorAll('.tx-sort').forEach(h => {
+    const isActive = h.dataset.sort === state.sort.column;
+    h.classList.toggle('active', isActive);
+  });
+  document.querySelectorAll('.tx-sort-arrow').forEach(a => {
+    if (a.dataset.arrow === state.sort.column) {
+      a.textContent = state.sort.direction === 'asc' ? '▲' : '▼';
+    } else {
+      a.textContent = '';
+    }
+  });
+
+  const cats = [...new Set(state.transactions.map(t => t.category))].sort();
+  const visible = list.slice(0, state.txShowCount);
+  const el = $('#tx-body');
+  if (!list.length) { el.innerHTML = '<div class="empty">No transactions match these filters</div>'; $('#btn-show-more').hidden = true; return; }
+
+  el.innerHTML = visible.map(t => `
+    <div class="tx-row" data-tx="${t.id}">
+      <div class="tx-date">${fmt.date(t.date)}</div>
+      <div class="tx-desc">${escapeHtml(t.description)}<div class="tx-desc-sub hide-sm">${escapeHtml(t.source)}</div></div>
+      <div class="tx-source hide-sm">${escapeHtml(t.source.replace(/\.csv$/i,''))}</div>
+      <div class="tx-cat hide-sm">
+        <select data-txcat="${t.id}">
+          ${cats.map(c => `<option value="${escapeHtml(c)}"${c===t.category?' selected':''}>${escapeHtml(c)}</option>`).join('')}
+        </select>
+      </div>
+      <div class="tx-amount ${t.amount >= 0 ? 'pos' : 'neg'}">${fmt.money(t.amount, true)}</div>
+      <div><button class="tx-menu-btn" data-recat="${t.id}" title="Recategorise">⋯</button></div>
+    </div>
+  `).join('');
+
+  el.querySelectorAll('[data-txcat]').forEach(s => s.onchange = (e) => quickRecat(s.dataset.txcat, e.target.value));
+  el.querySelectorAll('[data-recat]').forEach(b => b.onclick = () => openRecatDialog(b.dataset.recat));
+  $('#btn-show-more').hidden = list.length <= state.txShowCount;
+}
+
+// Wire up sortable column headers once on page load. Clicking a column toggles
+// the direction if it is already the active sort column, otherwise switches to
+// that column starting at ascending (lowest to highest), per user preference.
+function wireTxSortHeaders() {
+  document.querySelectorAll('.tx-head .tx-sort').forEach(h => {
+    h.onclick = () => {
+      const col = h.dataset.sort;
+      if (state.sort.column === col) {
+        state.sort.direction = state.sort.direction === 'asc' ? 'desc' : 'asc';
+      } else {
+        state.sort.column = col;
+        state.sort.direction = 'asc';
+      }
+      render();
+    };
+  });
+}
+
+function renderRules() {
+  const el = $('#rules-list');
+  if (!state.customRules.length) { el.innerHTML = ''; $('#rules-empty').style.display = 'block'; return; }
+  $('#rules-empty').style.display = 'none';
+  el.innerHTML = state.customRules.map((r, i) => `
+    <span class="rule-chip">
+      "${escapeHtml(r.pattern)}" <span class="arrow">→</span> <span class="cat">${escapeHtml(r.category)}</span>
+      <span class="x" data-rmrule="${i}">×</span>
+    </span>
+  `).join('');
+  el.querySelectorAll('[data-rmrule]').forEach(b => b.onclick = () => removeRule(parseInt(b.dataset.rmrule)));
+}
+
+/* ============================================================
+   CHART DEFAULTS
+   ============================================================ */
+function chartBaseOptions({ legend = false, money = false } = {}) {
+  return {
+    responsive: true,
+    maintainAspectRatio: false,
+    plugins: {
+      legend: legend ? {
+        position: 'top',
+        align: 'end',
+        labels: { color: '#5E574B', font: { family: 'Manrope', size: 12 }, usePointStyle: true, pointStyle: 'circle', boxWidth: 8 }
+      } : { display: false },
+      tooltip: tooltipStyle(money)
+    },
+    scales: {
+      x: {
+        grid: { color: '#E8E2D4', drawBorder: false },
+        ticks: { color: '#8F897A', font: { family: 'JetBrains Mono', size: 11 } }
+      },
+      y: {
+        grid: { color: '#E8E2D4', drawBorder: false },
+        ticks: {
+          color: '#8F897A',
+          font: { family: 'JetBrains Mono', size: 11 },
+          callback: (v) => money ? fmt.moneyShort(v) : v
+        }
+      }
+    }
+  };
+}
+
+function tooltipStyle(money) {
+  return {
+    backgroundColor: '#FDFBF7',
+    titleColor: '#2A2822',
+    bodyColor: '#2A2822',
+    borderColor: '#C9C0AB',
+    borderWidth: 1,
+    padding: 10,
+    titleFont: { family: 'Manrope', weight: '600' },
+    bodyFont: { family: 'JetBrains Mono' },
+    callbacks: money ? {
+      label: (ctx) => ctx.dataset.label ? `${ctx.dataset.label}: ${fmt.money(ctx.parsed.y ?? ctx.parsed)}` : fmt.money(ctx.parsed)
+    } : {}
+  };
+}
+
+function destroyChart(name) {
+  if (state.charts[name]) { state.charts[name].destroy(); delete state.charts[name]; }
+}
+
+/* ============================================================
+   DIALOG / RULES
+   ============================================================ */
+let recatTxId = null;
+
+function openRecatDialog(txId) {
+  const tx = state.transactions.find(t => t.id === txId);
+  if (!tx) return;
+  recatTxId = txId;
+  $('#recat-body').textContent = `"${tx.description}"  ·  ${fmt.money(tx.amount, true)}`;
+  const cats = Object.keys(CATEGORY_COLORS);
+  $('#recat-category').innerHTML = cats.map(c => `<option value="${escapeHtml(c)}"${c===tx.category?' selected':''}>${escapeHtml(c)}</option>`).join('');
+  // Suggest a pattern: first 2-3 meaningful words of description
+  const pattern = extractPattern(tx.description);
+  $('#recat-pattern').value = pattern;
+  $('#dialog-recat').classList.add('open');
+}
+
+const GENERIC_WORDS = new Set(['transfer','from','with','and','the','for','pay','payment','app','commbank','netbank','direct','credit','debit','purchase','pos','eftpos','australia','aus','nsw','vic','qld','pty','ltd']);
+
+function extractPattern(desc) {
+  // Pull the first recognisable merchant or distinguishing identifier
+  const cleaned = desc.replace(/\d+/g, '').replace(/[\*\-\/\\]/g,' ').replace(/\s+/g,' ').trim();
+  const allWords = cleaned.split(' ').filter(w => w.length > 2);
+  const distinctive = allWords.filter(w => !GENERIC_WORDS.has(w.toLowerCase()));
+  const useWords = distinctive.length ? distinctive : allWords;
+  return (useWords.slice(0, 3).join(' ') || desc).toLowerCase();
+}
+
+function applyRecat() {
+  const tx = state.transactions.find(t => t.id === recatTxId);
+  if (!tx) return;
+  const newCat = $('#recat-category').value;
+  const saveRule = $('#recat-save-rule').checked;
+  const pattern = $('#recat-pattern').value.trim();
+  if (saveRule && pattern) addRule(pattern, newCat);
+  else tx.category = newCat;
+  recategoriseAll();
+  render();
+  closeRecat();
+  toast(saveRule && pattern ? `Rule saved: "${pattern}" → ${newCat}` : `Set to ${newCat}`);
+}
+
+function closeRecat() { $('#dialog-recat').classList.remove('open'); recatTxId = null; }
+
+function quickRecat(txId, newCat) {
+  const tx = state.transactions.find(t => t.id === txId);
+  if (!tx) return;
+  const pattern = extractPattern(tx.description);
+  addRule(pattern, newCat);
+  recategoriseAll();
+  render();
+  toast(`Rule added: "${pattern}" → ${newCat}`);
+}
+
+function addRule(pattern, category) {
+  state.customRules = state.customRules.filter(r => r.pattern.toLowerCase() !== pattern.toLowerCase());
+  state.customRules.unshift({ pattern, category });
+  scheduleRuleSave();
+}
+
+function removeRule(i) {
+  state.customRules.splice(i, 1);
+  recategoriseAll();
+  render();
+  scheduleRuleSave();
+}
+
+/* ============================================================
+   FILE HANDLING
+   ============================================================ */
+async function handleFiles(fileList) {
+  log('handleFiles called with ' + (fileList ? fileList.length : 'null') + ' item(s)');
+  const files = Array.from(fileList || []);
+  if (!files.length) { log('ERROR: No files in FileList'); toast('No files selected'); return; }
+
+  for (const f of files) log('File: ' + f.name + ' (' + f.size + ' bytes, type: ' + (f.type || 'unknown') + ')');
+
+  toast('Reading ' + files.length + ' file(s)...');
+  let totalAdded = 0;
+  let errors = 0;
+
+  for (const file of files) {
+    try {
+      log('Parsing ' + file.name + '...');
+      const txs = await parseCSVFile(file);
+      log(file.name + ': extracted ' + txs.length + ' transactions');
+      if (!txs.length) { toast('No rows parsed from ' + file.name); errors++; continue; }
+      const type = detectFileType(txs, file.name);
+      log(file.name + ': detected as ' + type);
+      const id = 'f-' + Math.random().toString(36).slice(2,9);
+      const existing = state.files.find(f => f.name === file.name);
+      if (existing) {
+        state.transactions = state.transactions.filter(t => t.source !== file.name);
+        state.files = state.files.filter(f => f.name !== file.name);
+      }
+      state.files.push({ name: file.name, type, count: txs.length, id });
+      state.transactions.push(...txs);
+      totalAdded += txs.length;
+    } catch (e) {
+      errors++;
+      log('ERROR parsing ' + file.name + ': ' + (e.message || e));
+      toast(file.name + ': ' + (e.message || 'parse failed'));
+      console.error(file.name, e);
+    }
+  }
+  log('Running categorisation...');
+  try {
+    recategoriseAll();
+    log('Rendering dashboard with ' + state.transactions.length + ' total transactions...');
+    render();
+    log('Render complete.');
+  } catch (e) {
+    log('ERROR during render: ' + (e.message || e));
+    toast('Render failed: ' + (e.message || e));
+    console.error(e);
+  }
+  if (totalAdded > 0) toast('Loaded ' + totalAdded + ' transactions');
+  else if (errors > 0) toast('No transactions loaded. Check file format.');
+}
+
+function removeFile(id) {
+  const f = state.files.find(f => f.id === id);
+  if (!f) return;
+  state.transactions = state.transactions.filter(t => t.source !== f.name);
+  state.files = state.files.filter(x => x.id !== id);
+  render();
+}
+
+/* ============================================================
+   AUTH (MSAL) + MICROSOFT GRAPH
+   ============================================================ */
+const GRAPH_SCOPES = ['Files.ReadWrite', 'User.Read'];
+
+async function initMsal() {
+  if (AZURE_CLIENT_ID.startsWith('__REPLACE')) {
+    log('CONFIG: AZURE_CLIENT_ID / AZURE_TENANT_ID not set. Sign in disabled.');
+    $('#btn-signin').disabled = true;
+    $('#btn-signin').textContent = 'Not configured';
+    return false;
+  }
+  try {
+    state.msal = new msal.PublicClientApplication({
+      auth: {
+        clientId: AZURE_CLIENT_ID,
+        authority: `https://login.microsoftonline.com/${AZURE_TENANT_ID}`,
+        redirectUri: window.location.origin + window.location.pathname
+      },
+      cache: {
+        cacheLocation: 'sessionStorage',
+        storeAuthStateInCookie: false
+      }
+    });
+    await state.msal.initialize();
+
+    // Handle any redirect response
+    const resp = await state.msal.handleRedirectPromise();
+    if (resp?.account) {
+      state.msal.setActiveAccount(resp.account);
+      state.account = resp.account;
+    } else {
+      const accounts = state.msal.getAllAccounts();
+      if (accounts.length) {
+        state.msal.setActiveAccount(accounts[0]);
+        state.account = accounts[0];
+      }
+    }
+    log('MSAL initialised. ' + (state.account ? 'Signed in as ' + state.account.username : 'Not signed in.'));
+    return true;
+  } catch (e) {
+    log('MSAL init failed: ' + e.message);
+    return false;
+  }
+}
+
+async function signIn() {
+  if (!state.msal) return;
+  try {
+    log('Opening sign in...');
+    const resp = await state.msal.loginPopup({ scopes: GRAPH_SCOPES, prompt: 'select_account' });
+    state.msal.setActiveAccount(resp.account);
+    state.account = resp.account;
+    log('Signed in as ' + resp.account.username);
+    await onSignedIn();
+  } catch (e) {
+    if (e.errorCode === 'popup_window_error' || e.errorCode === 'user_cancelled') {
+      log('Popup blocked, redirecting...');
+      state.msal.loginRedirect({ scopes: GRAPH_SCOPES });
+    } else {
+      log('Sign in failed: ' + e.message);
+      toast('Sign in failed: ' + e.message);
+    }
+  }
+}
+
+async function signOut() {
+  if (!state.msal || !state.account) return;
+  await state.msal.logoutPopup({ account: state.account });
+  state.account = null;
+  state.connected = false;
+  state.transactions = [];
+  state.files = [];
+  state.customRules = [];
+  state.currentPeriod = null;
+  render();
+  toast('Signed out');
+}
+
+async function getToken() {
+  const account = state.msal.getActiveAccount();
+  if (!account) throw new Error('Not signed in');
+  try {
+    const r = await state.msal.acquireTokenSilent({ scopes: GRAPH_SCOPES, account });
+    return r.accessToken;
+  } catch (e) {
+    const r = await state.msal.acquireTokenPopup({ scopes: GRAPH_SCOPES });
+    return r.accessToken;
+  }
+}
+
+async function graphFetch(path, options = {}) {
+  const token = await getToken();
+  const res = await fetch('https://graph.microsoft.com/v1.0' + path, {
+    ...options,
+    headers: { 'Authorization': 'Bearer ' + token, ...(options.headers || {}) }
+  });
+  if (!res.ok) {
+    const text = await res.text().catch(() => '');
+    const err = new Error('Graph ' + res.status + ': ' + text.slice(0, 200));
+    err.status = res.status;
+    throw err;
+  }
+  return res;
+}
+
+// Encode an OneDrive path for use in Graph URLs.
+// Graph expects path segments to be URL-encoded individually, but slashes must remain literal.
+function encodePath(p) {
+  return p.split('/').map(encodeURIComponent).join('/');
+}
+
+async function listDriveChildren(folderPath) {
+  const path = folderPath
+    ? `/me/drive/root:/${encodePath(folderPath)}:/children?$top=200`
+    : '/me/drive/root/children?$top=200';
+  try {
+    const res = await graphFetch(path);
+    const data = await res.json();
+    return data.value || [];
+  } catch (e) {
+    if (e.status === 404) return null;
+    throw e;
+  }
+}
+
+// Ensure the configured ONEDRIVE_ROOT path exists. Creates parent folders as needed if the path is nested.
+async function ensureRootFolder() {
+  const segments = ONEDRIVE_ROOT.split('/').filter(Boolean);
+  let currentPath = '';
+  for (const seg of segments) {
+    const parentPath = currentPath;
+    currentPath = currentPath ? currentPath + '/' + seg : seg;
+    const items = await listDriveChildren(parentPath);
+    // If parent doesn't exist at all, listDriveChildren returns null.
+    // We need to check if the parent itself exists by listing ITS parent.
+    if (items === null) {
+      log('Parent folder "/' + parentPath + '" does not exist yet. Create OneDrive path manually or rerun setup.');
+      return;
+    }
+    const exists = items.some(i => i.name === seg && i.folder);
+    if (!exists) {
+      const createUrl = parentPath
+        ? `/me/drive/root:/${encodePath(parentPath)}:/children`
+        : '/me/drive/root/children';
+      await graphFetch(createUrl, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ name: seg, folder: {}, '@microsoft.graph.conflictBehavior': 'fail' })
+      });
+      log('Created /' + currentPath + ' in OneDrive');
+    }
+  }
+}
+
+async function discoverPeriods() {
+  const rootItems = await listDriveChildren(ONEDRIVE_ROOT);
+  if (!rootItems) { log('OneDrive folder /' + ONEDRIVE_ROOT + ' does not exist'); return; }
+  const years = rootItems.filter(i => i.folder && /^\d{4}$/.test(i.name)).map(i => i.name).sort().reverse();
+  state.availableYears = years;
+  state.availableMonths = {};          // all month folders (for dropdown)
+  state.populatedMonths = {};          // only months with CSVs (for auto-load)
+  for (const y of years) {
+    const sub = await listDriveChildren(ONEDRIVE_ROOT + '/' + y);
+    const allMonths = (sub || []).filter(i => i.folder && /^\d{1,2}$/.test(i.name))
+      .map(i => i.name.padStart(2, '0'))
+      .sort()
+      .reverse();
+    state.availableMonths[y] = allMonths;
+
+    // Check which months actually have CSV files (parallelised for speed)
+    const checks = await Promise.all(allMonths.map(async (m) => {
+      const children = await listDriveChildren(ONEDRIVE_ROOT + '/' + y + '/' + m);
+      const hasCsv = (children || []).some(c => c.file && /\.csv$/i.test(c.name));
+      return hasCsv ? m : null;
+    }));
+    state.populatedMonths[y] = checks.filter(Boolean);
+  }
+  const latestY = years.find(y => (state.populatedMonths[y] || []).length) || years[0];
+  const latestM = latestY ? (state.populatedMonths[latestY] || [])[0] : null;
+  log('Discovered ' + years.length + ' year(s). Latest with data: ' + (latestM ? latestY + '/' + latestM : 'none yet'));
+}
+
+async function downloadCSV(year, month, filename) {
+  const res = await graphFetch('/me/drive/root:/' + encodePath(ONEDRIVE_ROOT + '/' + year + '/' + month + '/' + filename) + ':/content');
+  return await res.text();
+}
+
+async function loadRulesFromCloud() {
+  try {
+    const res = await graphFetch('/me/drive/root:/' + encodePath(ONEDRIVE_ROOT + '/rules.json') + ':/content');
+    const data = await res.json();
+    // Support both legacy format (bare array of category rules) and new object format
+    if (Array.isArray(data)) {
+      state.customRules = data;
+      log('Loaded ' + data.length + ' custom rules from OneDrive');
+    } else if (data && typeof data === 'object') {
+      state.customRules = Array.isArray(data.customRules) ? data.customRules : [];
+      state.clientRules = Array.isArray(data.clientRules) ? data.clientRules : [];
+      log('Loaded ' + state.customRules.length + ' category rules and ' + state.clientRules.length + ' client rules');
+    }
+  } catch (e) {
+    if (e.status === 404) { log('No rules.json yet (this is fine)'); return; }
+    log('Could not load rules: ' + e.message);
+  }
+}
+
+let rulesSaveTimer;
+function scheduleRuleSave() {
+  if (!state.connected) return;
+  clearTimeout(rulesSaveTimer);
+  rulesSaveTimer = setTimeout(saveRulesToCloud, 1500);
+}
+
+async function saveRulesToCloud() {
+  if (!state.connected) return;
+  try {
+    const payload = { customRules: state.customRules, clientRules: state.clientRules };
+    await graphFetch('/me/drive/root:/' + encodePath(ONEDRIVE_ROOT + '/rules.json') + ':/content', {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload, null, 2)
+    });
+    log('Rules saved (' + state.customRules.length + ' category, ' + state.clientRules.length + ' client)');
+  } catch (e) {
+    log('Rule save failed: ' + e.message);
+  }
+}
+
+async function onSignedIn() {
+  state.connected = true;
+  log('Connecting to OneDrive...');
+  try {
+    await ensureRootFolder();
+    await loadRulesFromCloud();
+    await discoverPeriods();
+    populatePeriodDropdowns();
+    // Auto-load the latest period that actually contains CSVs
+    const populatedYear = state.availableYears.find(y => (state.populatedMonths[y] || []).length);
+    if (populatedYear) {
+      const y = populatedYear;
+      const m = state.populatedMonths[y][0];
+      await loadPeriod(y, m);
+    } else {
+      hide('#landing');
+      show('#dashboard');
+      $('#period-picker').hidden = false;
+      $('#user-chip').hidden = false;
+      $('#btn-signout').hidden = false;
+      updateUserChip();
+      render();
+      toast('Signed in. Drop CSVs into OneDrive/' + ONEDRIVE_ROOT + '/YYYY/MM/ then refresh.');
+    }
+  } catch (e) {
+    log('Post sign in failed: ' + e.message);
+    toast('Error after sign in: ' + e.message);
+  }
+}
+
+// Australian BAS quarter definitions. Each entry: { q, label, months: ['MM','MM','MM'], endYearOffset }
+// endYearOffset: 0 if the quarter's end is the same calendar year as its label, -1 otherwise.
+// We label quarters by the financial-year they belong to (e.g. Q3 FY26 = Jan-Mar 2026).
+// For simplicity, when picking a quarter, "year" means the calendar year in which the quarter ends.
+const BAS_QUARTERS = [
+  { q: 'Q3', label: 'Q3 Jan-Mar', months: ['01','02','03'] },
+  { q: 'Q4', label: 'Q4 Apr-Jun', months: ['04','05','06'] },
+  { q: 'Q1', label: 'Q1 Jul-Sep', months: ['07','08','09'] },
+  { q: 'Q2', label: 'Q2 Oct-Dec', months: ['10','11','12'] }
+];
+
+function getQuarterForMonth(month) {
+  const m = parseInt(month);
+  return BAS_QUARTERS.find(q => q.months.includes(String(m).padStart(2,'0'))) || BAS_QUARTERS[0];
+}
+
+function populatePeriodDropdowns() {
+  const ySel = $('#period-year');
+  ySel.innerHTML = state.availableYears.map(y => `<option value="${y}">${y}</option>`).join('');
+  if (state.availableYears.length) {
+    ySel.value = state.currentPeriod?.year || state.availableYears[0];
+    populateMonthDropdown(ySel.value);
+    populateQuarterDropdown(ySel.value);
+  }
+}
+
+function populateMonthDropdown(year) {
+  const mSel = $('#period-month');
+  const months = state.availableMonths[year] || [];
+  const MONTHS = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+  mSel.innerHTML = months.map(m => `<option value="${m}">${MONTHS[parseInt(m)-1]} ${year}</option>`).join('');
+  if (months.length) mSel.value = state.currentPeriod?.month || months[0];
+}
+
+function populateQuarterDropdown(year) {
+  const qSel = $('#period-quarter');
+  const months = state.availableMonths[year] || [];
+  // Only list quarters where at least one month of that quarter has CSVs
+  const quarters = BAS_QUARTERS.filter(q => q.months.some(m => months.includes(m)));
+  qSel.innerHTML = quarters.map(q => `<option value="${q.q}">${q.label} ${year}</option>`).join('');
+  if (quarters.length) qSel.value = state.currentPeriod?.quarter || quarters[0].q;
+}
+
+function setPeriodMode(mode) {
+  state.periodMode = mode;
+  $('#period-mode').querySelectorAll('.period-mode-btn').forEach(b => {
+    b.classList.toggle('active', b.dataset.mode === mode);
+  });
+  $('#period-month').style.display = mode === 'month' ? '' : 'none';
+  $('#period-quarter').style.display = mode === 'quarter' ? '' : 'none';
+}
+
+async function loadPeriod(year, monthOrQuarter) {
+  const mode = state.periodMode;
+  const months = mode === 'quarter'
+    ? BAS_QUARTERS.find(q => q.q === monthOrQuarter).months
+    : [monthOrQuarter];
+  const periodLabel = mode === 'quarter'
+    ? BAS_QUARTERS.find(q => q.q === monthOrQuarter).label + ' ' + year
+    : year + '/' + monthOrQuarter;
+
+  log('Loading ' + periodLabel + '...');
+  toast('Loading ' + periodLabel + '...');
+
+  try {
+    state.transactions = [];
+    state.files = [];
+
+    let totalCsvs = 0;
+    for (const month of months) {
+      const items = await listDriveChildren(ONEDRIVE_ROOT + '/' + year + '/' + month);
+      const csvFiles = (items || []).filter(f => f.file && /\.csv$/i.test(f.name));
+      log(year + '/' + month + ': ' + csvFiles.length + ' CSV file(s)');
+      totalCsvs += csvFiles.length;
+
+      for (const f of csvFiles) {
+        try {
+          log('Downloading ' + f.name + '...');
+          const text = await downloadCSV(year, month, f.name);
+          const txs = parseCSVContent(text, f.name);
+          if (!txs.length) { log(f.name + ': 0 rows extracted'); continue; }
+          const type = detectFileType(txs, f.name);
+          state.files.push({ name: month + '/' + f.name, type, count: txs.length, id: 'f-' + Math.random().toString(36).slice(2,9) });
+          // Tag each transaction's source with the month prefix so duplicates from diff months don't clash
+          txs.forEach(t => { t.source = month + '/' + f.name; });
+          state.transactions.push(...txs);
+          log(f.name + ': ' + txs.length + ' transactions (' + type + ')');
+        } catch (e) {
+          log('Error on ' + f.name + ': ' + e.message);
+        }
+      }
+    }
+
+    if (!totalCsvs) {
+      state.currentPeriod = mode === 'quarter' ? { year, quarter: monthOrQuarter } : { year, month: monthOrQuarter };
+      hide('#landing');
+      show('#dashboard');
+      $('#period-picker').hidden = false;
+      $('#user-chip').hidden = false;
+      $('#btn-signout').hidden = false;
+      updateUserChip();
+      $('#period-meta').textContent = '0 files';
+      toast('No CSVs in that folder yet');
+      render();
+      return;
+    }
+
+    recategoriseAll();
+    state.currentPeriod = mode === 'quarter' ? { year, quarter: monthOrQuarter } : { year, month: monthOrQuarter };
+
+    // Set date filter to exactly the selected period
+    const firstMonth = months[0];
+    const lastMonth = months[months.length - 1];
+    const lastDay = new Date(parseInt(year), parseInt(lastMonth), 0).getDate();
+    state.filters.range = 'custom';
+    state.filters.from = year + '-' + firstMonth + '-01';
+    state.filters.to = year + '-' + lastMonth + '-' + String(lastDay).padStart(2,'0');
+
+    hide('#landing');
+    show('#dashboard');
+    $('#period-picker').hidden = false;
+    $('#user-chip').hidden = false;
+    $('#btn-signout').hidden = false;
+    updateUserChip();
+    $('#filter-range').value = 'custom';
+    $('#filter-from').value = state.filters.from;
+    $('#filter-to').value = state.filters.to;
+    $('#custom-range-wrap').style.display = 'flex';
+    $('#period-meta').textContent = state.transactions.length + ' transactions across ' + state.files.length + ' files';
+    render();
+    toast('Loaded ' + state.transactions.length + ' transactions for ' + periodLabel);
+  } catch (e) {
+    log('Load period failed: ' + e.message);
+    toast('Failed: ' + e.message);
+  }
+}
+
+function updateUserChip() {
+  if (!state.account) return;
+  const chip = $('#user-chip');
+  const name = state.account.name || state.account.username;
+  const initials = name.split(' ').map(s => s[0]).filter(Boolean).slice(0, 2).join('').toUpperCase();
+  chip.innerHTML = `<span class="initials">${escapeHtml(initials)}</span><span>${escapeHtml(state.account.username)}</span>`;
+}
+
+/* ============================================================
+   EVENTS / INIT
+   ============================================================ */
+function $(s) { return document.querySelector(s); }
+function show(s) { $(s).hidden = false; }
+function hide(s) { $(s).hidden = true; }
+function escapeHtml(s) { return String(s).replace(/[&<>"']/g, c => ({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;' })[c]); }
+
+let toastTimer;
+function toast(msg) {
+  const t = $('#toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => t.classList.remove('show'), 4500);
+}
+
+function log(msg) {
+  const el = document.getElementById('status-log');
+  if (!el) return;
+  const time = new Date().toLocaleTimeString('en-AU', { hour12: false });
+  el.textContent = `[${time}] ${msg}\n` + el.textContent;
+  // Keep log manageable
+  if (el.textContent.length > 2000) el.textContent = el.textContent.slice(0, 2000);
+}
+
+function initEvents() {
+  // Surface any runtime errors visibly so the user can see what went wrong
+  window.addEventListener('error', (e) => {
+    log('JS ERROR: ' + (e.message || 'unknown'));
+    toast('Error: ' + (e.message || 'unknown'));
+    console.error(e.error || e);
+  });
+  window.addEventListener('unhandledrejection', (e) => {
+    log('PROMISE ERROR: ' + (e.reason?.message || e.reason || 'unknown'));
+    toast('Error: ' + (e.reason?.message || e.reason || 'unknown'));
+    console.error(e.reason);
+  });
+
+  log('Initialising... Papa=' + (typeof Papa) + ', Chart=' + (typeof Chart));
+
+  // Verify libraries loaded
+  if (typeof Papa === 'undefined') {
+    log('ERROR: PapaParse did not load from CDN.');
+    toast('CSV parser failed to load. Check internet connection.');
+    return;
+  }
+  if (typeof Chart === 'undefined') {
+    log('ERROR: Chart.js did not load from CDN.');
+    toast('Chart library failed to load. Check internet connection.');
+    return;
+  }
+  log('Libraries loaded. Ready for file upload.');
+
+  const dz = $('#drop-zone');
+  const fi = $('#file-input');
+  log('Drop zone found: ' + !!dz + ', File input found: ' + !!fi);
+  // Label natively triggers the input click, no JS needed for the click path.
+  fi.onchange = (e) => {
+    log('onchange fired, ' + (e.target.files?.length || 0) + ' file(s) selected');
+    handleFiles(e.target.files);
+    e.target.value = '';
+  };
+  dz.addEventListener('dragover', e => { e.preventDefault(); dz.classList.add('drag'); });
+  dz.addEventListener('dragleave', () => dz.classList.remove('drag'));
+  dz.addEventListener('drop', e => { e.preventDefault(); dz.classList.remove('drag'); handleFiles(e.dataTransfer.files); });
+
+  window.addEventListener('dragover', e => e.preventDefault());
+  window.addEventListener('drop', e => {
+    e.preventDefault();
+    if ($('#dashboard').hidden) return; // landing already handles
+    handleFiles(e.dataTransfer.files);
+  });
+
+  $('#btn-reset').onclick = () => {
+    if (!confirm('Clear all data and start over?')) return;
+    state.files = [];
+    state.transactions = [];
+    state.customRules = [];
+    state.filters.category = '';
+    state.filters.search = '';
+    render();
+  };
+
+  $('#filter-range').onchange = (e) => {
+    state.filters.range = e.target.value;
+    $('#custom-range-wrap').style.display = e.target.value === 'custom' ? 'flex' : 'none';
+    render();
+  };
+  $('#filter-from').onchange = (e) => { state.filters.from = e.target.value; render(); };
+  $('#filter-to').onchange = (e) => { state.filters.to = e.target.value; render(); };
+  $('#filter-exclude-cc').onchange = (e) => { state.filters.excludeCC = e.target.checked; render(); };
+
+  $('#tx-cat-filter').onchange = (e) => { state.filters.category = e.target.value; state.txShowCount = 50; render(); };
+  $('#tx-search').oninput = (e) => { state.filters.search = e.target.value; state.txShowCount = 50; render(); };
+  $('#btn-show-more').onclick = () => { state.txShowCount += 50; render(); };
+
+  // Make Date and Amount column headers clickable for sorting
+  wireTxSortHeaders();
+
+  $('#recat-cancel').onclick = closeRecat;
+  $('#recat-apply').onclick = applyRecat;
+  $('#dialog-recat').onclick = (e) => { if (e.target.id === 'dialog-recat') closeRecat(); };
+
+  $('#btn-clear-rules').onclick = () => {
+    if (!state.customRules.length) return;
+    if (!confirm('Clear all custom rules?')) return;
+    state.customRules = [];
+    recategoriseAll();
+    render();
+  };
+
+  $('#btn-dismiss-attention').onclick = () => { state.attentionDismissed = true; render(); };
+
+  // Auth + period picker wiring
+  $('#btn-signin').onclick = signIn;
+  $('#btn-signout').onclick = signOut;
+  $('#period-year').onchange = (e) => {
+    populateMonthDropdown(e.target.value);
+    populateQuarterDropdown(e.target.value);
+  };
+  $('#period-mode').querySelectorAll('.period-mode-btn').forEach(b => {
+    b.onclick = () => setPeriodMode(b.dataset.mode);
+  });
+  $('#btn-load-period').onclick = () => {
+    const y = $('#period-year').value;
+    if (!y) return;
+    if (state.periodMode === 'quarter') {
+      const q = $('#period-quarter').value;
+      if (q) loadPeriod(y, q);
+    } else {
+      const m = $('#period-month').value;
+      if (m) loadPeriod(y, m);
+    }
+  };
+}
+
+async function start() {
+  initEvents();
+  render();
+  const msalOk = await initMsal();
+  if (msalOk && state.account) {
+    log('Resuming previous session...');
+    await onSignedIn();
+  }
+}
+
+start();
+</script>
+</body>
+</html>
