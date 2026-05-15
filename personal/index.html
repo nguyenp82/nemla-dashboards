@@ -11,6 +11,8 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.0/chart.umd.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@azure/msal-browser@3/lib/msal-browser.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <style>
   :root {
     --bg: #F7F4EE;
@@ -306,6 +308,7 @@
       </label>
       <div class="spacer"></div>
       <label class="ghost-btn" for="file-input" style="cursor:pointer">+ Add CSV</label>
+      <button class="ghost-btn" id="btn-export-pdf">Export PDF</button>
       <button class="ghost-btn" id="btn-reset">Reset</button>
     </div>
 
@@ -469,7 +472,8 @@ const ONEDRIVE_ROOT = 'Apps/Personal';  // folder path in OneDrive root
 const state = {
   files: [],           // [{ name, type: 'bank'|'card', count, id }]
   transactions: [],    // all parsed
-  customRules: [],     // [{ pattern, category }]
+  customRules: [],     // [{ pattern, category }] — saved to rules.json
+  fileRules: [],       // [{ pattern, category }] — loaded from rules.csv in OneDrive, not persisted back
   attentionDismissed: false,
   // Auth and cloud state
   msal: null,          // MSAL instance
@@ -732,8 +736,12 @@ function extractTransactions(rows, fileName) {
    ============================================================ */
 function autoCategorise(desc) {
   const d = desc.toLowerCase();
-  // Custom rules first
+  // Custom rules (manual, saved to rules.json) win first
   for (const rule of state.customRules) {
+    if (d.includes(rule.pattern.toLowerCase())) return rule.category;
+  }
+  // File rules (bulk, loaded from rules.csv) checked next
+  for (const rule of state.fileRules) {
     if (d.includes(rule.pattern.toLowerCase())) return rule.category;
   }
   // Default rules
@@ -1528,6 +1536,27 @@ async function loadRulesFromCloud() {
   }
 }
 
+async function loadCsvRulesFromCloud() {
+  try {
+    const res = await graphFetch('/me/drive/root:/' + encodePath(ONEDRIVE_ROOT + '/rules.csv') + ':/content');
+    const text = await res.text();
+    const parsed = Papa.parse(text, { header: true, skipEmptyLines: true, transformHeader: h => h.trim().toLowerCase() });
+    if (!parsed || !Array.isArray(parsed.data)) { log('rules.csv could not be parsed'); return; }
+    const out = [];
+    for (const row of parsed.data) {
+      const pattern = (row.pattern || row.description || row.keyword || '').toString().trim();
+      const category = (row.category || row.cat || '').toString().trim();
+      if (!pattern || !category) continue;
+      out.push({ pattern, category });
+    }
+    state.fileRules = out;
+    log('Loaded ' + out.length + ' rules from rules.csv');
+  } catch (e) {
+    if (e.status === 404) { log('No rules.csv yet (drop one into ' + ONEDRIVE_ROOT + ' to bulk categorise)'); return; }
+    log('Could not load rules.csv: ' + e.message);
+  }
+}
+
 let rulesSaveTimer;
 function scheduleRuleSave() {
   if (!state.connected) return;
@@ -1555,6 +1584,7 @@ async function onSignedIn() {
   try {
     await ensureRootFolder();
     await loadRulesFromCloud();
+    await loadCsvRulesFromCloud();
     await discoverPeriods();
     populatePeriodDropdowns();
     // Auto-load the latest period if any
@@ -1697,6 +1727,74 @@ function log(msg) {
   if (el.textContent.length > 2000) el.textContent = el.textContent.slice(0, 2000);
 }
 
+async function exportDashboardToPdf() {
+  if (typeof html2canvas === 'undefined' || !window.jspdf) {
+    toast('PDF libraries failed to load');
+    return;
+  }
+  const btn = document.getElementById('btn-export-pdf');
+  const originalLabel = btn ? btn.textContent : '';
+  if (btn) { btn.disabled = true; btn.textContent = 'Exporting...'; }
+
+  // Hide interactive controls so they do not show in the printed PDF
+  const hideIds = ['btn-export-pdf', 'btn-reset', 'btn-signout', 'btn-signin', 'btn-load-period'];
+  const hidden = hideIds.map(id => {
+    const el = document.getElementById(id);
+    if (!el) return null;
+    const prev = el.style.visibility;
+    el.style.visibility = 'hidden';
+    return { el, prev };
+  }).filter(Boolean);
+
+  try {
+    const target = document.getElementById('dashboard');
+    if (!target) { toast('Nothing to export'); return; }
+
+    const bg = getComputedStyle(document.documentElement).getPropertyValue('--bg').trim() || '#F7F4EE';
+    const canvas = await html2canvas(target, {
+      backgroundColor: bg,
+      scale: 2,
+      useCORS: true,
+      logging: false,
+      windowWidth: target.scrollWidth,
+      windowHeight: target.scrollHeight,
+    });
+
+    const { jsPDF } = window.jspdf;
+    const pdf = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
+    const pageW = pdf.internal.pageSize.getWidth();
+    const pageH = pdf.internal.pageSize.getHeight();
+
+    const imgW = pageW;
+    const imgH = canvas.height * pageW / canvas.width;
+    const imgData = canvas.toDataURL('image/jpeg', 0.92);
+
+    let heightLeft = imgH;
+    let position = 0;
+    pdf.addImage(imgData, 'JPEG', 0, position, imgW, imgH);
+    heightLeft -= pageH;
+
+    while (heightLeft > 0) {
+      position = heightLeft - imgH;
+      pdf.addPage();
+      pdf.addImage(imgData, 'JPEG', 0, position, imgW, imgH);
+      heightLeft -= pageH;
+    }
+
+    const d = new Date();
+    const stamp = `${d.getFullYear()}_${String(d.getMonth()+1).padStart(2,'0')}_${String(d.getDate()).padStart(2,'0')}`;
+    pdf.save(`Ledger_${stamp}.pdf`);
+    log('PDF exported as Ledger_' + stamp + '.pdf');
+  } catch (err) {
+    console.error(err);
+    toast('Export failed: ' + (err.message || 'unknown'));
+    log('PDF export error: ' + (err.message || 'unknown'));
+  } finally {
+    hidden.forEach(({ el, prev }) => { el.style.visibility = prev; });
+    if (btn) { btn.disabled = false; btn.textContent = originalLabel; }
+  }
+}
+
 function initEvents() {
   // Surface any runtime errors visibly so the user can see what went wrong
   window.addEventListener('error', (e) => {
@@ -1801,6 +1899,7 @@ function initEvents() {
   // Auth + period picker wiring
   $('#btn-signin').onclick = signIn;
   $('#btn-signout').onclick = signOut;
+  $('#btn-export-pdf').onclick = exportDashboardToPdf;
   $('#period-year').onchange = (e) => populateMonthDropdown(e.target.value);
   $('#btn-load-period').onclick = () => {
     const y = $('#period-year').value;
