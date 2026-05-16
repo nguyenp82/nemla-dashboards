@@ -378,26 +378,28 @@
       <div id="attention-body"></div>
     </div>
 
-    <div class="panel">
-      <div class="panel-header">
-        <div>
-          <div class="panel-title">Income <em>versus</em> outflow</div>
-          <div class="panel-subtitle">By month, for the selected period</div>
+    <div class="two-col">
+      <div class="panel">
+        <div class="panel-header">
+          <div>
+            <div class="panel-title">Income <em>versus</em> outflow</div>
+            <div class="panel-subtitle">By month, for the selected period</div>
+          </div>
+          <div class="panel-meta" id="ie-meta"></div>
         </div>
-        <div class="panel-meta" id="ie-meta"></div>
+        <div class="chart-wrap tall"><canvas id="chart-ie"></canvas></div>
       </div>
-      <div class="chart-wrap tall"><canvas id="chart-ie"></canvas></div>
-    </div>
 
-    <div class="panel" id="cc-panel" hidden>
-      <div class="panel-header">
-        <div>
-          <div class="panel-title">Credit card <em>spend</em></div>
-          <div class="panel-subtitle">Total spend per card for the selected period. Card payments excluded.</div>
+      <div class="panel" id="cc-panel" hidden>
+        <div class="panel-header">
+          <div>
+            <div class="panel-title">Credit card <em>spend</em></div>
+            <div class="panel-subtitle">Total spend per card for the selected period. Card payments excluded.</div>
+          </div>
+          <div class="panel-meta" id="cc-meta"></div>
         </div>
-        <div class="panel-meta" id="cc-meta"></div>
+        <div class="chart-wrap tall"><canvas id="chart-cc"></canvas></div>
       </div>
-      <div class="chart-wrap"><canvas id="chart-cc"></canvas></div>
     </div>
 
     <div class="two-col">
@@ -525,6 +527,7 @@ const state = {
   },
   sort: { column: 'date', direction: 'desc' },  // 'date' | 'desc' | 'source' | 'category' | 'amount'  ·  'asc' | 'desc'
   txShowCount: 50,
+  exportMode: null,    // null normally. When exporting PDF: { topN: 20, excludeCategories: ['Mortgage & Loans'] }
   charts: {}
 };
 
@@ -1026,7 +1029,6 @@ function renderIncomeExpenses(agg) {
       ]
     },
     options: {
-      indexAxis: 'y',
       responsive: true,
       maintainAspectRatio: false,
       plugins: {
@@ -1039,16 +1041,16 @@ function renderIncomeExpenses(agg) {
       },
       scales: {
         x: {
+          grid: { display: false, drawBorder: false },
+          ticks: { color: '#2A2822', font: { family: 'Manrope', size: 12 } }
+        },
+        y: {
           grid: { color: '#E8E2D4', drawBorder: false },
           ticks: {
             color: '#8F897A',
             font: { family: 'JetBrains Mono', size: 11 },
             callback: (v) => fmt.moneyShort(v)
           }
-        },
-        y: {
-          grid: { display: false, drawBorder: false },
-          ticks: { color: '#2A2822', font: { family: 'Manrope', size: 12 } }
         }
       }
     }
@@ -1100,7 +1102,6 @@ function renderCreditCardSpend(filtered) {
       }]
     },
     options: {
-      indexAxis: 'y',
       responsive: true, maintainAspectRatio: false,
       plugins: {
         legend: { display: false },
@@ -1108,12 +1109,12 @@ function renderCreditCardSpend(filtered) {
       },
       scales: {
         x: {
-          grid: { color: '#E8E2D4', drawBorder: false },
-          ticks: { color: '#8F897A', font: { family: 'JetBrains Mono', size: 11 }, callback: (v) => fmt.moneyShort(v) }
-        },
-        y: {
           grid: { display: false },
           ticks: { color: '#5E574B', font: { family: 'Manrope', size: 12 } }
+        },
+        y: {
+          grid: { color: '#E8E2D4', drawBorder: false },
+          ticks: { color: '#8F897A', font: { family: 'JetBrains Mono', size: 11 }, callback: (v) => fmt.moneyShort(v) }
         }
       }
     }
@@ -1186,39 +1187,55 @@ function renderCategoryFilter() {
 
 function renderTransactions(filtered) {
   let list = filtered.slice();
-  if (state.filters.category) list = list.filter(t => t.category === state.filters.category);
-  if (state.filters.search) {
-    const q = state.filters.search.toLowerCase();
-    list = list.filter(t => t.description.toLowerCase().includes(q));
-  }
-  const dir = state.sort.direction === 'asc' ? 1 : -1;
-  list.sort((a, b) => {
-    let av, bv;
-    switch (state.sort.column) {
-      case 'date':        av = a.date.getTime(); bv = b.date.getTime(); break;
-      case 'description': av = a.description.toLowerCase(); bv = b.description.toLowerCase(); break;
-      case 'source':      av = a.source.toLowerCase(); bv = b.source.toLowerCase(); break;
-      case 'category':    av = a.category.toLowerCase(); bv = b.category.toLowerCase(); break;
-      case 'amount':      av = a.amount; bv = b.amount; break;
-      default:            av = a.date.getTime(); bv = b.date.getTime();
+
+  // PDF export view: ignore screen filters/sort, keep only spending (negative) outside excluded
+  // categories, sort by largest spend first, and truncate to the top N.
+  if (state.exportMode) {
+    const excl = new Set(state.exportMode.excludeCategories || []);
+    list = list.filter(t => t.amount < 0 && !excl.has(t.category));
+    list.sort((a, b) => a.amount - b.amount); // most negative first = biggest spend first
+    list = list.slice(0, state.exportMode.topN || 20);
+  } else {
+    if (state.filters.category) list = list.filter(t => t.category === state.filters.category);
+    if (state.filters.search) {
+      const q = state.filters.search.toLowerCase();
+      list = list.filter(t => t.description.toLowerCase().includes(q));
     }
-    if (av < bv) return -1 * dir;
-    if (av > bv) return  1 * dir;
-    return 0;
-  });
+    const dir = state.sort.direction === 'asc' ? 1 : -1;
+    list.sort((a, b) => {
+      let av, bv;
+      switch (state.sort.column) {
+        case 'date':        av = a.date.getTime(); bv = b.date.getTime(); break;
+        case 'description': av = a.description.toLowerCase(); bv = b.description.toLowerCase(); break;
+        case 'source':      av = a.source.toLowerCase(); bv = b.source.toLowerCase(); break;
+        case 'category':    av = a.category.toLowerCase(); bv = b.category.toLowerCase(); break;
+        case 'amount':      av = a.amount; bv = b.amount; break;
+        default:            av = a.date.getTime(); bv = b.date.getTime();
+      }
+      if (av < bv) return -1 * dir;
+      if (av > bv) return  1 * dir;
+      return 0;
+    });
+  }
 
   // Update header arrows / active state
   document.querySelectorAll('.tx-head .sortable').forEach(el => {
-    const isActive = el.dataset.sort === state.sort.column;
+    const isActive = !state.exportMode && el.dataset.sort === state.sort.column;
     el.classList.toggle('active', isActive);
     const arrow = el.querySelector('.sort-arrow');
     if (arrow) arrow.textContent = isActive ? (state.sort.direction === 'asc' ? '▲' : '▼') : '';
   });
 
-  $('#tx-subtitle').textContent = `${list.length} transactions${state.filters.category ? ' · ' + state.filters.category : ''}`;
+  if (state.exportMode) {
+    const excl = (state.exportMode.excludeCategories || []).join(', ');
+    $('#tx-subtitle').textContent = `Top ${state.exportMode.topN || 20} spending transactions${excl ? ' · excluding ' + excl : ''}`;
+  } else {
+    $('#tx-subtitle').textContent = `${list.length} transactions${state.filters.category ? ' · ' + state.filters.category : ''}`;
+  }
 
   const cats = [...new Set(state.transactions.map(t => t.category))].sort();
-  const visible = list.slice(0, state.txShowCount);
+  const showAll = !!state.exportMode;
+  const visible = showAll ? list : list.slice(0, state.txShowCount);
   const el = $('#tx-body');
   if (!list.length) { el.innerHTML = '<div class="empty">No transactions match these filters</div>'; $('#btn-show-more').hidden = true; return; }
 
@@ -1239,7 +1256,7 @@ function renderTransactions(filtered) {
 
   el.querySelectorAll('[data-txcat]').forEach(s => s.onchange = (e) => quickRecat(s.dataset.txcat, e.target.value));
   el.querySelectorAll('[data-recat]').forEach(b => b.onclick = () => openRecatDialog(b.dataset.recat));
-  $('#btn-show-more').hidden = list.length <= state.txShowCount;
+  $('#btn-show-more').hidden = state.exportMode || (list.length <= state.txShowCount);
 }
 
 function renderRules() {
@@ -1843,6 +1860,12 @@ async function exportDashboardToPdf() {
     return { el, prev };
   }).filter(Boolean);
 
+  // Switch to export view: top 20 spending transactions excluding Mortgage & Loans
+  state.exportMode = { topN: 20, excludeCategories: ['Mortgage & Loans'] };
+  render();
+  // Give the browser a paint cycle so charts and the new transaction list are settled before capture
+  await new Promise(r => requestAnimationFrame(() => requestAnimationFrame(r)));
+
   try {
     const target = document.getElementById('dashboard');
     if (!target) { toast('Nothing to export'); return; }
@@ -1887,6 +1910,8 @@ async function exportDashboardToPdf() {
     toast('Export failed: ' + (err.message || 'unknown'));
     log('PDF export error: ' + (err.message || 'unknown'));
   } finally {
+    state.exportMode = null;
+    render();
     hidden.forEach(({ el, prev }) => { el.style.visibility = prev; });
     if (btn) { btn.disabled = false; btn.textContent = originalLabel; }
   }
