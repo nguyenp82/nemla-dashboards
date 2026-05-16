@@ -13,6 +13,7 @@
 <script src="https://cdn.jsdelivr.net/npm/@azure/msal-browser@3/lib/msal-browser.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 <style>
   :root {
     --bg: #F7F4EE;
@@ -264,10 +265,10 @@
       </div>
 
       <div style="background: var(--surface); border: 1px solid var(--border); border-radius: 4px; padding: 16px 18px;">
-        <div style="font-size: 11px; letter-spacing: 0.12em; color: var(--accent); text-transform: uppercase; margin-bottom: 6px;">Step 2 &middot; Categorisation rules (optional)</div>
-        <div style="font-size: 14px; color: var(--text); margin-bottom: 6px;">Bulk teach the dashboard which patterns map to which categories by saving</div>
-        <code style="display: inline-block; background: var(--surface-2); border: 1px solid var(--border); padding: 4px 8px; border-radius: 2px; font-family: 'JetBrains Mono', monospace; font-size: 12px; color: var(--text);">Apps / Personal / rules.csv</code>
-        <div style="font-size: 12px; color: var(--text-faint); margin-top: 8px;">Two columns: <span class="mono">Pattern,Category</span>. Patterns match case insensitive substrings of the transaction description.</div>
+        <div style="font-size: 11px; letter-spacing: 0.12em; color: var(--accent); text-transform: uppercase; margin-bottom: 6px;">Step 2 &middot; Categorisation rules</div>
+        <div style="font-size: 14px; color: var(--text); margin-bottom: 6px;">Maintain your master categorisation workbook at</div>
+        <code style="display: inline-block; background: var(--surface-2); border: 1px solid var(--border); padding: 4px 8px; border-radius: 2px; font-family: 'JetBrains Mono', monospace; font-size: 12px; color: var(--text);">Apps / Personal / rules.xlsx</code>
+        <div style="font-size: 12px; color: var(--text-faint); margin-top: 8px;">One tab per category. Each tab has a single <span class="mono">Pattern</span> column. The tab name is the category. Patterns match case insensitive substrings of the transaction description.</div>
       </div>
 
       <div style="background: var(--surface); border: 1px solid var(--border); border-radius: 4px; padding: 16px 18px;">
@@ -744,6 +745,15 @@ function extractTransactions(rows, fileName) {
 /* ============================================================
    CATEGORISATION
    ============================================================ */
+function getAllCategories() {
+  const set = new Set();
+  state.fileRules.forEach(r => r.category && set.add(r.category));
+  state.customRules.forEach(r => r.category && set.add(r.category));
+  state.transactions.forEach(t => t.category && set.add(t.category));
+  set.add('Uncategorised');
+  return [...set].sort((a, b) => a.localeCompare(b));
+}
+
 function autoCategorise(desc) {
   const d = desc.toLowerCase();
   // Manual rules (saved to rules.json) win first
@@ -932,7 +942,7 @@ function renderAttention(filtered) {
   if (!items.length) { $('#attention-panel').hidden = true; return; }
   $('#attention-panel').hidden = false;
 
-  const cats = Object.keys(DEFAULT_RULES).concat('Uncategorised');
+  const cats = getAllCategories();
   $('#attention-body').innerHTML = items.map(t => `
     <div class="attn-row">
       <div class="attn-main">
@@ -1307,7 +1317,7 @@ function openRecatDialog(txId) {
   if (!tx) return;
   recatTxId = txId;
   $('#recat-body').textContent = `"${tx.description}"  ·  ${fmt.money(tx.amount, true)}`;
-  const cats = Object.keys(DEFAULT_RULES).concat('Uncategorised');
+  const cats = getAllCategories();
   $('#recat-category').innerHTML = cats.map(c => `<option value="${escapeHtml(c)}"${c===tx.category?' selected':''}>${escapeHtml(c)}</option>`).join('');
   // Suggest a pattern: first 2-3 meaningful words of description
   const pattern = extractPattern(tx.description);
@@ -1612,24 +1622,35 @@ async function loadRulesFromCloud() {
   }
 }
 
-async function loadCsvRulesFromCloud() {
+async function loadXlsxRulesFromCloud() {
   try {
-    const res = await graphFetch('/me/drive/root:/' + encodePath(ONEDRIVE_ROOT + '/rules.csv') + ':/content');
-    const text = await res.text();
-    const parsed = Papa.parse(text, { header: true, skipEmptyLines: true, transformHeader: h => h.trim().toLowerCase() });
-    if (!parsed || !Array.isArray(parsed.data)) { log('rules.csv could not be parsed'); return; }
+    if (typeof XLSX === 'undefined') { log('SheetJS not loaded; cannot read rules.xlsx'); return; }
+    const res = await graphFetch('/me/drive/root:/' + encodePath(ONEDRIVE_ROOT + '/rules.xlsx') + ':/content');
+    const buf = await res.arrayBuffer();
+    const wb = XLSX.read(buf, { type: 'array' });
     const out = [];
-    for (const row of parsed.data) {
-      const pattern = (row.pattern || row.description || row.keyword || '').toString().trim();
-      const category = (row.category || row.cat || '').toString().trim();
-      if (!pattern || !category) continue;
-      out.push({ pattern, category });
+    let tabs = 0;
+    for (const sheetName of wb.SheetNames) {
+      const category = sheetName.trim();
+      if (!category) continue;
+      const sheet = wb.Sheets[sheetName];
+      // Parse as array of arrays so we can ignore header and only take the first column
+      const rows = XLSX.utils.sheet_to_json(sheet, { header: 1, blankrows: false, defval: '' });
+      // Detect a header row by checking if the first cell is literally "pattern" (case insensitive)
+      const first = (rows[0] && (rows[0][0] || '').toString().trim().toLowerCase()) || '';
+      const startIdx = (first === 'pattern' || first === 'description' || first === 'keyword') ? 1 : 0;
+      for (let i = startIdx; i < rows.length; i++) {
+        const pattern = (rows[i][0] || '').toString().trim();
+        if (!pattern) continue;
+        out.push({ pattern, category });
+      }
+      tabs++;
     }
     state.fileRules = out;
-    log('Loaded ' + out.length + ' rules from rules.csv');
+    log('Loaded ' + out.length + ' rules across ' + tabs + ' category tabs from rules.xlsx');
   } catch (e) {
-    if (e.status === 404) { log('No rules.csv yet (drop one into ' + ONEDRIVE_ROOT + ' to bulk categorise)'); return; }
-    log('Could not load rules.csv: ' + e.message);
+    if (e.status === 404) { log('No rules.xlsx yet (drop one into ' + ONEDRIVE_ROOT + ' to bulk categorise)'); return; }
+    log('Could not load rules.xlsx: ' + e.message);
   }
 }
 
@@ -1660,7 +1681,7 @@ async function onSignedIn() {
   try {
     await ensureRootFolder();
     await loadRulesFromCloud();
-    await loadCsvRulesFromCloud();
+    await loadXlsxRulesFromCloud();
     await discoverPeriods();
     populatePeriodDropdowns();
     // Auto-load the latest period if any
