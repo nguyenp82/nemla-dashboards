@@ -388,6 +388,17 @@
       <div class="chart-wrap tall"><canvas id="chart-ie"></canvas></div>
     </div>
 
+    <div class="panel" id="cc-panel" hidden>
+      <div class="panel-header">
+        <div>
+          <div class="panel-title">Credit card <em>spend</em></div>
+          <div class="panel-subtitle">Total spend per card for the selected period. Card payments excluded.</div>
+        </div>
+        <div class="panel-meta" id="cc-meta"></div>
+      </div>
+      <div class="chart-wrap"><canvas id="chart-cc"></canvas></div>
+    </div>
+
     <div class="two-col">
       <div class="panel">
         <div class="panel-header">
@@ -923,6 +934,7 @@ function render() {
   renderKPIs(agg, filtered);
   renderAttention(filtered);
   renderIncomeExpenses(agg);
+  renderCreditCardSpend(filtered);
   renderCategoryChart(agg);
   renderCategoryList(agg);
   renderCategoryFilter();
@@ -1049,6 +1061,71 @@ function renderIncomeExpenses(agg) {
         y: {
           grid: { display: false, drawBorder: false },
           ticks: { color: '#2A2822', font: { family: 'Manrope', size: 12 } }
+        }
+      }
+    }
+  });
+}
+
+function renderCreditCardSpend(filtered) {
+  // Build a quick lookup of source filename to file metadata
+  const byName = {};
+  state.files.forEach(f => { byName[f.name] = f; });
+
+  // Sum spending per card (negative amounts on a card source), skipping card payments received
+  const totals = {};
+  filtered.forEach(t => {
+    const f = byName[t.source];
+    if (!f || f.type !== 'card') return;
+    if (isCardPaymentReceived(t)) return;
+    if (t.amount >= 0) return;
+    totals[t.source] = (totals[t.source] || 0) + Math.abs(t.amount);
+  });
+
+  const entries = Object.entries(totals).sort((a,b) => b[1]-a[1]);
+
+  // Hide the panel entirely when there is no card data so the dashboard does not show an empty section
+  const panel = $('#cc-panel');
+  if (!entries.length) {
+    if (panel) panel.hidden = true;
+    destroyChart('cc');
+    return;
+  }
+  if (panel) panel.hidden = false;
+
+  const total = entries.reduce((s, e) => s + e[1], 0);
+  $('#cc-meta').textContent = entries.length + (entries.length === 1 ? ' card · ' : ' cards · ') + fmt.money(total);
+
+  destroyChart('cc');
+  const palette = ['#A07A1F','#3E6A88','#B85838','#5B8C47','#A7649C','#5E997B','#C99324','#D17A52'];
+  state.charts.cc = new Chart($('#chart-cc'), {
+    type: 'bar',
+    data: {
+      labels: entries.map(e => e[0].replace(/\.csv$/i,'').replace(/[-_]/g,' ').toUpperCase()),
+      datasets: [{
+        label: 'Spend',
+        data: entries.map(e => e[1]),
+        backgroundColor: entries.map((_, i) => palette[i % palette.length]),
+        borderRadius: 2,
+        barPercentage: 0.7,
+        categoryPercentage: 0.75
+      }]
+    },
+    options: {
+      indexAxis: 'y',
+      responsive: true, maintainAspectRatio: false,
+      plugins: {
+        legend: { display: false },
+        tooltip: tooltipStyle(true)
+      },
+      scales: {
+        x: {
+          grid: { color: '#E8E2D4', drawBorder: false },
+          ticks: { color: '#8F897A', font: { family: 'JetBrains Mono', size: 11 }, callback: (v) => fmt.moneyShort(v) }
+        },
+        y: {
+          grid: { display: false },
+          ticks: { color: '#5E574B', font: { family: 'Manrope', size: 12 } }
         }
       }
     }
