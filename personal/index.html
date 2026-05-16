@@ -548,31 +548,9 @@ const CATEGORY_COLORS = {
   'Uncategorised':      '#8F897A'
 };
 
-// Order matters: earlier rules win. Put specific, high-confidence rules first.
-const DEFAULT_RULES = {
-  'Income':             ['salary','wages','payroll','pay run','dividend','interest earned','tax refund','refund purchase','rebate'],
-  'Credit Card Payment':[
-    'credit card payment','cba cc','commbank cc','anz cc','anz credit','anz cards','cba cards',
-    'mastercard payment','visa payment','qantas money','qantas card','qantas visa','qantas credit','qantascc',
-    'amex payment','card payment to','payment received','credit card direct',
-    'cba cr card','cr card autopay','card autopay','autopay pmnt','cards commbank'
-  ],
-  'Mortgage & Loans':   ['home loan','mortgage','loan repayment','ln repay','home ln','housing loan','personal loan','car loan'],
-  'Groceries':          ['woolworths','coles','aldi','iga','costco','harris farm','foodworks','metro fresh'],
-  'Dining':             ['mcdonald','kfc','subway','hungry jack','guzman','nando','uber eats','menulog','deliveroo','doordash','pizza','sushi','cafe','restaurant','bakery','starbucks','gloria jean','boost juice','chatime','gongcha'],
-  'Fuel':               ['bp ','bp ret','shell ','caltex','ampol','7-eleven','united pet','metro petroleum','mobil ','liberty '],
-  'Transport':          ['uber trip','uber*','didi ','ola cabs','ola *','opal card','opal ','transport nsw','transport for nsw','toll road','linkt','e-toll','etoll','cabcharge','taxi ','13cabs','wilson parking','secure parking','care park','parking '],
-  'Utilities':          ['energy australia','energyaustralia','agl ','origin energy','red energy','alinta','sydney water','hunter water','telstra','optus','vodafone','tpg','belong','aussie broadband','iinet','more telecom','amaysim'],
-  'Insurance':          ['nrma','aami','bupa','medibank','hcf','allianz','suncorp insur','qbe ','youi','real insurance','budget direct','racv','racq'],
-  'Entertainment':      ['netflix','spotify','disney','apple.com/bill','amazon prime','stan.com','binge','kayo','foxtel','paramount','youtube premium','hbo','audible','steam ','nintendo','playstation','xbox','tatts'],
-  'Shopping':           ['amazon','kmart','big w','target','bunnings','jb hi-fi','jb hifi','harvey norman','officeworks','ikea','myer','david jones','the iconic','kathmandu','anaconda','rebel sport','chemist warehouse','dan murphy','bws','liquorland'],
-  'Health':             ['chemist','pharmacy','priceline','medicare','medical','dental','physio','optometrist','bupa claim','vision'],
-  'Kids & School':      ['daycare','childcare','school','kindergarten','kidstuff','toys r us','kmart toy','primary school','high school'],
-  'Cash':               ['atm ','wdl atm','withdrawal','cash out','cash advance'],
-  'Fees & Interest':    ['bank fee','interest charge','account fee','international txn fee','currency conversion','overseas transaction','monthly fee'],
-  'Subscriptions':      ['openai','chatgpt','anthropic','claude','github','microsoft','office 365','google one','dropbox','icloud','adobe','canva','notion','figma','linkedin premium'],
-  'Transfers':          ['transfer to','transfer from','osko','bpay','internet transfer','direct debit','fast transfer','beem ','payid']
-};
+// Categorisation rules live in OneDrive at Apps/Personal/rules.csv. This list intentionally stays empty;
+// it remains as a hook only so the autoCategorise function below has a final no-op fallback if ever needed.
+const DEFAULT_RULES = {};
 
 /* ============================================================
    UTILITIES
@@ -768,15 +746,15 @@ function extractTransactions(rows, fileName) {
    ============================================================ */
 function autoCategorise(desc) {
   const d = desc.toLowerCase();
-  // Custom rules (manual, saved to rules.json) win first
+  // Manual rules (saved to rules.json) win first
   for (const rule of state.customRules) {
     if (d.includes(rule.pattern.toLowerCase())) return rule.category;
   }
-  // File rules (bulk, loaded from rules.csv) checked next
+  // Bulk rules (loaded from rules.csv in OneDrive). This is the master source of truth.
   for (const rule of state.fileRules) {
     if (d.includes(rule.pattern.toLowerCase())) return rule.category;
   }
-  // Default rules
+  // Reserved hook for built-in fallback rules. Empty by design; see DEFAULT_RULES declaration.
   for (const [cat, keywords] of Object.entries(DEFAULT_RULES)) {
     for (const k of keywords) {
       if (d.includes(k)) return cat;
