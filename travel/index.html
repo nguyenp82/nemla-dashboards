@@ -200,6 +200,35 @@
     color: var(--surface);
     font-weight: 500;
   }
+  .trip-picker {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 6px 10px;
+    margin-top: 8px;
+  }
+  .trip-picker-label {
+    font-size: 11px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--text-faint);
+  }
+  .trip-picker select {
+    background: transparent;
+    border: none;
+    font: inherit;
+    font-size: 13px;
+    color: var(--text);
+    cursor: pointer;
+    padding: 4px 6px;
+    border-radius: 6px;
+    outline: none;
+  }
+  .trip-picker select:hover { background: var(--surface-2); }
+  .trip-picker.active select { color: var(--travel); font-weight: 500; }
 
   .summary {
     display: grid;
@@ -535,7 +564,13 @@
         <h1 class="serif" id="hero-title">Your travels</h1>
         <p id="hero-sub">Choose a year to explore.</p>
       </div>
-      <div id="year-picker" class="year-picker"></div>
+      <div style="display: flex; flex-direction: column; align-items: flex-end; gap: 8px;">
+        <div id="year-picker" class="year-picker"></div>
+        <div id="trip-picker" class="trip-picker" hidden>
+          <span class="trip-picker-label">Trip</span>
+          <select id="trip-select"></select>
+        </div>
+      </div>
     </div>
 
     <!-- Empty state when no data -->
@@ -599,9 +634,6 @@
         <div class="table-head-row">
           <h3>Transactions</h3>
           <div class="filter-bar">
-            <select id="filter-trip" onchange="renderTable()">
-              <option value="">All trips</option>
-            </select>
             <select id="filter-category" onchange="renderTable()">
               <option value="">All categories</option>
             </select>
@@ -677,10 +709,16 @@ const state = {
   account: null,
   years: [],          // ['2024', '2025']
   currentYear: null,
+  currentTrip: '',    // '' means All trips; otherwise the exact trip name
   transactions: [],   // [{ date, category, amount, trip, vendor, notes, receipt }]
   charts: { category: null, trip: null },
   receiptCache: {}    // { 'year/filename': blobUrl }
 };
+
+function getActiveTransactions() {
+  if (!state.currentTrip) return state.transactions;
+  return state.transactions.filter(t => t.trip === state.currentTrip);
+}
 
 const $ = (q) => document.querySelector(q);
 const $$ = (q) => document.querySelectorAll(q);
@@ -892,6 +930,7 @@ async function discoverYears() {
 async function loadYear(year) {
   showLoading(true);
   state.currentYear = year;
+  state.currentTrip = '';   // Reset trip filter so a stale selection from another year does not blank the dashboard
   state.receiptCache = {};
   renderYearPicker();
   $('#hero-title').textContent = year + ' travels';
@@ -1007,6 +1046,7 @@ function renderYearPicker() {
 window.loadYear = loadYear;
 
 function renderAll() {
+  renderTripPicker();
   renderSummary();
   renderCategoryChart();
   renderTripChart();
@@ -1015,7 +1055,7 @@ function renderAll() {
 }
 
 function renderSummary() {
-  const txs = state.transactions;
+  const txs = getActiveTransactions();
   const total = txs.reduce((s, t) => s + t.amount, 0);
   const trips = [...new Set(txs.map(t => t.trip).filter(Boolean))];
 
@@ -1030,11 +1070,11 @@ function renderSummary() {
   $('#stat-trips-sub').textContent = trips.length ? trips.slice(0, 2).join(', ') + (trips.length > 2 ? '...' : '') : 'No trip labels';
   $('#stat-avg').textContent = trips.length ? AUD.format(total / trips.length) : AUD.format(total);
   $('#stat-top-cat').textContent = topCat ? topCat[0] : '—';
-  $('#stat-top-cat-sub').textContent = topCat ? AUD.format(topCat[1]) + ` · ${Math.round(topCat[1] / total * 100)}%` : '';
+  $('#stat-top-cat-sub').textContent = topCat && total ? AUD.format(topCat[1]) + ` · ${Math.round(topCat[1] / total * 100)}%` : '';
 }
 
 function renderCategoryChart() {
-  const txs = state.transactions;
+  const txs = getActiveTransactions();
   const byCat = {};
   txs.forEach(t => { byCat[t.category] = (byCat[t.category] || 0) + t.amount; });
   const entries = Object.entries(byCat).sort((a, b) => b[1] - a[1]);
@@ -1070,7 +1110,16 @@ function renderCategoryChart() {
 }
 
 function renderTripChart() {
-  const txs = state.transactions;
+  // When filtering to a single trip, the By trip chart would be a single bar; hide its panel instead.
+  const panel = document.getElementById('chart-trip')?.closest('.panel');
+  if (state.currentTrip) {
+    if (state.charts.trip) { state.charts.trip.destroy(); state.charts.trip = null; }
+    if (panel) panel.hidden = true;
+    return;
+  }
+  if (panel) panel.hidden = false;
+
+  const txs = getActiveTransactions();
   const byTrip = {};
   txs.forEach(t => {
     const key = t.trip || '(no trip)';
@@ -1120,21 +1169,34 @@ function renderTripChart() {
 }
 
 function populateFilters() {
-  const trips = [...new Set(state.transactions.map(t => t.trip).filter(Boolean))].sort();
-  const cats = [...new Set(state.transactions.map(t => t.category))].sort();
-  $('#filter-trip').innerHTML = '<option value="">All trips</option>' +
-    trips.map(t => `<option value="${t}">${t}</option>`).join('');
+  // Categories are drawn from the active scope so they reflect the selected trip
+  const cats = [...new Set(getActiveTransactions().map(t => t.category))].sort();
+  const previousCat = $('#filter-category').value;
   $('#filter-category').innerHTML = '<option value="">All categories</option>' +
     cats.map(c => `<option value="${c}">${c}</option>`).join('');
+  if (cats.includes(previousCat)) $('#filter-category').value = previousCat;
+}
+
+function renderTripPicker() {
+  const trips = [...new Set(state.transactions.map(t => t.trip).filter(Boolean))].sort();
+  const wrap = $('#trip-picker');
+  const sel = $('#trip-select');
+  if (!trips.length) { wrap.hidden = true; return; }
+  wrap.hidden = false;
+  sel.innerHTML = '<option value="">All trips</option>' +
+    trips.map(t => `<option value="${escapeHtml(t)}"${state.currentTrip === t ? ' selected' : ''}>${escapeHtml(t)}</option>`).join('');
+  wrap.classList.toggle('active', !!state.currentTrip);
+  sel.onchange = (e) => {
+    state.currentTrip = e.target.value;
+    renderAll();
+  };
 }
 
 function renderTable() {
-  const fTrip = $('#filter-trip').value;
   const fCat = $('#filter-category').value;
   const fSearch = $('#filter-search').value.trim().toLowerCase();
 
-  const filtered = state.transactions.filter(t => {
-    if (fTrip && t.trip !== fTrip) return false;
+  const filtered = getActiveTransactions().filter(t => {
     if (fCat && t.category !== fCat) return false;
     if (fSearch) {
       const blob = (t.vendor + ' ' + t.notes + ' ' + t.category + ' ' + t.trip).toLowerCase();
