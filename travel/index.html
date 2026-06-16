@@ -615,6 +615,15 @@
         </div>
       </div>
 
+      <div class="panel" id="itinerary-panel" hidden style="margin-bottom: 24px;">
+        <div style="display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 6px;">
+          <h3 id="itinerary-title">Itinerary</h3>
+          <div id="itinerary-meta" style="font-size: 12px; color: var(--text-faint); font-family: 'JetBrains Mono', monospace;"></div>
+        </div>
+        <div id="itinerary-body" style="overflow-x: auto;"></div>
+        <div style="font-size: 12px; color: var(--text-faint); margin-top: 6px;">Bar length shows time in each city &middot; one tick = one night</div>
+      </div>
+
       <div class="charts">
         <div class="panel">
           <h3>By category</h3>
@@ -711,6 +720,7 @@ const state = {
   currentYear: null,
   currentTrip: '',    // '' means All trips; otherwise the exact trip name
   transactions: [],   // [{ date, category, amount, trip, vendor, notes, receipt }]
+  itineraries: {},    // { 'Vietnam 2026': [{ order, city, arrives, departs, notes, color }, ...] }
   charts: { category: null, trip: null },
   receiptCache: {}    // { 'year/filename': blobUrl }
 };
@@ -1047,11 +1057,165 @@ window.loadYear = loadYear;
 
 function renderAll() {
   renderTripPicker();
+  renderItinerary();
   renderSummary();
   renderCategoryChart();
   renderTripChart();
   populateFilters();
   renderTable();
+}
+
+function colorForCity(city) {
+  const palette = ['#7FC4A6','#B6B0E0','#EFB59B','#F3C0CD','#D5BE7C','#8BB7C7','#C99393','#A8C29A','#D6A78A','#9CADD0'];
+  const key = (city || '').toLowerCase();
+  let h = 0;
+  for (let i = 0; i < key.length; i++) h = (h * 31 + key.charCodeAt(i)) | 0;
+  return palette[Math.abs(h) % palette.length];
+}
+
+function renderItinerary() {
+  const panel = $('#itinerary-panel');
+  const trip = state.currentTrip;
+  const rawStops = trip ? state.itineraries[trip] : null;
+  if (!trip || !rawStops || rawStops.length < 2) { panel.hidden = true; return; }
+  panel.hidden = false;
+
+  $('#itinerary-title').textContent = trip + ' · itinerary';
+
+  // Step 1. Compute time spent at each stop (in days). Identify transit (< 12 hours).
+  const stops = rawStops.map(s => {
+    const knownBoth = s.arrives && s.departs;
+    const hours = knownBoth ? (s.departs - s.arrives) / (1000 * 60 * 60) : null;
+    const isTransit = hours !== null && hours < 12 && s.city.toLowerCase() !== 'home';
+    let nights = 0;
+    if (knownBoth) nights = Math.max(0, Math.round(hours / 24));
+    return { ...s, nights, isTransit, knownBoth };
+  });
+
+  // Step 2. Fold transit stops into a note on the previous transition.
+  // We do this by attaching a "via X at time" hint to the *next* segment's departure label.
+  const merged = [];
+  for (let i = 0; i < stops.length; i++) {
+    const s = stops[i];
+    if (s.isTransit) {
+      // Attach via note to the previous merged item's outgoing transition
+      const note = `via ${s.city}${s.arrives ? ' ' + d(s.arrives, true) : ''}`;
+      if (merged.length) {
+        merged[merged.length - 1].outgoingExtra = (merged[merged.length - 1].outgoingExtra ? merged[merged.length - 1].outgoingExtra + ' · ' : '') + note;
+      }
+      continue;
+    }
+    merged.push({ ...s });
+  }
+
+  // Step 3. Decide nights per visible stop. For Home bookends and stops with unknown dates, use fallbacks.
+  const HOME_BUFFER = 2;
+  const FALLBACK = 3; // used when both dates unknown for a real city stay
+  merged.forEach((s, i) => {
+    const isHome = s.city.toLowerCase() === 'home';
+    if (isHome) {
+      s.unitWidth = HOME_BUFFER;
+      return;
+    }
+    if (s.knownBoth) {
+      s.unitWidth = Math.max(1, s.nights);
+    } else {
+      s.unitWidth = FALLBACK;
+    }
+  });
+
+  const totalUnits = merged.reduce((s, x) => s + x.unitWidth, 0);
+  if (totalUnits <= 0) { panel.hidden = true; return; }
+
+  // Footer total: sum of computed nights for non-home stops; if some unknown, prefix with "approx".
+  const realStops = merged.filter(s => s.city.toLowerCase() !== 'home');
+  const anyUnknown = realStops.some(s => !s.knownBoth);
+  const totalNights = realStops.reduce((s, x) => s + (x.knownBoth ? x.nights : 0), 0);
+  $('#itinerary-meta').textContent = (anyUnknown ? '~' : '') + totalNights + ' nights away in total';
+
+  // SVG layout
+  const padL = 16, padR = 16;
+  const width  = 1100;
+  const inner  = width - padL - padR;
+  const barH   = 56;
+  const barY   = 110;
+  const bottomLabelY = barY + barH + 22;
+
+  let x = padL;
+  const segEls = [];
+  const labelTopEls = [];
+  const labelBottomEls = [];
+  const tickEls = [];
+
+  merged.forEach((s, i) => {
+    const w = (s.unitWidth / totalUnits) * inner;
+    const isHome = s.city.toLowerCase() === 'home';
+    const fill = isHome ? '#EFE9DA' : colorForCity(s.city);
+    const rL = i === 0 ? 14 : 0;
+    const rR = i === merged.length - 1 ? 14 : 0;
+    const x2 = x + w;
+    const pathD = `M ${x + rL} ${barY} ` +
+                  `H ${x2 - rR} ` +
+                  (rR ? `Q ${x2} ${barY} ${x2} ${barY + rR} ` : '') +
+                  `V ${barY + barH - rR} ` +
+                  (rR ? `Q ${x2} ${barY + barH} ${x2 - rR} ${barY + barH} ` : '') +
+                  `H ${x + rL} ` +
+                  (rL ? `Q ${x} ${barY + barH} ${x} ${barY + barH - rL} ` : '') +
+                  `V ${barY + rL} ` +
+                  (rL ? `Q ${x} ${barY} ${x + rL} ${barY} ` : '') + 'Z';
+    segEls.push(`<path d="${pathD}" fill="${fill}" />`);
+
+    if (!isHome && s.unitWidth > 0) {
+      for (let n = 1; n < s.unitWidth; n++) {
+        const tx = x + (n / s.unitWidth) * w;
+        tickEls.push(`<line x1="${tx}" x2="${tx}" y1="${barY + 6}" y2="${barY + barH - 6}" stroke="rgba(255,255,255,0.55)" stroke-width="1" />`);
+      }
+    }
+
+    const cx = x + w / 2;
+    if (!isHome) {
+      labelTopEls.push(`<text x="${cx}" y="${barY - 32}" text-anchor="middle" font-family="Manrope, sans-serif" font-size="16" font-weight="500" fill="${fill}">${escapeHtml(s.city)}</text>`);
+      const nightsText = s.knownBoth ? String(s.nights) : '?';
+      labelTopEls.push(`<text x="${cx}" y="${barY + barH/2 + 4}" text-anchor="middle" font-family="Fraunces, serif" font-size="22" font-weight="500" fill="#2A2822">${nightsText}</text>`);
+      labelTopEls.push(`<text x="${cx}" y="${barY + barH/2 + 22}" text-anchor="middle" font-family="Manrope, sans-serif" font-size="11" fill="#5E574B">nights</text>`);
+    } else {
+      labelTopEls.push(`<text x="${cx}" y="${barY + barH/2 + 4}" text-anchor="middle" font-family="Manrope, sans-serif" font-size="12" fill="#8F897A">Home</text>`);
+    }
+
+    // Bottom: transition labels at this stop's outgoing edge
+    if (s.departs) {
+      const tx = x + w;
+      const offset = (i % 2 === 0) ? 0 : 44;
+      const dateLine = s.departs.toLocaleDateString('en-AU', { weekday: 'short', day: 'numeric', month: 'short' });
+      let timeLine = (isHome ? 'fly out ' : 'fly ') + d(s.departs, true);
+      if (s.outgoingExtra) timeLine += ' · ' + s.outgoingExtra;
+      labelBottomEls.push(`<line x1="${tx}" x2="${tx}" y1="${barY + barH}" y2="${bottomLabelY + offset - 4}" stroke="#C9C0AB" stroke-width="1" />`);
+      labelBottomEls.push(`<text x="${tx}" y="${bottomLabelY + offset + 8}" text-anchor="middle" font-family="Manrope, sans-serif" font-size="12" font-weight="600" fill="#2A2822">${escapeHtml(dateLine)}</text>`);
+      labelBottomEls.push(`<text x="${tx}" y="${bottomLabelY + offset + 26}" text-anchor="middle" font-family="Manrope, sans-serif" font-size="11" fill="#5E574B">${escapeHtml(timeLine)}</text>`);
+    } else if (isHome && s.arrives && i === merged.length - 1) {
+      const tx = x + w / 2;
+      const dateLine = s.arrives.toLocaleDateString('en-AU', { weekday: 'short', day: 'numeric', month: 'short' });
+      const timeLine = 'fly home ' + d(s.arrives, true);
+      labelBottomEls.push(`<text x="${tx}" y="${bottomLabelY + 8}" text-anchor="middle" font-family="Manrope, sans-serif" font-size="12" font-weight="600" fill="#2A2822">${escapeHtml(dateLine)}</text>`);
+      labelBottomEls.push(`<text x="${tx}" y="${bottomLabelY + 26}" text-anchor="middle" font-family="Manrope, sans-serif" font-size="11" fill="#5E574B">${escapeHtml(timeLine)}</text>`);
+    }
+
+    x += w;
+  });
+
+  const svgH = bottomLabelY + 80;
+  const svg = `<svg viewBox="0 0 ${width} ${svgH}" preserveAspectRatio="xMinYMin meet" style="width: 100%; min-width: 720px; height: auto; display: block;" xmlns="http://www.w3.org/2000/svg">
+    ${segEls.join('')}
+    ${tickEls.join('')}
+    ${labelTopEls.join('')}
+    ${labelBottomEls.join('')}
+  </svg>`;
+  $('#itinerary-body').innerHTML = svg;
+}
+
+function d(dt, lowercase) {
+  let s = dt.toLocaleTimeString('en-AU', { hour: 'numeric', minute: '2-digit', hour12: true });
+  return lowercase ? s.toLowerCase() : s;
 }
 
 function renderSummary() {
@@ -1334,10 +1498,73 @@ async function onSignedIn() {
       showEmpty(`No year folders found. Create <code>OneDrive/Apps/Travel/2025/</code> with a <code>ledger.xlsx</code> inside.`);
       return;
     }
+    await loadItineraryFromCloud();
     await loadYear(state.years[0]);
   } catch (e) {
     showEmpty(`Could not load travel data: ${e.message}`);
   }
+}
+
+async function loadItineraryFromCloud() {
+  try {
+    const buf = await downloadFile(`${ONEDRIVE_ROOT}/itinerary.xlsx`);
+    const wb = XLSX.read(buf, { type: 'array', cellDates: true });
+    const sheetName = wb.SheetNames[0];
+    // Parse as array of arrays because the schema uses two columns both called "City"
+    const rows = XLSX.utils.sheet_to_json(wb.Sheets[sheetName], { header: 1, blankrows: false, defval: '' });
+    if (!rows.length) { state.itineraries = {}; return; }
+    // Drop header row
+    const dataRows = rows.slice(1);
+    // Columns: 0 Trip, 1 Order, 2 From City, 3 To City, 4 Departs, 5 Arrive
+    const bySegments = {};
+    for (const r of dataRows) {
+      const trip = (r[0] || '').toString().trim();
+      if (!trip) continue;
+      const seg = {
+        order:    Number(r[1]) || 0,
+        from:     (r[2] || '').toString().trim(),
+        to:       (r[3] || '').toString().trim(),
+        departs:  parseDateLoose(r[4]),
+        arrives:  parseDateLoose(r[5])
+      };
+      if (!seg.from || !seg.to) continue;
+      (bySegments[trip] = bySegments[trip] || []).push(seg);
+    }
+    // For each trip, sort by order then derive stops
+    const itineraries = {};
+    for (const [trip, segs] of Object.entries(bySegments)) {
+      segs.sort((a, b) => a.order - b.order);
+      itineraries[trip] = stopsFromSegments(segs);
+    }
+    state.itineraries = itineraries;
+  } catch (e) {
+    if (e && e.status === 404) { state.itineraries = {}; return; }
+    state.itineraries = {};
+    toast('Could not load itinerary.xlsx: ' + (e.message || 'unknown'));
+  }
+}
+
+function stopsFromSegments(segs) {
+  // Each segment is a flight/move from A to B. Stops are the chain of cities.
+  // First stop: from city of seg[0], departs at seg[0].departs (no arrives — trip start)
+  // Middle stop i (1..n-1): toCity of seg[i-1], arrives at seg[i-1].arrives, departs at seg[i].departs
+  // Last stop: toCity of seg[n-1], arrives at seg[n-1].arrives (no departs — trip end)
+  if (!segs.length) return [];
+  const stops = [];
+  stops.push({ city: segs[0].from, arrives: null, departs: segs[0].departs, notes: '' });
+  for (let i = 0; i < segs.length; i++) {
+    const arrives = segs[i].arrives;
+    const departs = (i < segs.length - 1) ? segs[i + 1].departs : null;
+    stops.push({ city: segs[i].to, arrives, departs, notes: '' });
+  }
+  return stops;
+}
+
+function parseDateLoose(v) {
+  if (!v) return null;
+  if (v instanceof Date) return isNaN(v.getTime()) ? null : v;
+  const d = new Date(v);
+  return isNaN(d.getTime()) ? null : d;
 }
 
 /* ============================================================
