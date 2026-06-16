@@ -1,0 +1,15 @@
+# App data lives in the SharePoint "Documents" library and is read at runtime via
+# the Graph API. It must never be committed to this PUBLIC repo or deployed to the
+# public website. Keep it out of git entirely.
+AppData/
+
+# Working notes, not part of the deployed site.
+HANDOFF.md
+
+# Data files must never be committed or deployed. The apps read all data from
+# SharePoint at runtime; nothing tabular belongs in this public repo. This also
+# catches stray files dropped into the app folders during local testing.
+*.xlsx
+*.xls
+*.csv
+*.tsv

@@ -725,8 +725,10 @@
    ============================================================ */
 const AZURE_CLIENT_ID = 'f455b7f0-a8ad-4d17-8752-7a8b709607d1';
 const AZURE_TENANT_ID = '91faaa92-6633-43b2-a302-8122e930e674';
-const GRAPH_SCOPES    = ['Files.ReadWrite', 'User.Read'];
-const ONEDRIVE_ROOT   = 'Apps/Travel';
+const GRAPH_SCOPES    = ['Files.ReadWrite', 'Sites.ReadWrite.All', 'User.Read'];
+// SharePoint Online: "Clients" site, default "Documents" library. graphFetch rewrites /me/drive to this.
+const SP_DRIVE        = '/sites/nemla.sharepoint.com,03c13251-4cec-4fd0-a9fc-ed0896c45745,4ae31160-74d6-4b1a-bbaf-89cd88ca1da2/drive';
+const ONEDRIVE_ROOT   = 'Nemla/Apps/nemla-dashboards-app/AppData/Travel';  // path within the SharePoint Documents library
 
 const COLORS = ['#B86842','#A07A1F','#3E6A88','#5B8C47','#8B5A8C','#C9A14A','#6B8E8E','#D08862','#7A8B5F','#A0526B'];
 const AUD = new Intl.NumberFormat('en-AU', { style: 'currency', currency: 'AUD', maximumFractionDigits: 0 });
@@ -881,6 +883,7 @@ async function getToken() {
 
 async function graphFetch(path, options = {}) {
   const token = await getToken();
+  if (path.indexOf('/me/drive') === 0) path = SP_DRIVE + path.slice(9);  // route to SharePoint, not personal OneDrive
   const res = await fetch('https://graph.microsoft.com/v1.0' + path, {
     ...options,
     headers: { 'Authorization': 'Bearer ' + token, ...(options.headers || {}) }
