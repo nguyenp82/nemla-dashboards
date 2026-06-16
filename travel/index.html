@@ -592,6 +592,15 @@
     <!-- Data view -->
     <div id="data-view" hidden>
 
+      <div class="panel" id="itinerary-panel" hidden style="margin-bottom: 24px; padding: 1.25rem 0.5rem 1rem;">
+        <div style="display: flex; justify-content: space-between; align-items: baseline; margin: 0 1rem 6px;">
+          <h3 id="itinerary-title">Itinerary</h3>
+          <div id="itinerary-meta" style="font-size: 12px; color: var(--text-faint); font-family: 'JetBrains Mono', monospace;"></div>
+        </div>
+        <div id="itinerary-body" style="overflow-x: auto;"></div>
+        <div style="font-size: 12px; color: var(--text-faint); margin: 6px 1rem 0;">Bar length shows time in each city &middot; one tick = one night</div>
+      </div>
+
       <div class="summary">
         <div class="stat">
           <div class="stat-label">Total spent</div>
@@ -613,15 +622,6 @@
           <div class="stat-value" id="stat-top-cat" style="font-size: 18px;">—</div>
           <div class="stat-sub" id="stat-top-cat-sub"></div>
         </div>
-      </div>
-
-      <div class="panel" id="itinerary-panel" hidden style="margin-bottom: 24px;">
-        <div style="display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 6px;">
-          <h3 id="itinerary-title">Itinerary</h3>
-          <div id="itinerary-meta" style="font-size: 12px; color: var(--text-faint); font-family: 'JetBrains Mono', monospace;"></div>
-        </div>
-        <div id="itinerary-body" style="overflow-x: auto;"></div>
-        <div style="font-size: 12px; color: var(--text-faint); margin-top: 6px;">Bar length shows time in each city &middot; one tick = one night</div>
       </div>
 
       <div class="charts">
@@ -1065,12 +1065,20 @@ function renderAll() {
   renderTable();
 }
 
-function colorForCity(city) {
-  const palette = ['#7FC4A6','#B6B0E0','#EFB59B','#F3C0CD','#D5BE7C','#8BB7C7','#C99393','#A8C29A','#D6A78A','#9CADD0'];
-  const key = (city || '').toLowerCase();
-  let h = 0;
-  for (let i = 0; i < key.length; i++) h = (h * 31 + key.charCodeAt(i)) | 0;
-  return palette[Math.abs(h) % palette.length];
+// Palette used to assign a unique colour to each city in a trip, in the order they appear.
+const CITY_PALETTE = ['#7FC4A6','#B6B0E0','#EFB59B','#F3C0CD','#D5BE7C','#8BB7C7','#C99393','#A8C29A','#9CADD0','#E2A7C0','#A6C9B5','#D2B48C'];
+
+function buildCityColorMap(stops) {
+  const map = {};
+  let i = 0;
+  for (const s of stops) {
+    const key = (s.city || '').toLowerCase();
+    if (!key || key === 'home') continue;
+    if (map[key]) continue;            // same city repeated keeps the same colour
+    map[key] = CITY_PALETTE[i % CITY_PALETTE.length];
+    i++;
+  }
+  return map;
 }
 
 function renderItinerary() {
@@ -1092,65 +1100,45 @@ function renderItinerary() {
     return { ...s, nights, isTransit, knownBoth };
   });
 
-  // Step 2. Fold transit stops into a note on the previous transition.
-  // We do this by attaching a "via X at time" hint to the *next* segment's departure label.
-  const merged = [];
-  for (let i = 0; i < stops.length; i++) {
-    const s = stops[i];
-    if (s.isTransit) {
-      // Attach via note to the previous merged item's outgoing transition
-      const note = `via ${s.city}${s.arrives ? ' ' + d(s.arrives, true) : ''}`;
-      if (merged.length) {
-        merged[merged.length - 1].outgoingExtra = (merged[merged.length - 1].outgoingExtra ? merged[merged.length - 1].outgoingExtra + ' · ' : '') + note;
-      }
-      continue;
-    }
-    merged.push({ ...s });
-  }
+  // Step 2. Drop transit stops entirely. We no longer add a "via X" note to the previous transition.
+  const merged = stops.filter(s => !s.isTransit).map(s => ({ ...s }));
 
   // Step 3. Decide nights per visible stop. For Home bookends and stops with unknown dates, use fallbacks.
   const HOME_BUFFER = 2;
-  const FALLBACK = 3; // used when both dates unknown for a real city stay
-  merged.forEach((s, i) => {
+  const FALLBACK = 3;
+  merged.forEach((s) => {
     const isHome = s.city.toLowerCase() === 'home';
-    if (isHome) {
-      s.unitWidth = HOME_BUFFER;
-      return;
-    }
-    if (s.knownBoth) {
-      s.unitWidth = Math.max(1, s.nights);
-    } else {
-      s.unitWidth = FALLBACK;
-    }
+    if (isHome)            { s.unitWidth = HOME_BUFFER; return; }
+    if (s.knownBoth)       { s.unitWidth = Math.max(1, s.nights); return; }
+    s.unitWidth = FALLBACK;
   });
 
   const totalUnits = merged.reduce((s, x) => s + x.unitWidth, 0);
   if (totalUnits <= 0) { panel.hidden = true; return; }
 
-  // Footer total: sum of computed nights for non-home stops; if some unknown, prefix with "approx".
   const realStops = merged.filter(s => s.city.toLowerCase() !== 'home');
   const anyUnknown = realStops.some(s => !s.knownBoth);
   const totalNights = realStops.reduce((s, x) => s + (x.knownBoth ? x.nights : 0), 0);
   $('#itinerary-meta').textContent = (anyUnknown ? '~' : '') + totalNights + ' nights away in total';
 
-  // SVG layout
-  const padL = 16, padR = 16;
-  const width  = 1100;
-  const inner  = width - padL - padR;
-  const barH   = 56;
-  const barY   = 110;
+  // Build per-trip colour map so every distinct city has a different colour.
+  const cityColors = buildCityColorMap(merged);
+
+  // SVG layout: bar goes edge to edge (no internal horizontal padding)
+  const width  = 1200;
+  const padL = 0, padR = 0;
+  const inner = width - padL - padR;
+  const barH = 56;
+  const barY = 110;
   const bottomLabelY = barY + barH + 22;
 
   let x = padL;
-  const segEls = [];
-  const labelTopEls = [];
-  const labelBottomEls = [];
-  const tickEls = [];
+  const segEls = [], labelTopEls = [], labelBottomEls = [], tickEls = [];
 
   merged.forEach((s, i) => {
     const w = (s.unitWidth / totalUnits) * inner;
     const isHome = s.city.toLowerCase() === 'home';
-    const fill = isHome ? '#EFE9DA' : colorForCity(s.city);
+    const fill = isHome ? '#EFE9DA' : (cityColors[s.city.toLowerCase()] || '#B86842');
     const rL = i === 0 ? 14 : 0;
     const rR = i === merged.length - 1 ? 14 : 0;
     const x2 = x + w;
@@ -1182,29 +1170,23 @@ function renderItinerary() {
       labelTopEls.push(`<text x="${cx}" y="${barY + barH/2 + 4}" text-anchor="middle" font-family="Manrope, sans-serif" font-size="12" fill="#8F897A">Home</text>`);
     }
 
-    // Bottom: transition labels at this stop's outgoing edge
+    // Bottom: transition labels at this stop's outgoing edge. No "via X" note any more.
     if (s.departs) {
       const tx = x + w;
       const offset = (i % 2 === 0) ? 0 : 44;
+      const isLastBeforeHome = (i + 1 < merged.length) && merged[i + 1].city.toLowerCase() === 'home';
       const dateLine = s.departs.toLocaleDateString('en-AU', { weekday: 'short', day: 'numeric', month: 'short' });
-      let timeLine = (isHome ? 'fly out ' : 'fly ') + d(s.departs, true);
-      if (s.outgoingExtra) timeLine += ' · ' + s.outgoingExtra;
+      const timeLine = (isHome ? 'fly out ' : (isLastBeforeHome ? 'fly home ' : 'fly ')) + d(s.departs, true);
       labelBottomEls.push(`<line x1="${tx}" x2="${tx}" y1="${barY + barH}" y2="${bottomLabelY + offset - 4}" stroke="#C9C0AB" stroke-width="1" />`);
       labelBottomEls.push(`<text x="${tx}" y="${bottomLabelY + offset + 8}" text-anchor="middle" font-family="Manrope, sans-serif" font-size="12" font-weight="600" fill="#2A2822">${escapeHtml(dateLine)}</text>`);
       labelBottomEls.push(`<text x="${tx}" y="${bottomLabelY + offset + 26}" text-anchor="middle" font-family="Manrope, sans-serif" font-size="11" fill="#5E574B">${escapeHtml(timeLine)}</text>`);
-    } else if (isHome && s.arrives && i === merged.length - 1) {
-      const tx = x + w / 2;
-      const dateLine = s.arrives.toLocaleDateString('en-AU', { weekday: 'short', day: 'numeric', month: 'short' });
-      const timeLine = 'fly home ' + d(s.arrives, true);
-      labelBottomEls.push(`<text x="${tx}" y="${bottomLabelY + 8}" text-anchor="middle" font-family="Manrope, sans-serif" font-size="12" font-weight="600" fill="#2A2822">${escapeHtml(dateLine)}</text>`);
-      labelBottomEls.push(`<text x="${tx}" y="${bottomLabelY + 26}" text-anchor="middle" font-family="Manrope, sans-serif" font-size="11" fill="#5E574B">${escapeHtml(timeLine)}</text>`);
     }
 
     x += w;
   });
 
   const svgH = bottomLabelY + 80;
-  const svg = `<svg viewBox="0 0 ${width} ${svgH}" preserveAspectRatio="xMinYMin meet" style="width: 100%; min-width: 720px; height: auto; display: block;" xmlns="http://www.w3.org/2000/svg">
+  const svg = `<svg viewBox="0 0 ${width} ${svgH}" preserveAspectRatio="xMidYMid meet" style="width: 100%; height: auto; display: block;" xmlns="http://www.w3.org/2000/svg">
     ${segEls.join('')}
     ${tickEls.join('')}
     ${labelTopEls.join('')}
