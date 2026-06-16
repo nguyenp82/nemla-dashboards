@@ -1290,30 +1290,58 @@ function renderCategoryChart() {
   if (state.charts.category) state.charts.category.destroy();
   const ctx = document.getElementById('chart-category').getContext('2d');
   state.charts.category = new Chart(ctx, {
-    type: 'doughnut',
+    type: 'bar',
     data: {
       labels: entries.map(e => e[0]),
       datasets: [{
         data: entries.map(e => e[1]),
         backgroundColor: entries.map((_, i) => COLORS[i % COLORS.length]),
-        borderWidth: 2,
-        borderColor: '#FDFBF7'
+        borderRadius: 6,
+        borderSkipped: false
       }]
     },
     options: {
+      indexAxis: 'y',
       responsive: true,
       maintainAspectRatio: false,
-      cutout: '62%',
+      layout: { padding: { right: 70 } },   // room for the value labels at the bar ends
       plugins: {
-        legend: {
-          position: 'right',
-          labels: { font: { family: 'Manrope', size: 12 }, color: '#5E574B', boxWidth: 10, padding: 10 }
-        },
+        legend: { display: false },
         tooltip: {
-          callbacks: { label: (ctx) => ctx.label + ': ' + AUD.format(ctx.parsed) }
+          callbacks: { label: (ctx) => AUD.format(ctx.parsed.x) }
+        }
+      },
+      scales: {
+        x: {
+          grid: { color: '#F1ECE2' },
+          ticks: {
+            font: { family: 'Manrope', size: 11 },
+            color: '#8F897A',
+            callback: (v) => AUD.format(v)
+          }
+        },
+        y: {
+          grid: { display: false },
+          ticks: { font: { family: 'Manrope', size: 12 }, color: '#5E574B' }
         }
       }
-    }
+    },
+    plugins: [{
+      id: 'categoryValueLabels',
+      afterDatasetsDraw(chart) {
+        const c = chart.ctx;
+        const meta = chart.getDatasetMeta(0);
+        c.save();
+        c.font = '600 11px Manrope, sans-serif';
+        c.fillStyle = '#5E574B';
+        c.textBaseline = 'middle';
+        c.textAlign = 'left';
+        meta.data.forEach((bar, i) => {
+          c.fillText(AUD.format(chart.data.datasets[0].data[i]), bar.x + 8, bar.y);
+        });
+        c.restore();
+      }
+    }]
   });
 }
 
