@@ -64,19 +64,18 @@
     border-left: none !important;
     border-right: none !important;
   }
-  .hotel-callouts { position: relative; width: 100%; height: 130px; pointer-events: none; }
+  .hotel-callouts { position: relative; width: 100%; height: 230px; pointer-events: none; }
   .hotel-callout { position: absolute; bottom: 0; transform: translateX(-50%); display: flex; flex-direction: column; align-items: center; }
   .hotel-callout-img {
-    width: 140px; height: 88px; object-fit: cover; border-radius: 8px;
-    border: 2px solid var(--surface); box-shadow: 0 2px 6px rgba(0,0,0,0.12); background: var(--surface-2);
+    width: 280px; height: 176px; object-fit: cover; border-radius: 10px;
+    border: 2px solid var(--surface); box-shadow: 0 3px 10px rgba(0,0,0,0.14); background: var(--surface-2);
   }
   .hotel-callout-name {
     margin-top: 6px;
-    font-family: 'Manrope', sans-serif; font-size: 12px; font-weight: 600; color: var(--text);
-    background: var(--surface); padding: 3px 8px; border-radius: 4px; border: 1px solid var(--border);
+    font-family: 'Manrope', sans-serif; font-size: 13px; font-weight: 600; color: var(--text);
+    background: var(--surface); padding: 4px 10px; border-radius: 4px; border: 1px solid var(--border);
     white-space: nowrap;
   }
-  .hotel-callout-stem { width: 1px; height: 14px; background: var(--border-strong, #C9C0AB); }
 
   /* ---------- top bar ---------- */
   .topbar {
@@ -1151,7 +1150,7 @@ function renderItinerary() {
   const width  = 1200;
   const padL = 0, padR = 0;
   const inner = width - padL - padR;
-  const barH = 56;
+  const barH = 45;                    // bar height reduced by ~20% from 56
   const barY = 110;
   const bottomLabelY = barY + barH + 22;
 
@@ -1185,10 +1184,14 @@ function renderItinerary() {
 
     const cx = x + w / 2;
     if (!isHome) {
+      // Connecting line from the HTML hotel callout above down to just above the city name label
+      if (s.hotel) {
+        labelTopEls.push(`<line x1="${cx}" x2="${cx}" y1="0" y2="${barY - 46}" stroke="${fill}" stroke-width="1.5" />`);
+      }
       labelTopEls.push(`<text x="${cx}" y="${barY - 32}" text-anchor="middle" font-family="Manrope, sans-serif" font-size="16" font-weight="500" fill="${fill}">${escapeHtml(s.city)}</text>`);
       const nightsText = s.knownBoth ? String(s.nights) : '?';
-      labelTopEls.push(`<text x="${cx}" y="${barY + barH/2 + 4}" text-anchor="middle" font-family="Fraunces, serif" font-size="22" font-weight="500" fill="#2A2822">${nightsText}</text>`);
-      labelTopEls.push(`<text x="${cx}" y="${barY + barH/2 + 22}" text-anchor="middle" font-family="Manrope, sans-serif" font-size="11" fill="#5E574B">nights</text>`);
+      labelTopEls.push(`<text x="${cx}" y="${barY + barH/2 + 2}" text-anchor="middle" font-family="Fraunces, serif" font-size="22" font-weight="500" fill="#2A2822">${nightsText}</text>`);
+      labelTopEls.push(`<text x="${cx}" y="${barY + barH/2 + 18}" text-anchor="middle" font-family="Manrope, sans-serif" font-size="11" fill="#5E574B">nights</text>`);
     } else {
       labelTopEls.push(`<text x="${cx}" y="${barY + barH/2 + 4}" text-anchor="middle" font-family="Manrope, sans-serif" font-size="12" fill="#8F897A">Home</text>`);
     }
@@ -1232,7 +1235,6 @@ function renderItinerary() {
       <div class="hotel-callout" style="left: ${centerPct}%;">
         <img class="hotel-callout-img" data-hotel-img="${escapeHtml(imgRef)}" alt="${safeName}" ${imgRef ? '' : 'style="display:none;"'}>
         <div class="hotel-callout-name">${safeName}</div>
-        <div class="hotel-callout-stem"></div>
       </div>
     `);
   });
