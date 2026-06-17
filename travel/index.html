@@ -292,6 +292,8 @@
     gap: 14px;
     margin-bottom: 1.5rem;
   }
+  /* When the By trip chart is hidden (single trip), let By category span the full row. */
+  .charts.single { grid-template-columns: 1fr; }
   @media (max-width: 800px) {
     .charts { grid-template-columns: 1fr; }
   }
@@ -1348,12 +1350,15 @@ function renderCategoryChart() {
 function renderTripChart() {
   // When filtering to a single trip, the By trip chart would be a single bar; hide its panel instead.
   const panel = document.getElementById('chart-trip')?.closest('.panel');
+  const chartsEl = panel?.closest('.charts');
   if (state.currentTrip) {
     if (state.charts.trip) { state.charts.trip.destroy(); state.charts.trip = null; }
     if (panel) panel.hidden = true;
+    if (chartsEl) chartsEl.classList.add('single');   // By category spans full width
     return;
   }
   if (panel) panel.hidden = false;
+  if (chartsEl) chartsEl.classList.remove('single');
 
   const txs = getActiveTransactions();
   const byTrip = {};
