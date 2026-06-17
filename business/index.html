@@ -685,10 +685,12 @@ function parseDate(v) {
     const date = new Date(parseInt(y), parseInt(mo)-1, parseInt(d));
     if (!isNaN(date)) return date;
   }
-  // DD Mon YY / DD Month YYYY
-  m = s.match(/^(\d{1,2})\s+([A-Za-z]{3,9})\s+(\d{2,4})$/);
+  // DD Mon YY / DD-Mon-YY / DD Month YYYY (month name, separated by space, dash, or slash)
+  m = s.match(/^(\d{1,2})[\s\-\/]+([A-Za-z]{3,9})[\s\-\/]+(\d{2,4})$/);
   if (m) {
-    const date = new Date(m[1] + ' ' + m[2] + ' ' + m[3]);
+    let y = m[3];
+    if (y.length === 2) y = (parseInt(y) > 50 ? '19' : '20') + y;
+    const date = new Date(m[1] + ' ' + m[2] + ' ' + y);
     if (!isNaN(date)) return date;
   }
   // YYYY-MM-DD
