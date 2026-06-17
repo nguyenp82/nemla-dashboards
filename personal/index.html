@@ -428,7 +428,7 @@
       <div class="panel-header">
         <div>
           <div class="panel-title">Monthly <em>commitments</em></div>
-          <div class="panel-subtitle">Recurring costs you marked in column B of rules.xlsx, excluding mortgage. Each shows its most recent month's amount.</div>
+          <div class="panel-subtitle">Recurring costs you marked in column B of rules.xlsx, excluding mortgage. Each shows its most recent month's amount across all your data (not affected by the period filter).</div>
         </div>
         <div class="panel-meta" id="commitments-total"></div>
       </div>
@@ -941,7 +941,7 @@ function render() {
   renderCreditCardSpend(filtered);
   renderCategoryChart(agg);
   renderCategoryList(agg);
-  renderCommitments(filtered);
+  renderCommitments();
   renderCategoryFilter();
   renderTransactions(filtered);
   renderBrandMeta();
@@ -1191,15 +1191,16 @@ function renderCategoryList(agg) {
   });
 }
 
-function renderCommitments(filtered) {
+function renderCommitments() {
   const panel = $('#commitments-panel');
   // Recurring patterns are those flagged in column B of rules.xlsx; mortgage is excluded by design.
   const recRules = state.fileRules.filter(r => r.recurring && r.category !== 'Mortgage & Loans');
   if (!recRules.length) { if (panel) panel.hidden = true; return; }
 
-  // Match each outflow in the selected period to the first recurring pattern it contains (no double counting).
+  // Scan ALL transactions (not the selected period) so the figure is a stable, current commitment.
+  // Each outflow maps to the first recurring pattern it contains (first-match-wins, no double counting).
   const byPattern = {};
-  filtered.forEach(t => {
+  state.transactions.forEach(t => {
     if (t.amount >= 0) return;
     const d = t.description.toLowerCase();
     const rule = recRules.find(r => r.pattern && d.includes(r.pattern.toLowerCase()));
