@@ -424,6 +424,17 @@
       </div>
     </div>
 
+    <div class="panel" id="commitments-panel" hidden>
+      <div class="panel-header">
+        <div>
+          <div class="panel-title">Monthly <em>commitments</em></div>
+          <div class="panel-subtitle">Recurring costs you marked in column B of rules.xlsx, excluding mortgage. Each shows its most recent month's amount.</div>
+        </div>
+        <div class="panel-meta" id="commitments-total"></div>
+      </div>
+      <div class="cat-list" id="commitments-list"></div>
+    </div>
+
     <div class="panel">
       <div class="panel-header">
         <div>
@@ -930,6 +941,7 @@ function render() {
   renderCreditCardSpend(filtered);
   renderCategoryChart(agg);
   renderCategoryList(agg);
+  renderCommitments(filtered);
   renderCategoryFilter();
   renderTransactions(filtered);
   renderBrandMeta();
@@ -1177,6 +1189,52 @@ function renderCategoryList(agg) {
       document.querySelector('.panel .tx-head')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
     };
   });
+}
+
+function renderCommitments(filtered) {
+  const panel = $('#commitments-panel');
+  // Recurring patterns are those flagged in column B of rules.xlsx; mortgage is excluded by design.
+  const recRules = state.fileRules.filter(r => r.recurring && r.category !== 'Mortgage & Loans');
+  if (!recRules.length) { if (panel) panel.hidden = true; return; }
+
+  // Match each outflow in the selected period to the first recurring pattern it contains (no double counting).
+  const byPattern = {};
+  filtered.forEach(t => {
+    if (t.amount >= 0) return;
+    const d = t.description.toLowerCase();
+    const rule = recRules.find(r => r.pattern && d.includes(r.pattern.toLowerCase()));
+    if (!rule) return;
+    const key = rule.pattern.toLowerCase();
+    const ym = t.date.getFullYear() + '-' + String(t.date.getMonth() + 1).padStart(2, '0');
+    if (!byPattern[key]) byPattern[key] = { label: rule.pattern, category: rule.category, months: {} };
+    byPattern[key].months[ym] = (byPattern[key].months[ym] || 0) + Math.abs(t.amount);
+  });
+
+  // For each pattern take its most recent month's total = the current monthly commitment.
+  const items = Object.values(byPattern).map(p => {
+    const latest = Object.keys(p.months).sort().pop();
+    return { label: p.label, category: p.category, monthly: p.months[latest] || 0 };
+  }).filter(i => i.monthly > 0).sort((a, b) => b.monthly - a.monthly);
+
+  if (!items.length) { if (panel) panel.hidden = true; return; }
+  if (panel) panel.hidden = false;
+
+  const total = items.reduce((s, i) => s + i.monthly, 0);
+  $('#commitments-total').textContent = fmt.money(total) + ' / mo';
+  $('#commitments-list').innerHTML = items.map(i => {
+    const pct = total > 0 ? (i.monthly / total * 100) : 0;
+    const color = CATEGORY_COLORS[i.category] || '#8B7D6B';
+    const name = i.label.replace(/\b\w/g, c => c.toUpperCase());
+    return `
+      <div class="cat-row">
+        <span class="cat-swatch" style="background:${color}"></span>
+        <span class="cat-name">${escapeHtml(name)}</span>
+        <span class="cat-pct">${escapeHtml(i.category)}</span>
+        <span class="cat-amount">${fmt.money(i.monthly)}</span>
+        <div class="cat-bar-wrap"><div class="cat-bar" style="width:${pct}%;background:${color}"></div></div>
+      </div>
+    `;
+  }).join('');
 }
 
 function renderCategoryFilter() {
@@ -1662,7 +1720,9 @@ async function loadXlsxRulesFromCloud() {
       for (let i = startIdx; i < rows.length; i++) {
         const pattern = (rows[i][0] || '').toString().trim();
         if (!pattern) continue;
-        out.push({ pattern, category });
+        // Column B: any non-empty mark (e.g. "x") flags this pattern as a recurring monthly commitment.
+        const recurring = (rows[i][1] || '').toString().trim() !== '';
+        out.push({ pattern, category, recurring });
       }
       tabs++;
     }
