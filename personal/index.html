@@ -1197,10 +1197,13 @@ function renderCommitments() {
   const recRules = state.fileRules.filter(r => r.recurring && r.category !== 'Mortgage & Loans');
   if (!recRules.length) { if (panel) panel.hidden = true; return; }
 
-  // Scan ALL transactions (not the selected period) so the figure is a stable, current commitment.
-  // Each outflow maps to the first recurring pattern it contains (first-match-wins, no double counting).
+  // Use every month's data (loaded once into state.allTx) so the figure is stable and not tied to
+  // the single month shown in the main view. Each outflow maps to the first recurring pattern it
+  // contains (first-match-wins, no double counting).
+  const txs = state.allTx;
+  if (!txs) { if (panel) panel.hidden = true; return; }   // all-months data not loaded yet
   const byPattern = {};
-  state.transactions.forEach(t => {
+  txs.forEach(t => {
     if (t.amount >= 0) return;
     const d = t.description.toLowerCase();
     const rule = recRules.find(r => r.pattern && d.includes(r.pattern.toLowerCase()));
@@ -1690,6 +1693,38 @@ async function downloadCSV(year, month, filename) {
   return await res.text();
 }
 
+// The main view loads one month at a time. This loads EVERY month's CSVs once, so cross-period
+// features (the Monthly commitments panel) can see all data. Cached on state.allTx.
+async function loadAllTransactions() {
+  const all = [];
+  const fileTypes = {};
+  for (const y of (state.availableYears || [])) {
+    for (const m of (state.availableMonths[y] || [])) {
+      let items;
+      try { items = await listDriveChildren(ONEDRIVE_ROOT + '/' + y + '/' + m); }
+      catch (e) { continue; }
+      const csvs = (items || []).filter(f => f.file && /\.csv$/i.test(f.name));
+      for (const f of csvs) {
+        try {
+          const text = await downloadCSV(y, m, f.name);
+          const txs = parseCSVContent(text, f.name);
+          if (!txs.length) continue;
+          const type = detectFileType(txs, f.name);
+          txs.forEach(t => { fileTypes[t.source] = type; });
+          all.push(...txs);
+        } catch (e) { /* skip unreadable file */ }
+      }
+    }
+  }
+  // Categorise the same way the live month view does.
+  all.forEach(t => {
+    t.category = autoCategorise(t.description);
+    if (fileTypes[t.source] === 'card' && t.amount > 0) t.category = 'Credit Card Payment';
+  });
+  state.allTx = all;
+  log('Loaded ' + all.length + ' transactions across all months for commitments.');
+}
+
 async function loadRulesFromCloud() {
   try {
     const res = await graphFetch('/me/drive/root:/' + encodePath(ONEDRIVE_ROOT + '/rules.json') + ':/content');
@@ -1780,6 +1815,8 @@ async function onSignedIn() {
       render();
       toast('Signed in. Drop CSVs into OneDrive/' + ONEDRIVE_ROOT + '/YYYY/MM/ then refresh.');
     }
+    // Background-load every month so the commitments panel reflects all data, not just the shown month.
+    loadAllTransactions().then(renderCommitments).catch(e => log('Commitments load failed: ' + e.message));
   } catch (e) {
     log('Post sign in failed: ' + e.message);
     toast('Error after sign in: ' + e.message);
