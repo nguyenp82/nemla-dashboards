@@ -10,7 +10,6 @@
 <script src="https://cdn.jsdelivr.net/npm/@azure/msal-browser@3/lib/msal-browser.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/fflate@0.8.2/umd/index.js"></script>
 <style>
   :root {
     --bg: #F7F4EE;
@@ -754,10 +753,7 @@ const state = {
   transactions: [],   // [{ date, category, amount, trip, vendor, notes, receipt }]
   itineraries: {},    // { 'Vietnam 2026': [{ order, city, arrives, departs, notes, color }, ...] }
   charts: { category: null, trip: null },
-  receiptCache: {},   // { 'year/filename': blobUrl }
-  ledgerBytes: null,  // raw bytes of the loaded year's ledger.xlsx (for surgical status write-back)
-  ledgerPath: '',     // OneDrive/SharePoint path of the loaded ledger
-  ledgerMeta: {}      // { sheetName: { headerRow, statusCol } }
+  receiptCache: {}    // { 'year/filename': blobUrl }
 };
 
 function getActiveTransactions() {
@@ -983,8 +979,6 @@ async function loadYear(year) {
 
   try {
     const buf = await downloadFile(`${ONEDRIVE_ROOT}/${year}/ledger.xlsx`);
-    state.ledgerBytes = new Uint8Array(buf);
-    state.ledgerPath = `${ONEDRIVE_ROOT}/${year}/ledger.xlsx`;
     const wb = XLSX.read(buf, { type: 'array', cellDates: true });
     state.transactions = parseLedger(wb, year);
     if (state.transactions.length === 0) {
@@ -1004,7 +998,6 @@ async function loadYear(year) {
 
 function parseLedger(wb, year) {
   const txs = [];
-  state.ledgerMeta = {};
   // Read every sheet that isn't "Read me" or "Categories"
   for (const sheetName of wb.SheetNames) {
     if (/^(read ?me|categories)$/i.test(sheetName)) continue;
@@ -1034,9 +1027,6 @@ function parseLedger(wb, year) {
     const idxNotes    = colIdx('notes');
     const idxReceipt  = headers.findIndex(h => h.includes('receipt'));
     const idxStatus   = colIdx('status');
-    // Where the Status column lives (or will live) for write-back: existing column, else next free one.
-    const statusColIdx = idxStatus >= 0 ? idxStatus : headers.length;
-    state.ledgerMeta[sheetName] = { headerRow: headerIdx + 1, statusCol: colLetter(statusColIdx) };
 
     for (let i = headerIdx + 1; i < rows.length; i++) {
       const r = rows[i] || [];
@@ -1503,114 +1493,6 @@ function statusInfo(s) {
   if (l === 'not paid' || l.includes('nothing paid') || l === 'booked') return { label: 'Not Paid', cls: 'status-notpaid' };
   return { label: v, cls: v ? 'status-other' : '' };
 }
-
-/* ============================================================
-   PAYMENT STATUS  — editable in the table, written back into the
-   ledger.xlsx Status column WITHOUT disturbing formulas, dropdowns,
-   colours or number formats (surgical cell-level edit via fflate).
-   ============================================================ */
-const STATUS_OPTIONS = ['Fully Paid', 'Deposit', 'Booked (Nothing Paid)'];
-
-function setRowStatus(el) {
-  const sheet = el.dataset.sheet;
-  const row = parseInt(el.dataset.row, 10);
-  const value = el.value;
-  const tx = state.transactions.find(t => t._sheet === sheet && t._row === row);
-  if (tx) tx.status = value;
-  saveLedgerStatus(sheet, row, value);
-}
-window.setRowStatus = setRowStatus;
-
-let ledgerSaveTimer = null;
-function saveLedgerStatus(sheet, row, value) {
-  if (!state.ledgerBytes) { toast('Ledger not loaded yet'); return; }
-  if (typeof fflate === 'undefined') { toast('Could not load the zip library; status not saved'); return; }
-  try {
-    state.ledgerBytes = applyStatusEdit(state.ledgerBytes, sheet, row, value);
-  } catch (e) {
-    toast('Could not update ledger: ' + (e.message || 'error'));
-    return;
-  }
-  toast('Saving status…');
-  clearTimeout(ledgerSaveTimer);
-  ledgerSaveTimer = setTimeout(uploadLedger, 800);   // debounce rapid edits into one upload
-}
-
-async function uploadLedger() {
-  try {
-    await graphFetch(`/me/drive/root:/${encodePath(state.ledgerPath)}:/content`, {
-      method: 'PUT',
-      headers: { 'Content-Type': 'application/octet-stream' },
-      body: state.ledgerBytes
-    });
-    toast('Status saved to ledger');
-  } catch (e) {
-    toast('Could not save to ledger: ' + (e.message || 'error'));
-  }
-}
-
-// Edit only the Status cell for one row, preserving everything else in the workbook.
-function applyStatusEdit(bytes, sheetName, row, value) {
-  const files = fflate.unzipSync(bytes);
-  const sheetPath = resolveSheetPath(files, sheetName);
-  if (!sheetPath || !files[sheetPath]) throw new Error('sheet not found in workbook');
-  let xml = fflate.strFromU8(files[sheetPath]);
-  const meta = (state.ledgerMeta && state.ledgerMeta[sheetName]) || { headerRow: 1, statusCol: 'H' };
-  const col = meta.statusCol;
-  if (xml.indexOf('r="' + col + meta.headerRow + '"') === -1) {
-    xml = setCellXml(xml, col, meta.headerRow, 'Status');   // add the header once
-  }
-  xml = setCellXml(xml, col, row, value);                    // '' clears the cell
-  xml = xml.replace(/<dimension ref="([A-Z]+)(\d+):([A-Z]+)(\d+)"\s*\/>/,
-    (m, c1, r1, c2, r2) => '<dimension ref="' + c1 + r1 + ':' + col + r2 + '"/>');
-  xml = ensureStatusValidation(xml, col, meta.headerRow);    // Excel dropdown for the column
-  files[sheetPath] = fflate.strToU8(xml);
-  return fflate.zipSync(files);
-}
-
-function setCellXml(xml, col, row, value) {
-  const ref = col + row;
-  const m = xml.match(new RegExp('(<row r="' + row + '"[^>]*>)([\\s\\S]*?)(</row>)'));
-  if (!m) return xml;                       // data rows always exist; bail safely otherwise
-  let head = m[1], inner = m[2], tail = m[3];
-  head = head.replace(/spans="1:\d+"/, 'spans="1:' + (colIndex(col) + 1) + '"');
-  inner = inner.replace(new RegExp('<c r="' + ref + '"[^>]*?(?:/>|>[\\s\\S]*?</c>)'), '');
-  if (value !== '' && value != null) {
-    const sm = inner.match(new RegExp('<c r="' + prevCol(col) + row + '"[^>]*?\\ss="(\\d+)"'));
-    const s = sm ? ' s="' + sm[1] + '"' : '';
-    inner += '<c r="' + ref + '"' + s + ' t="inlineStr"><is><t xml:space="preserve">' + escapeXml(value) + '</t></is></c>';
-  }
-  return xml.slice(0, m.index) + head + inner + tail + xml.slice(m.index + m[0].length);
-}
-
-function ensureStatusValidation(xml, col, headerRow) {
-  const sqref = col + (headerRow + 1) + ':' + col + '500';
-  if (xml.indexOf('sqref="' + sqref + '"') !== -1) return xml;
-  const dv = '<dataValidation type="list" allowBlank="1" showInputMessage="1" showErrorMessage="1" sqref="' +
-    sqref + '"><formula1>"' + STATUS_OPTIONS.join(',') + '"</formula1></dataValidation>';
-  if (xml.indexOf('</dataValidations>') !== -1) return xml.replace('</dataValidations>', dv + '</dataValidations>');
-  if (xml.indexOf('<pageMargins') !== -1) return xml.replace('<pageMargins', '<dataValidations count="1">' + dv + '</dataValidations><pageMargins');
-  return xml;   // no safe spot for the Excel dropdown; the cell value still saves fine
-}
-
-function resolveSheetPath(files, sheetName) {
-  const wbXml = fflate.strFromU8(files['xl/workbook.xml']);
-  const re = /<sheet [^>]*name="([^"]*)"[^>]*r:id="([^"]*)"[^>]*\/>/g;
-  let mm, rid = null;
-  while ((mm = re.exec(wbXml))) { if (decodeXml(mm[1]) === sheetName) { rid = mm[2]; break; } }
-  if (!rid) return null;
-  const rels = fflate.strFromU8(files['xl/_rels/workbook.xml.rels']);
-  const rm = rels.match(new RegExp('Id="' + rid + '"[^>]*Target="([^"]*)"')) ||
-             rels.match(new RegExp('Target="([^"]*)"[^>]*Id="' + rid + '"'));
-  if (!rm) return null;
-  return 'xl/' + rm[1].replace(/^\/?xl\//, '').replace(/^\//, '');
-}
-
-function colIndex(letters) { let n = 0; for (let i = 0; i < letters.length; i++) n = n * 26 + (letters.charCodeAt(i) - 64); return n - 1; }
-function colLetter(idx) { let s = '', n = idx + 1; while (n > 0) { s = String.fromCharCode(65 + (n - 1) % 26) + s; n = Math.floor((n - 1) / 26); } return s; }
-function prevCol(letter) { return colLetter(Math.max(0, colIndex(letter) - 1)); }
-function escapeXml(s) { return (s == null ? '' : String(s)).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;'); }
-function decodeXml(s) { return (s || '').replace(/&amp;/g, '&').replace(/&quot;/g, '"').replace(/&lt;/g, '<').replace(/&gt;/g, '>'); }
 
 function formatDate(d) {
   if (!(d instanceof Date) || isNaN(d)) return '';
