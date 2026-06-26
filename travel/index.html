@@ -1483,7 +1483,7 @@ function renderTable() {
       <td>${escapeHtml(t.notes) || '<span style="color:var(--text-faint);">—</span>'}</td>
       <td class="amount">${AUD2.format(t.amount)}</td>
       <td onclick="event.stopPropagation()">
-        <select class="status-select" data-sheet="${escapeHtml(t._sheet)}" data-row="${t._row}" onchange="setStatus(this)">
+        <select class="status-select" data-sheet="${escapeHtml(t._sheet)}" data-row="${t._row}" onchange="setRowStatus(this)">
           <option value=""${!t.status ? ' selected' : ''}>—</option>
           <option${t.status === 'Fully Paid' ? ' selected' : ''}>Fully Paid</option>
           <option${t.status === 'Deposit' ? ' selected' : ''}>Deposit</option>
@@ -1507,7 +1507,7 @@ window.renderTable = renderTable;
    ============================================================ */
 const STATUS_OPTIONS = ['Fully Paid', 'Deposit', 'Booked (Nothing Paid)'];
 
-function setStatus(el) {
+function setRowStatus(el) {
   const sheet = el.dataset.sheet;
   const row = parseInt(el.dataset.row, 10);
   const value = el.value;
@@ -1515,7 +1515,7 @@ function setStatus(el) {
   if (tx) tx.status = value;
   saveLedgerStatus(sheet, row, value);
 }
-window.setStatus = setStatus;
+window.setRowStatus = setRowStatus;
 
 let ledgerSaveTimer = null;
 function saveLedgerStatus(sheet, row, value) {
