@@ -383,7 +383,7 @@
   }
   .pill.trip { background: var(--travel-soft); color: var(--travel); }
 
-  .status-cell { font-weight: 600; font-size: 13px; }
+  .status-cell { font-weight: 600; font-size: 13px; white-space: nowrap; }
   .status-cell.status-paid { background: #E6F4EA; color: #1E7E34; }       /* green */
   .status-cell.status-deposit { background: #E4EEF8; color: #1763A6; }    /* blue */
   .status-cell.status-notpaid { background: #FBE9E7; color: #C0392B; }    /* red */
@@ -1455,6 +1455,10 @@ function renderTable() {
     return true;
   });
 
+  // Sort by payment status: Paid, then Deposit, then Not Paid (anything else last); newest first within each.
+  const statusRank = s => { const l = statusInfo(s).label; return l === 'Paid' ? 0 : l === 'Deposit' ? 1 : l === 'Not Paid' ? 2 : 3; };
+  filtered.sort((a, b) => (statusRank(a.status) - statusRank(b.status)) || (b.date - a.date));
+
   const body = $('#tx-body');
   if (!filtered.length) {
     body.innerHTML = '<tr><td colspan="8" style="text-align:center;color:var(--text-faint);padding:2rem;">No matching transactions</td></tr>';
@@ -1471,10 +1475,10 @@ function renderTable() {
       <td><span class="pill">${escapeHtml(t.category)}</span></td>
       <td>${escapeHtml(t.vendor) || '<span style="color:var(--text-faint);">—</span>'}</td>
       <td>${escapeHtml(t.notes) || '<span style="color:var(--text-faint);">—</span>'}</td>
-      <td class="amount">${AUD2.format(t.amount)}</td>
+      <td class="amount">${AUD.format(t.amount)}</td>
       <td class="status-cell ${st.cls}">${st.label ? escapeHtml(st.label) : '<span style="color:var(--text-faint);">—</span>'}</td>
       <td>${hasReceipt
-        ? `<span class="receipt-link"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m21.44 11.05-9.19 9.19a6 6 0 0 1-8.49-8.49l8.57-8.57A4 4 0 1 1 17.93 8.8l-8.57 8.57a2 2 0 0 1-2.83-2.83l8.49-8.49"/></svg>${escapeHtml(t.receipt)}</span>`
+        ? `<span class="receipt-link" title="${escapeHtml(t.receipt)}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m21.44 11.05-9.19 9.19a6 6 0 0 1-8.49-8.49l8.57-8.57A4 4 0 1 1 17.93 8.8l-8.57 8.57a2 2 0 0 1-2.83-2.83l8.49-8.49"/></svg></span>`
         : '<span class="no-receipt">—</span>'
       }</td>
     </tr>
