@@ -1484,11 +1484,12 @@ function renderTable() {
 window.renderTable = renderTable;
 
 // Read-only payment status (set in the ledger's Status column in Excel).
-// Maps the stored value to a display label + colour. "Booked (Nothing Paid)" shows as "Not Paid".
+// Maps the stored value to a display label + colour. Legacy "Fully Paid" shows as "Paid",
+// and "Booked (Nothing Paid)" shows as "Not Paid".
 function statusInfo(s) {
   const v = (s || '').toString().trim();
   const l = v.toLowerCase();
-  if (l === 'fully paid') return { label: 'Fully Paid', cls: 'status-paid' };
+  if (l === 'paid' || l === 'fully paid') return { label: 'Paid', cls: 'status-paid' };
   if (l === 'deposit') return { label: 'Deposit', cls: 'status-deposit' };
   if (l === 'not paid' || l.includes('nothing paid') || l === 'booked') return { label: 'Not Paid', cls: 'status-notpaid' };
   return { label: v, cls: v ? 'status-other' : '' };
