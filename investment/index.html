@@ -239,7 +239,7 @@
         <div class="setup-num">3</div>
         <div class="setup-body">
           <h4>Receipts go in the <code>receipts</code> subfolder</h4>
-          <p>Inside each FY folder: <code>FY2025-26 / receipts / council_q1.pdf</code></p>
+          <p>Inside each FY folder, under <code>receipts</code>. You can organise them into subfolders (e.g. per property, or <code>Sydney Water</code>) — the app searches every subfolder.</p>
           <p style="margin-top: 6px;">Then write just the filename (not the path) in the Receipt column of the spreadsheet.</p>
         </div>
       </div>
@@ -538,6 +538,7 @@ const state = {
   charts: {},
   loading: false,
   receiptCache: {},
+  receiptIndex: null,        // { lowercased filename: [relative paths under receipts/] }
   currentFolderName: '',
   // Manual upload mode (testing without OneDrive)
   manualMode: false,
@@ -995,6 +996,8 @@ async function loadFYData(fyStart) {
     }
 
     log('Total ' + totalParsed + ' records loaded for ' + fyLabel(fyStart));
+    try { await buildReceiptIndex(); }
+    catch (e) { state.receiptIndex = null; log('Receipt index build failed: ' + e.message); }
   } catch (e) {
     log('loadFYData error: ' + e.message);
     throw e;
@@ -1435,7 +1438,7 @@ async function openViewDialog(id) {
     wrap.hidden = false;
     recEl.innerHTML = '<div style="padding: 40px; text-align: center; color: var(--text-faint); font-style: italic; font-family: Fraunces, serif;">Loading receipt...</div>';
     try {
-      const url = await getReceiptUrl(t.receiptFilename);
+      const url = await getReceiptUrl(t.receiptFilename, t.propertyId);
       if (url) {
         const isPdf = /\.pdf$/i.test(t.receiptFilename);
         recEl.innerHTML = isPdf
@@ -1453,18 +1456,78 @@ async function openViewDialog(id) {
   $('#dialog-view').classList.add('open');
 }
 
-async function getReceiptUrl(filename) {
+// Build an index of every receipt file under the FY's receipts/ folder, recursing
+// into subfolders. Receipts are now organised per-property, e.g.
+// receipts/3 Robyn Cres/Sydney Water/Water-Q1.pdf. Maps a lowercased filename to
+// the list of relative paths it was found at, so the spreadsheet only needs the
+// bare filename.
+async function buildReceiptIndex() {
+  state.receiptIndex = null;
+  if (state.manualMode) return;
+  const index = {};
+  const base = ONEDRIVE_ROOT + '/' + state.currentFolderName + '/receipts';
+  async function walk(rel) {
+    const items = await listChildren(rel ? base + '/' + rel : base);
+    if (!items) return;                       // 404 -> folder absent
+    for (const it of items) {
+      const childRel = rel ? rel + '/' + it.name : it.name;
+      if (it.folder) await walk(childRel);
+      else if (it.file) {
+        const k = it.name.toLowerCase();
+        (index[k] = index[k] || []).push(childRel);
+      }
+    }
+  }
+  await walk('');
+  state.receiptIndex = index;
+  const n = Object.values(index).reduce((a, v) => a + v.length, 0);
+  log('Indexed ' + n + ' receipt file(s) across subfolders');
+}
+
+function receiptTokens(s) {
+  return String(s || '').toLowerCase().replace(/[^a-z0-9]+/g, ' ').trim().split(/\s+/).filter(Boolean);
+}
+
+// Resolve a spreadsheet Receipt value to its relative path under receipts/.
+// Uses the recursive index; when the same filename lives under more than one
+// property folder (e.g. Water-Q1.pdf), prefers the copy whose top folder best
+// matches the record's property.
+function resolveReceiptPath(filename, propertyId) {
+  const base = String(filename || '').split('/').pop();
+  if (!base) return null;
+  const idx = state.receiptIndex;
+  if (!idx) return base;                       // index unavailable -> legacy flat lookup
+  const candidates = idx[base.toLowerCase()] || [];
+  if (candidates.length === 0) return null;
+  if (candidates.length === 1) return candidates[0];
+  const prop = state.properties.find(p => p.id === propertyId);
+  if (prop) {
+    const want = receiptTokens(prop.name);
+    let best = null, bestScore = -1;
+    for (const path of candidates) {
+      const score = receiptTokens(path.split('/')[0]).filter(w => want.includes(w)).length;
+      if (score > bestScore) { bestScore = score; best = path; }
+    }
+    if (best && bestScore > 0) return best;
+  }
+  return candidates[0];
+}
+
+async function getReceiptUrl(filename, propertyId) {
   if (state.manualMode) {
-    if (state.manualReceiptUrls[filename]) return state.manualReceiptUrls[filename];
-    const file = state.manualFiles.receipts[filename];
+    const base = String(filename || '').split('/').pop();
+    if (state.manualReceiptUrls[base]) return state.manualReceiptUrls[base];
+    const file = state.manualFiles.receipts[base];
     if (!file) return null;
     const url = URL.createObjectURL(file);
-    state.manualReceiptUrls[filename] = url;
+    state.manualReceiptUrls[base] = url;
     return url;
   }
-  const key = state.currentFolderName + '/' + filename;
+  const relPath = resolveReceiptPath(filename, propertyId);
+  if (!relPath) return null;
+  const key = state.currentFolderName + '/' + relPath;
   if (state.receiptCache[key]) return state.receiptCache[key];
-  const path = ONEDRIVE_ROOT + '/' + state.currentFolderName + '/receipts/' + filename;
+  const path = ONEDRIVE_ROOT + '/' + state.currentFolderName + '/receipts/' + relPath;
   try {
     const blob = await cloudDownload(path);
     const url = URL.createObjectURL(blob);
@@ -1558,7 +1621,9 @@ async function exportReceipts() {
         if (!file) { log('Manual: receipt ' + t.receiptFilename + ' not uploaded, skipping'); continue; }
         blob = file;
       } else {
-        const path = ONEDRIVE_ROOT + '/' + state.currentFolderName + '/receipts/' + t.receiptFilename;
+        const relPath = resolveReceiptPath(t.receiptFilename, t.propertyId);
+        if (!relPath) { log('Receipt not found in any subfolder: ' + t.receiptFilename); continue; }
+        const path = ONEDRIVE_ROOT + '/' + state.currentFolderName + '/receipts/' + relPath;
         blob = await cloudDownload(path);
       }
       const dataUrl = await blobToDataUrl(blob);
