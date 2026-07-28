@@ -273,6 +273,63 @@
     color: var(--text-faint);
   }
 
+  /* ---------- setup guide ---------- */
+  .setup-guide {
+    margin-top: 3.5rem;
+    padding-top: 2rem;
+    border-top: 1px solid var(--border);
+  }
+  .setup-guide h2 {
+    font-family: 'Fraunces', Georgia, serif;
+    font-size: 22px;
+    font-weight: 500;
+    margin-bottom: 6px;
+  }
+  .setup-guide > p {
+    font-size: 13px;
+    color: var(--text-dim);
+    max-width: 660px;
+    line-height: 1.6;
+    margin-bottom: 1.5rem;
+  }
+  .setup-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 14px;
+  }
+  @media (max-width: 900px) { .setup-grid { grid-template-columns: 1fr; } }
+  .setup-col {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 1.25rem 1.35rem;
+  }
+  .setup-col-head {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-family: 'Fraunces', Georgia, serif;
+    font-size: 16px;
+    font-weight: 500;
+    margin-bottom: 12px;
+  }
+  .setup-col-head .dot { width: 9px; height: 9px; border-radius: 50%; display: inline-block; flex: none; }
+  .setup-col-head .dot.investment { background: var(--accent); }
+  .setup-col-head .dot.personal { background: var(--personal); }
+  .setup-col-head .dot.business { background: var(--business); }
+  .setup-col ol { margin: 0; padding-left: 1.1rem; }
+  .setup-col li { font-size: 12.5px; color: var(--text-dim); line-height: 1.55; margin-bottom: 10px; }
+  .setup-col li:last-child { margin-bottom: 0; }
+  .setup-col code {
+    font-family: ui-monospace, 'JetBrains Mono', Menlo, monospace;
+    background: var(--surface-2);
+    border: 1px solid var(--border);
+    padding: 1px 5px;
+    border-radius: 3px;
+    font-size: 11px;
+    color: var(--text);
+  }
+
   /* ---------- toast ---------- */
   .toast {
     position: fixed;
@@ -401,6 +458,42 @@
         </div>
       </a>
 
+    </div>
+
+    <!-- Setup guide (moved here from the individual dashboards) -->
+    <div class="setup-guide">
+      <h2 class="serif">Getting set up</h2>
+      <p>Each dashboard reads from its own folder in <code>OneDrive / Apps</code>. Drop the starter files in, and the dashboard loads them when you open it. Everything stays in your OneDrive — nothing is written back or sent anywhere else.</p>
+      <div class="setup-grid">
+
+        <div class="setup-col">
+          <div class="setup-col-head"><span class="dot investment"></span>Investment · property</div>
+          <ol>
+            <li>Put <code>properties.xlsx</code> at <code>Apps / Property / properties.xlsx</code>.</li>
+            <li>Add a year ledger at <code>Apps / Property / FY2025-26 / ledger.xlsx</code> — one tab per property; folders named <code>FY2024-25</code>, <code>FY2025-26</code>, and so on.</li>
+            <li>Drop receipts under <code>Apps / Property / FY2025-26 / receipts</code>. Subfolders are fine (per property, or <code>Sydney Water</code>) — just write the filename in the Receipt column.</li>
+          </ol>
+        </div>
+
+        <div class="setup-col">
+          <div class="setup-col-head"><span class="dot personal"></span>Personal</div>
+          <ol>
+            <li>Drop each month's bank/card CSV into <code>Apps / Personal / YYYY / MM</code> — e.g. <code>Apps/Personal/2026/04/anz-credit.csv</code>.</li>
+            <li>Keep categorisation rules at <code>Apps / Personal / rules.xlsx</code> — one tab per category, each with a <code>Pattern</code> column.</li>
+            <li>Open the dashboard, pick a month, and use Export PDF for a snapshot.</li>
+          </ol>
+        </div>
+
+        <div class="setup-col">
+          <div class="setup-col-head"><span class="dot business"></span>Business</div>
+          <ol>
+            <li>Use monthly folders: <code>Apps / Business / YYYY / MM</code> (zero-padded month).</li>
+            <li>Drop that month's bank and card CSVs in — any filename; CBA, ANZ and most AU banks are auto-detected.</li>
+            <li>In the dashboard, toggle Month / Quarter (Quarter is handy for BAS prep).</li>
+          </ol>
+        </div>
+
+      </div>
     </div>
   </section>
 

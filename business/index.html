@@ -282,52 +282,13 @@
     <div class="brand-meta" id="brand-meta"></div>
   </div>
 
+  <!-- LANDING removed: sign-in and setup instructions now live on the home page. -->
   <div id="landing" class="landing">
-    <h2>One quick setup, <em>then you're sorted.</em></h2>
-    <p>Drop your business CSVs into OneDrive, then sign in with Microsoft to load your dashboard.</p>
-
-    <div class="setup-panel">
-      <div class="setup-step">
-        <div class="setup-num">1</div>
-        <div class="setup-body">
-          <div class="setup-title">Create the folder structure</div>
-          <div class="setup-desc">In your Nemla OneDrive, the app uses: <code>OneDrive / Apps / Business / 2026 / 03</code></div>
-          <div class="setup-note">Folders are <code>YYYY</code> for year and <code>MM</code> for month (zero-padded). Create as many months as you need.</div>
-        </div>
-      </div>
-      <div class="setup-step">
-        <div class="setup-num">2</div>
-        <div class="setup-body">
-          <div class="setup-title">Drop your CSVs each month</div>
-          <div class="setup-desc">Goes into the monthly folder: <code>OneDrive / Apps / Business / 2026 / 03 / cba-bank.csv</code></div>
-          <div class="setup-note">Main bank and both credit cards for that month. Any filename works. CBA, ANZ, and most AU banks are auto-detected.</div>
-        </div>
-      </div>
-      <div class="setup-step">
-        <div class="setup-num">3</div>
-        <div class="setup-body">
-          <div class="setup-title">Pick month or quarter view</div>
-          <div class="setup-desc">After sign in, toggle between <strong>Month</strong> and <strong>Quarter</strong> at the top of the dashboard.</div>
-          <div class="setup-note">Quarter view aggregates three months at once and is ideal for BAS lodgement prep.</div>
-        </div>
-      </div>
+    <div style="max-width: 460px; margin: 5rem auto; text-align: center;">
+      <p style="font-family: 'Fraunces', Georgia, serif; font-size: 20px; color: var(--text);">Loading your dashboard…</p>
+      <p style="font-size: 13px; color: var(--text-faint); margin-top: 8px;">One moment while we open your business records.</p>
     </div>
-
-    <button class="btn-signin" id="btn-signin">Sign in with Microsoft</button>
-    <div class="landing-hint">Uses your Nemla work account. Statements stay in your OneDrive. Nothing is copied anywhere else.</div>
-
-    <details class="fallback-upload">
-      <summary>or analyse a single CSV without signing in</summary>
-      <label class="drop-zone" id="drop-zone" for="file-input" style="margin-top: 16px;">
-        <div class="drop-zone-label">Drop CSV files here</div>
-        <div class="drop-zone-hint">One off analysis, rules are not saved between sessions</div>
-      </label>
-      <div style="margin-top: 14px; display: flex; flex-direction: column; align-items: center; gap: 10px;">
-        <input type="file" id="file-input" accept="*/*" multiple style="background: var(--surface-2); color: var(--text); padding: 10px; border: 1px solid var(--border-strong); border-radius: 2px; font-family: inherit; font-size: 13px; max-width: 100%;">
-      </div>
-    </details>
-
-    <div id="status-log" style="margin-top: 32px; min-height: 60px; max-width: 640px; width: 100%; background: var(--surface-2); border: 1px solid var(--border); border-radius: 2px; padding: 12px 16px; font-family: 'JetBrains Mono', monospace; font-size: 12px; color: var(--text-dim); text-align: left; white-space: pre-wrap; line-height: 1.6;">Ready. Sign in or upload a CSV to begin.</div>
+    <div id="status-log" hidden></div>
   </div>
 
   <div id="dashboard" hidden>
@@ -1670,8 +1631,6 @@ const GRAPH_SCOPES = ['Files.ReadWrite', 'Sites.ReadWrite.All', 'User.Read'];
 async function initMsal() {
   if (AZURE_CLIENT_ID.startsWith('__REPLACE')) {
     log('CONFIG: AZURE_CLIENT_ID / AZURE_TENANT_ID not set. Sign in disabled.');
-    $('#btn-signin').disabled = true;
-    $('#btn-signin').textContent = 'Not configured';
     return false;
   }
   try {
@@ -2121,18 +2080,16 @@ function initEvents() {
   }
   log('Libraries loaded. Ready for file upload.');
 
+  // Single-CSV fallback removed from the landing (sign-in now happens on the home page);
+  // guard the wiring so the absent drop zone can't break init.
   const dz = $('#drop-zone');
   const fi = $('#file-input');
-  log('Drop zone found: ' + !!dz + ', File input found: ' + !!fi);
-  // Label natively triggers the input click, no JS needed for the click path.
-  fi.onchange = (e) => {
-    log('onchange fired, ' + (e.target.files?.length || 0) + ' file(s) selected');
-    handleFiles(e.target.files);
-    e.target.value = '';
-  };
-  dz.addEventListener('dragover', e => { e.preventDefault(); dz.classList.add('drag'); });
-  dz.addEventListener('dragleave', () => dz.classList.remove('drag'));
-  dz.addEventListener('drop', e => { e.preventDefault(); dz.classList.remove('drag'); handleFiles(e.dataTransfer.files); });
+  if (fi) fi.onchange = (e) => { handleFiles(e.target.files); e.target.value = ''; };
+  if (dz) {
+    dz.addEventListener('dragover', e => { e.preventDefault(); dz.classList.add('drag'); });
+    dz.addEventListener('dragleave', () => dz.classList.remove('drag'));
+    dz.addEventListener('drop', e => { e.preventDefault(); dz.classList.remove('drag'); handleFiles(e.dataTransfer.files); });
+  }
 
   window.addEventListener('dragover', e => e.preventDefault());
   window.addEventListener('drop', e => {
@@ -2182,7 +2139,7 @@ function initEvents() {
   $('#btn-dismiss-attention').onclick = () => { state.attentionDismissed = true; render(); };
 
   // Auth + period picker wiring
-  $('#btn-signin').onclick = signIn;
+  { const b = $('#btn-signin'); if (b) b.onclick = signIn; }   // sign-in button now lives on the home page
   $('#btn-signout').onclick = signOut;
   $('#period-year').onchange = (e) => {
     populateMonthDropdown(e.target.value);
@@ -2211,6 +2168,10 @@ async function start() {
   if (msalOk && state.account) {
     log('Resuming previous session...');
     await onSignedIn();
+  } else {
+    // Sign-in lives on the home page now; bounce there if there's no active session.
+    log('No active session — redirecting to the home page to sign in.');
+    window.location.replace('../');
   }
 }
 

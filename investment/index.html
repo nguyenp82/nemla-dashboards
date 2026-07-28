@@ -214,41 +214,14 @@
     <div class="brand-meta" id="brand-meta"></div>
   </div>
 
-  <!-- LANDING (pre sign in + setup instructions) -->
+  <!-- LANDING removed: sign-in and setup instructions now live on the home page.
+       A lightweight loader shows while the dashboard resumes the home-page session. -->
   <div id="landing" class="landing">
-    <h2>One quick setup, <em>then you're sorted.</em></h2>
-    <p>Drop the starter spreadsheets into your OneDrive, then sign in with Microsoft to load your dashboard.</p>
-
-    <div class="setup-card">
-      <div class="setup-step">
-        <div class="setup-num">1</div>
-        <div class="setup-body">
-          <h4>Upload <code>properties.xlsx</code></h4>
-          <p>Goes at the root: <code>OneDrive / Apps / Property / properties.xlsx</code></p>
-        </div>
-      </div>
-      <div class="setup-step">
-        <div class="setup-num">2</div>
-        <div class="setup-body">
-          <h4>Upload a financial year ledger</h4>
-          <p>Goes inside an FY folder: <code>OneDrive / Apps / Property / FY2025-26 / ledger.xlsx</code></p>
-          <p style="margin-top: 6px;">One tab per property. Folders must be named <code>FY2024-25</code>, <code>FY2025-26</code>, etc.</p>
-        </div>
-      </div>
-      <div class="setup-step">
-        <div class="setup-num">3</div>
-        <div class="setup-body">
-          <h4>Receipts go in the <code>receipts</code> subfolder</h4>
-          <p>Inside each FY folder, under <code>receipts</code>. You can organise them into subfolders (e.g. per property, or <code>Sydney Water</code>) — the app searches every subfolder.</p>
-          <p style="margin-top: 6px;">Then write just the filename (not the path) in the Receipt column of the spreadsheet.</p>
-        </div>
-      </div>
+    <div style="max-width: 460px; margin: 5rem auto; text-align: center;">
+      <p style="font-family: 'Fraunces', Georgia, serif; font-size: 20px; color: var(--text);">Loading your dashboard…</p>
+      <p style="font-size: 13px; color: var(--text-faint); margin-top: 8px;">One moment while we open your property records.</p>
     </div>
-
-    <button class="btn-signin" id="btn-signin" style="margin-top: 8px;">Sign in with Microsoft</button>
-    <div class="landing-hint">Reads from your OneDrive folder <code style="font-family: 'JetBrains Mono', monospace; background: var(--surface-2); padding: 2px 6px; border-radius: 2px;">/Apps/Property/</code>. Nothing is written back or sent anywhere else.</div>
-
-    <div class="status-log" id="status-log">Ready. Sign in with Microsoft to load your property records.</div>
+    <div class="status-log" id="status-log" hidden></div>
   </div>
 
   <!-- SETUP (shown when signed in but data missing) -->
@@ -1890,7 +1863,7 @@ function initEvents() {
   window.addEventListener('error', (e) => log('JS ERROR: ' + (e.message || 'unknown')));
   window.addEventListener('unhandledrejection', (e) => log('PROMISE ERROR: ' + (e.reason?.message || e.reason)));
 
-  $('#btn-signin').onclick = signIn;
+  { const b = $('#btn-signin'); if (b) b.onclick = signIn; }   // sign-in button now lives on the home page
   $('#btn-signout').onclick = signOut;
   $('#btn-signout-setup').onclick = signOut;
   $('#btn-refresh-setup').onclick = refreshAll;
@@ -1936,6 +1909,10 @@ async function start() {
   if (msalOk && state.account) {
     log('Resuming previous session...');
     await onSignedIn();
+  } else {
+    // Sign-in lives on the home page now; bounce there if there's no active session.
+    log('No active session — redirecting to the home page to sign in.');
+    window.location.replace('../');
   }
 }
 
