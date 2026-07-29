@@ -76,6 +76,10 @@
     background: var(--surface); padding: 3px 8px; border-radius: 4px; border: 1px solid var(--border);
     white-space: nowrap;
   }
+  /* callouts for cities placed below the bar: hang from the top, name above the image */
+  .hotel-callouts-below { position: relative; width: 100%; height: 184px; pointer-events: none; }
+  .hotel-callouts-below .hotel-callout { top: 0; bottom: auto; flex-direction: column-reverse; }
+  .hotel-callouts-below .hotel-callout-name { margin-top: 0; margin-bottom: 5px; }
 
   /* ---------- top bar ---------- */
   .topbar {
@@ -1157,6 +1161,16 @@ function renderItinerary() {
   const totalNights = realStops.reduce((s, x) => s + (x.knownBoth ? x.nights : 0), 0);
   $('#itinerary-meta').textContent = (anyUnknown ? '~' : '') + totalNights + ' nights away in total';
 
+  // Alternate real (non-home) stops above/below the bar to reduce callout crowding:
+  // 1st stop above, 2nd below, 3rd above, 4th below, ...
+  let _ri = -1;
+  merged.forEach(s => {
+    if (s.city.toLowerCase() === 'home') { s.below = false; return; }
+    s.realIdx = ++_ri;
+    s.below = (s.realIdx % 2 === 1);
+  });
+  const hasBelow = merged.some(s => s.below);
+
   // Build per-trip colour map so every distinct city has a different colour.
   const cityColors = buildCityColorMap(merged);
 
@@ -1166,7 +1180,12 @@ function renderItinerary() {
   const inner = width - padL - padR;
   const barH = 45;                    // bar height reduced by ~20% from 56
   const barY = 110;
-  const bottomLabelY = barY + barH + 22;
+  const barBottom = barY + barH;
+  // When cities sit below the bar, push the flight labels down to make room for their
+  // names (just under the bar) and drop their callouts beneath everything.
+  const bottomLabelY = barBottom + (hasBelow ? 60 : 22);
+  const belowNameY = barBottom + 26;
+  const belowCalloutY = bottomLabelY + 88;   // below the (staggered) flight labels
 
   let x = padL;
   const segEls = [], labelTopEls = [], labelBottomEls = [], tickEls = [];
@@ -1198,11 +1217,20 @@ function renderItinerary() {
 
     const cx = x + w / 2;
     if (!isHome) {
-      // Connecting line from the HTML hotel callout above down to just above the city name label
-      if (s.hotel) {
-        labelTopEls.push(`<line x1="${cx}" x2="${cx}" y1="0" y2="${barY - 46}" stroke="${fill}" stroke-width="1.5" />`);
+      if (!s.below) {
+        // City name + hotel connector above the bar
+        if (s.hotel) {
+          labelTopEls.push(`<line x1="${cx}" x2="${cx}" y1="0" y2="${barY - 46}" stroke="${fill}" stroke-width="1.5" />`);
+        }
+        labelTopEls.push(`<text x="${cx}" y="${barY - 32}" text-anchor="middle" font-family="Manrope, sans-serif" font-size="16" font-weight="500" fill="${fill}">${escapeHtml(s.city)}</text>`);
+      } else {
+        // City name below the bar; hotel connector runs down past the flight labels to the callout
+        if (s.hotel) {
+          labelBottomEls.push(`<line x1="${cx}" x2="${cx}" y1="${barBottom}" y2="${belowNameY - 16}" stroke="${fill}" stroke-width="1.5" />`);
+          labelBottomEls.push(`<line x1="${cx}" x2="${cx}" y1="${belowNameY + 6}" y2="${belowCalloutY}" stroke="${fill}" stroke-width="1.5" />`);
+        }
+        labelBottomEls.push(`<text x="${cx}" y="${belowNameY}" text-anchor="middle" font-family="Manrope, sans-serif" font-size="16" font-weight="500" fill="${fill}">${escapeHtml(s.city)}</text>`);
       }
-      labelTopEls.push(`<text x="${cx}" y="${barY - 32}" text-anchor="middle" font-family="Manrope, sans-serif" font-size="16" font-weight="500" fill="${fill}">${escapeHtml(s.city)}</text>`);
       const nightsText = s.knownBoth ? String(s.nights) : '?';
       labelTopEls.push(`<text x="${cx}" y="${barY + barH/2 + 2}" text-anchor="middle" font-family="Fraunces, serif" font-size="22" font-weight="500" fill="#2A2822">${nightsText}</text>`);
       labelTopEls.push(`<text x="${cx}" y="${barY + barH/2 + 18}" text-anchor="middle" font-family="Manrope, sans-serif" font-size="11" fill="#5E574B">nights</text>`);
@@ -1225,7 +1253,7 @@ function renderItinerary() {
     x += w;
   });
 
-  const svgH = bottomLabelY + 80;
+  const svgH = hasBelow ? belowCalloutY : bottomLabelY + 80;
   const svg = `<svg viewBox="0 0 ${width} ${svgH}" preserveAspectRatio="xMidYMid meet" style="width: 100%; height: auto; display: block;" xmlns="http://www.w3.org/2000/svg">
     ${segEls.join('')}
     ${tickEls.join('')}
@@ -1233,10 +1261,10 @@ function renderItinerary() {
     ${labelBottomEls.join('')}
   </svg>`;
 
-  // Build hotel callouts as an HTML overlay above the SVG.
-  // Position each by the percentage of its segment center within the bar.
+  // Build hotel callouts as HTML overlays — above the SVG for "above" cities, below it
+  // for "below" cities. Position each by the percentage of its segment center in the bar.
   let cursor = 0;
-  const callouts = [];
+  const aboveCallouts = [], belowCallouts = [];
   merged.forEach((s, i) => {
     const segStart = cursor;
     const segEnd = cursor + s.unitWidth;
@@ -1245,19 +1273,19 @@ function renderItinerary() {
     const centerPct = ((segStart + s.unitWidth / 2) / totalUnits) * 100;
     const safeName = escapeHtml(s.hotel);
     const imgRef = (s.image || '').toString();
-    callouts.push(`
+    const html = `
       <div class="hotel-callout" style="left: ${centerPct}%;">
         <img class="hotel-callout-img" data-hotel-img="${escapeHtml(imgRef)}" alt="${safeName}" ${imgRef ? '' : 'style="display:none;"'}>
         <div class="hotel-callout-name">${safeName}</div>
       </div>
-    `);
+    `;
+    (s.below ? belowCallouts : aboveCallouts).push(html);
   });
 
-  const calloutsHtml = callouts.length
-    ? `<div class="hotel-callouts">${callouts.join('')}</div>`
-    : '';
+  const aboveHtml = aboveCallouts.length ? `<div class="hotel-callouts">${aboveCallouts.join('')}</div>` : '';
+  const belowHtml = belowCallouts.length ? `<div class="hotel-callouts-below">${belowCallouts.join('')}</div>` : '';
 
-  $('#itinerary-body').innerHTML = calloutsHtml + svg;
+  $('#itinerary-body').innerHTML = aboveHtml + svg + belowHtml;
 
   // Lazy-load hotel images
   document.querySelectorAll('#itinerary-body [data-hotel-img]').forEach(async (img) => {
