@@ -1180,11 +1180,11 @@ function renderItinerary() {
   const barH = 45;                    // bar height reduced by ~20% from 56
   const barY = 110;
   const barBottom = barY + barH;
-  // When cities sit below the bar, push the flight labels down to make room for their
-  // names (just under the bar) and drop their callouts beneath everything.
-  const bottomLabelY = barBottom + (hasBelow ? 60 : 22);
-  const belowNameY = barBottom + 26;
-  const belowCalloutY = bottomLabelY + 88;   // below the (staggered) flight labels
+  // Flight dates sit right under the bar with no connector line; below-bar city names
+  // and their callouts drop beneath the date row.
+  const bottomLabelY = barBottom + 18;
+  const belowNameY = barBottom + 62;
+  const belowCalloutY = barBottom + 100;
 
   let x = padL;
   const segEls = [], labelTopEls = [], labelBottomEls = [], tickEls = [];
@@ -1223,9 +1223,8 @@ function renderItinerary() {
         }
         labelTopEls.push(`<text x="${cx}" y="${barY - 32}" text-anchor="middle" font-family="Manrope, sans-serif" font-size="16" font-weight="500" fill="${fill}">${escapeHtml(s.city)}</text>`);
       } else {
-        // City name below the bar; hotel connector runs down past the flight labels to the callout
+        // City name below the flight dates; hotel connector runs from the name to its callout
         if (s.hotel) {
-          labelBottomEls.push(`<line x1="${cx}" x2="${cx}" y1="${barBottom}" y2="${belowNameY - 16}" stroke="${fill}" stroke-width="1.5" />`);
           labelBottomEls.push(`<line x1="${cx}" x2="${cx}" y1="${belowNameY + 6}" y2="${belowCalloutY}" stroke="${fill}" stroke-width="1.5" />`);
         }
         labelBottomEls.push(`<text x="${cx}" y="${belowNameY}" text-anchor="middle" font-family="Manrope, sans-serif" font-size="16" font-weight="500" fill="${fill}">${escapeHtml(s.city)}</text>`);
@@ -1237,16 +1236,14 @@ function renderItinerary() {
       labelTopEls.push(`<text x="${cx}" y="${barY + barH/2 + 4}" text-anchor="middle" font-family="Manrope, sans-serif" font-size="12" fill="#8F897A">Home</text>`);
     }
 
-    // Bottom: transition labels at this stop's outgoing edge. No "via X" note any more.
+    // Bottom: transition date/time sit right under the bar — one level, no connector line.
     if (s.departs) {
       const tx = x + w;
-      const offset = (i % 2 === 0) ? 0 : 44;
       const isLastBeforeHome = (i + 1 < merged.length) && merged[i + 1].city.toLowerCase() === 'home';
       const dateLine = s.departs.toLocaleDateString('en-AU', { weekday: 'short', day: 'numeric', month: 'short' });
       const timeLine = (isHome ? 'fly out ' : (isLastBeforeHome ? 'fly home ' : 'fly ')) + d(s.departs, true);
-      labelBottomEls.push(`<line x1="${tx}" x2="${tx}" y1="${barY + barH}" y2="${bottomLabelY + offset - 4}" stroke="#C9C0AB" stroke-width="1" />`);
-      labelBottomEls.push(`<text x="${tx}" y="${bottomLabelY + offset + 8}" text-anchor="middle" font-family="Manrope, sans-serif" font-size="12" font-weight="600" fill="#2A2822">${escapeHtml(dateLine)}</text>`);
-      labelBottomEls.push(`<text x="${tx}" y="${bottomLabelY + offset + 26}" text-anchor="middle" font-family="Manrope, sans-serif" font-size="11" fill="#5E574B">${escapeHtml(timeLine)}</text>`);
+      labelBottomEls.push(`<text x="${tx}" y="${bottomLabelY + 8}" text-anchor="middle" font-family="Manrope, sans-serif" font-size="12" font-weight="600" fill="#2A2822">${escapeHtml(dateLine)}</text>`);
+      labelBottomEls.push(`<text x="${tx}" y="${bottomLabelY + 26}" text-anchor="middle" font-family="Manrope, sans-serif" font-size="11" fill="#5E574B">${escapeHtml(timeLine)}</text>`);
     }
 
     x += w;
