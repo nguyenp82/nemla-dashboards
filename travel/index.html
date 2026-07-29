@@ -80,8 +80,8 @@
   .hotel-callout-city { margin: 2px 0; font-family: 'Manrope', sans-serif; font-size: 15px; font-weight: 500; white-space: nowrap; }
   .hotel-callouts-below { position: relative; width: 100%; height: 210px; pointer-events: none; }
   .hotel-callouts-below .hotel-callout { top: 0; bottom: auto; }
-  .hotel-callouts-below .hotel-callout-img { order: 1; }
-  .hotel-callouts-below .hotel-callout-city { order: 2; }
+  .hotel-callouts-below .hotel-callout-city { order: 1; }
+  .hotel-callouts-below .hotel-callout-img { order: 2; }
   .hotel-callouts-below .hotel-callout-name { order: 3; }
 
   /* ---------- top bar ---------- */
@@ -1188,7 +1188,7 @@ function renderItinerary() {
   // and their callouts drop beneath the date row.
   const bottomLabelY = barBottom + 18;
   const belowNameY = barBottom + 62;
-  const belowCalloutY = barBottom + 100;
+  const belowCalloutY = barBottom + 108;   // match the above-bar connector length (barY - 2)
 
   let x = padL;
   const segEls = [], labelTopEls = [], labelBottomEls = [], tickEls = [];
