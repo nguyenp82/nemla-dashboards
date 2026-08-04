@@ -1166,11 +1166,11 @@ function renderCommitments() {
   const recRules = state.fileRules.filter(r => r.recurring && r.category !== 'Mortgage & Loans');
   if (!recRules.length) { if (panel) panel.hidden = true; return; }
 
-  // Use every month's data (loaded once into state.allTx) so the figure is stable and not tied to
-  // the single month shown in the main view. Each outflow maps to the first recurring pattern it
-  // contains (first-match-wins, no double counting).
-  const txs = state.allTx;
-  if (!txs) { if (panel) panel.hidden = true; return; }   // all-months data not loaded yet
+  // Reflect the month currently in view: sum each recurring bill's outflows within the selected
+  // period (state.transactions). Each outflow maps to the first recurring pattern it contains
+  // (first-match-wins, no double counting). Re-runs on every render(), so it tracks the picker.
+  const txs = state.transactions;
+  if (!txs || !txs.length) { if (panel) panel.hidden = true; return; }
   const byPattern = {};
   txs.forEach(t => {
     if (t.amount >= 0) return;
@@ -1178,16 +1178,13 @@ function renderCommitments() {
     const rule = recRules.find(r => r.pattern && d.includes(r.pattern.toLowerCase()));
     if (!rule) return;
     const key = rule.pattern.toLowerCase();
-    const ym = t.date.getFullYear() + '-' + String(t.date.getMonth() + 1).padStart(2, '0');
-    if (!byPattern[key]) byPattern[key] = { label: rule.pattern, category: rule.category, months: {} };
-    byPattern[key].months[ym] = (byPattern[key].months[ym] || 0) + Math.abs(t.amount);
+    if (!byPattern[key]) byPattern[key] = { label: rule.pattern, category: rule.category, monthly: 0 };
+    byPattern[key].monthly += Math.abs(t.amount);
   });
 
-  // For each pattern take its most recent month's total = the current monthly commitment.
-  const items = Object.values(byPattern).map(p => {
-    const latest = Object.keys(p.months).sort().pop();
-    return { label: p.label, category: p.category, monthly: p.months[latest] || 0 };
-  }).filter(i => i.monthly > 0).sort((a, b) => b.monthly - a.monthly);
+  const items = Object.values(byPattern)
+    .filter(i => i.monthly > 0)
+    .sort((a, b) => b.monthly - a.monthly);
 
   if (!items.length) { if (panel) panel.hidden = true; return; }
   if (panel) panel.hidden = false;
@@ -1660,38 +1657,6 @@ async function downloadCSV(year, month, filename) {
   return await res.text();
 }
 
-// The main view loads one month at a time. This loads EVERY month's CSVs once, so cross-period
-// features (the Monthly commitments panel) can see all data. Cached on state.allTx.
-async function loadAllTransactions() {
-  const all = [];
-  const fileTypes = {};
-  for (const y of (state.availableYears || [])) {
-    for (const m of (state.availableMonths[y] || [])) {
-      let items;
-      try { items = await listDriveChildren(ONEDRIVE_ROOT + '/' + y + '/' + m); }
-      catch (e) { continue; }
-      const csvs = (items || []).filter(f => f.file && /\.csv$/i.test(f.name));
-      for (const f of csvs) {
-        try {
-          const text = await downloadCSV(y, m, f.name);
-          const txs = parseCSVContent(text, f.name);
-          if (!txs.length) continue;
-          const type = detectFileType(txs, f.name);
-          txs.forEach(t => { fileTypes[t.source] = type; });
-          all.push(...txs);
-        } catch (e) { /* skip unreadable file */ }
-      }
-    }
-  }
-  // Categorise the same way the live month view does.
-  all.forEach(t => {
-    t.category = autoCategorise(t.description);
-    if (fileTypes[t.source] === 'card' && t.amount > 0) t.category = 'Credit Card Payment';
-  });
-  state.allTx = all;
-  log('Loaded ' + all.length + ' transactions across all months for commitments.');
-}
-
 async function loadRulesFromCloud() {
   try {
     const res = await graphFetch('/me/drive/root:/' + encodePath(ONEDRIVE_ROOT + '/rules.json') + ':/content');
@@ -1782,8 +1747,7 @@ async function onSignedIn() {
       render();
       toast('Signed in. Drop CSVs into OneDrive/' + ONEDRIVE_ROOT + '/YYYY/MM/ then refresh.');
     }
-    // Background-load every month so the commitments panel reflects all data, not just the shown month.
-    loadAllTransactions().then(renderCommitments).catch(e => log('Commitments load failed: ' + e.message));
+    // Commitments panel renders per selected month via render(); no all-months preload needed.
   } catch (e) {
     log('Post sign in failed: ' + e.message);
     toast('Error after sign in: ' + e.message);
