@@ -67,6 +67,7 @@
 
   /* Landing (upload) */
   .landing { display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 60vh; text-align: center; }
+  .landing[hidden] { display: none; }   /* the display:flex above otherwise overrides the hidden attribute */
   .landing h2 { font-family: 'Fraunces', serif; font-weight: 300; font-size: 52px; line-height: 1.1; letter-spacing: -0.025em; max-width: 680px; margin-bottom: 20px; }
   .landing h2 em { color: var(--accent); font-style: italic; }
   .landing p { color: var(--text-dim); max-width: 520px; margin-bottom: 40px; font-size: 15px; }
