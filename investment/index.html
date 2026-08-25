@@ -672,13 +672,23 @@ function setLoading(on) {
 /* ============================================================
    MSAL / GRAPH
    ============================================================ */
+/* Static Web Apps serves a folder with and without a trailing slash (and as
+   .../index.html) all as 200, with no redirect, so window.location.pathname depends on
+   how the page was reached. Entra matches redirect URIs exactly, so normalise every
+   form to the one registered value. */
+function appRedirectUri() {
+  var path = window.location.pathname.replace(/index\.html$/i, '');
+  if (path.charAt(path.length - 1) !== '/') path += '/';
+  return window.location.origin + path;
+}
+
 async function initMsal() {
   try {
     state.msal = new msal.PublicClientApplication({
       auth: {
         clientId: AZURE_CLIENT_ID,
         authority: `https://login.microsoftonline.com/${AZURE_TENANT_ID}`,
-        redirectUri: window.location.origin + window.location.pathname
+        redirectUri: appRedirectUri()
       },
       cache: { cacheLocation: 'sessionStorage', storeAuthStateInCookie: false }
     });
