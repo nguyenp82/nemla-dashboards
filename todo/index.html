@@ -418,12 +418,21 @@ function toast(msg){
 /* ============================================================
    AUTH (MSAL)
    ============================================================ */
+/* Azure Static Web Apps serves /todo, /todo/ and /todo/index.html all as 200 with no
+   redirect, so window.location.pathname varies by how you arrived. Entra matches redirect
+   URIs exactly, so normalise every form to the single registered value: <origin>/todo/ */
+function appRedirectUri(){
+  var path = window.location.pathname.replace(/index\.html$/i, '');
+  if(path.charAt(path.length-1) !== '/') path += '/';
+  return window.location.origin + path;
+}
+
 async function initMsal(){
   state.msal = new msal.PublicClientApplication({
     auth: {
       clientId: AZURE_CLIENT_ID,
       authority: 'https://login.microsoftonline.com/' + AZURE_TENANT_ID,
-      redirectUri: window.location.origin + window.location.pathname
+      redirectUri: appRedirectUri()
     },
     cache: { cacheLocation:'sessionStorage', storeAuthStateInCookie:false }
   });
@@ -1248,7 +1257,8 @@ async function enterApp(){
 })();
 
 /* expose a couple of internals for local smoke-testing only */
-window.__todo = { state:state, ui:ui, render:render, normalise:normalise, mergeRemote:mergeRemote };
+window.__todo = { state:state, ui:ui, render:render, normalise:normalise, mergeRemote:mergeRemote,
+                  appRedirectUri:appRedirectUri };
 
 })();
 </script>
