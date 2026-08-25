@@ -512,8 +512,13 @@ async function graphFetch(path, options){
 function encodePath(p){ return p.split('/').map(encodeURIComponent).join('/'); }
 
 async function listDriveChildren(folderPath){
+  // An empty path means the drive root, which has its own endpoint form —
+  // '/me/drive/root:/:/children' is malformed and Graph rejects it.
+  var url = folderPath
+    ? '/me/drive/root:/' + encodePath(folderPath) + ':/children?$top=200'
+    : '/me/drive/root/children?$top=200';
   try{
-    var res = await graphFetch('/me/drive/root:/' + encodePath(folderPath) + ':/children?$top=200');
+    var res = await graphFetch(url);
     var data = await res.json();
     return data.value || [];
   }catch(e){
@@ -606,13 +611,15 @@ function mergeRemote(remote){
   r.projects.forEach(function(p){ if(state.projects.indexOf(p) === -1) state.projects.push(p); });
 }
 
-function setSync(kind, text){
+function setSync(kind, text, retryFn, detail){
   var pill = $("syncPill");
   pill.className = 'sync' + (kind==='busy'?' busy':'') + (kind==='bad'?' bad':'');
+  pill.title = detail || '';
   if(kind === 'bad'){
     $("syncTxt").innerHTML = esc(text) + ' <button id="btnRetry">Retry</button>';
     var r = $("btnRetry");
-    if(r) r.addEventListener("click", function(ev){ ev.stopPropagation(); saveNow(); });
+    // Retry has to redo whatever actually failed — saveNow() is a no-op before a load succeeds.
+    if(r) r.addEventListener("click", function(ev){ ev.stopPropagation(); (retryFn || saveNow)(); });
   } else {
     $("syncTxt").textContent = text;
   }
@@ -666,10 +673,10 @@ async function saveNow(){
         render();
         toast('Tasks had changed on another device — merged.');
       }catch(e2){
-        state.saveErr = e2; setSync('bad','Save failed');
+        state.saveErr = e2; setSync('bad','Save failed', saveNow, e2.message);
       }
     } else {
-      state.saveErr = e; setSync('bad','Save failed');
+      state.saveErr = e; setSync('bad','Save failed', saveNow, e.message);
     }
   }
   state.saving = false;
@@ -719,7 +726,7 @@ async function refreshIfStale(force){
     setSync('ok','Up to date ' + stamp(new Date()));
     render();
   }catch(e){
-    setSync('bad','Refresh failed');
+    setSync('bad','Refresh failed', function(){ refreshIfStale(true); }, e.message);
   }
 }
 document.addEventListener("visibilitychange", function(){
@@ -1236,13 +1243,17 @@ async function enterApp(){
     {weekday:"long", day:"numeric", month:"long"});
   renderProjectPicker();
   render();
+  await runLoad();
+}
+
+async function runLoad(){
   try{
     await loadAll();
     renderProjectPicker();
     render();
     $("addTitle").focus();
   }catch(e){
-    setSync('bad','Could not load');
+    setSync('bad','Could not load', runLoad, e.message);
     toast('Could not load tasks: ' + e.message);
   }
 }
@@ -1258,7 +1269,8 @@ async function enterApp(){
 
 /* expose a couple of internals for local smoke-testing only */
 window.__todo = { state:state, ui:ui, render:render, normalise:normalise, mergeRemote:mergeRemote,
-                  appRedirectUri:appRedirectUri };
+                  appRedirectUri:appRedirectUri, loadAll:loadAll, runLoad:runLoad, ensureDataDir:ensureDataDir,
+                  listDriveChildren:listDriveChildren, DATA_DIR:DATA_DIR, DATA_PATH:DATA_PATH };
 
 })();
 </script>
