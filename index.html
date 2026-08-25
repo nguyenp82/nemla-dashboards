@@ -27,6 +27,8 @@
     --business-soft: #E5EEDB;
     --travel: #B86842;
     --travel-soft: #F5DCD0;
+    --tasks: #6B4E9E;
+    --tasks-soft: #E8E0F4;
     --danger: #A33F3F;
   }
 
@@ -228,6 +230,7 @@
   .card-icon.investment { background: var(--accent-soft); color: var(--accent); }
   .card-icon.business { background: var(--business-soft); color: var(--business); }
   .card-icon.travel { background: var(--travel-soft); color: var(--travel); }
+  .card-icon.tasks { background: var(--tasks-soft); color: var(--tasks); }
   .card-icon svg { width: 22px; height: 22px; stroke-width: 1.75; }
 
   .card-title {
@@ -378,7 +381,7 @@
         </svg>
       </div>
       <h2 class="serif">Welcome to nemla</h2>
-      <p>Sign in with your Microsoft account to access your personal, investment and business dashboards.</p>
+      <p>Sign in with your Microsoft account to access your dashboards and task board.</p>
       <button id="signin-btn" class="signin-btn" onclick="signIn()">
         <span class="ms-logo" aria-hidden="true"><span></span><span></span><span></span><span></span></span>
         Sign in with Microsoft
@@ -454,6 +457,23 @@
         <div class="card-desc">Holiday and trip spending</div>
         <div class="card-meta">
           <span>By year</span>
+          <svg class="arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 5l7 7-7 7"/></svg>
+        </div>
+      </a>
+
+      <a href="todo" class="card active">
+        <div class="card-icon tasks">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M9 5h10M9 12h10M9 19h10"/>
+            <path d="M4 5.5l1 1 2-2"/>
+            <path d="M4 12.5l1 1 2-2"/>
+            <path d="M4 19.5l1 1 2-2"/>
+          </svg>
+        </div>
+        <div class="card-title serif">Tasks</div>
+        <div class="card-desc">Work across client projects</div>
+        <div class="card-meta">
+          <span>By priority</span>
           <svg class="arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 5l7 7-7 7"/></svg>
         </div>
       </a>
