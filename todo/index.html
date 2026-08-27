@@ -235,6 +235,29 @@ button,input,select,textarea{font:inherit;color:inherit}
 .danger{background:none;border:1px solid var(--line);color:var(--p1);border-radius:9px;padding:9px 14px;cursor:pointer}
 .danger:hover{background:var(--p1-bg);border-color:var(--p1)}
 
+.attach{grid-column:1/-1;border-top:1px dashed var(--line);padding-top:13px;margin-top:2px}
+.attlabel{font-size:11.5px;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;
+  font-weight:650;margin-bottom:8px}
+.attlist{display:flex;flex-direction:column;gap:6px}
+.attlist:not(:empty){margin-bottom:9px}
+.attrow{display:flex;align-items:center;gap:9px;background:var(--panel-2);border:1px solid var(--line);
+  border-radius:8px;padding:7px 10px;font-size:13px}
+.attrow .nm{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:var(--accent);
+  text-decoration:none}
+.attrow .nm:hover{text-decoration:underline}
+.attrow .sz{color:var(--muted);font-size:12px;white-space:nowrap;font-variant-numeric:tabular-nums}
+.attrow .x{background:none;border:0;color:var(--muted);cursor:pointer;font-size:17px;line-height:1;padding:0 2px}
+.attrow .x:hover{color:var(--p1)}
+.attrow.busy{opacity:.6} .attrow.busy .nm{color:var(--muted)}
+.attrow.fail{border-color:var(--p1);background:var(--p1-bg)} .attrow.fail .nm{color:var(--p1)}
+.dropzone{border:1.5px dashed var(--line);border-radius:9px;padding:15px 12px;text-align:center;cursor:pointer;
+  font-size:13px;color:var(--muted)}
+.dropzone:hover,.dropzone:focus-visible{border-color:var(--accent);background:var(--panel-2);outline:none}
+.dropzone.over{border-color:var(--accent);background:var(--p3-bg);color:var(--accent)}
+.dropzone b{color:var(--text);font-weight:650}
+.dropzone small{display:block;margin-top:3px;font-size:11.5px;opacity:.85}
+.attmsg{font-size:12.5px;margin-top:7px;color:var(--muted)}
+.attmsg.err{color:var(--p1)}
 .toast{position:fixed;left:50%;bottom:26px;transform:translateX(-50%);background:var(--text);color:var(--bg);
   padding:11px 18px;border-radius:22px;font-size:13.5px;box-shadow:var(--shadow-lg);z-index:80;
   opacity:0;pointer-events:none;transition:opacity .25s}
@@ -355,6 +378,16 @@ button,input,select,textarea{font:inherit;color:inherit}
       <label>Status<select class="ctl" id="mDone">
         <option value="0">Open</option><option value="1">Completed</option></select></label>
       <label class="full">Notes<textarea class="ctl" id="mNotes" placeholder="Context, links, who you're waiting on&hellip;"></textarea></label>
+      <div class="attach">
+        <div class="attlabel">Attachments</div>
+        <div class="attlist" id="mAttList"></div>
+        <div class="dropzone" id="mDrop" tabindex="0" role="button">
+          <b>Drop files here</b> or click to choose
+          <small>Up to 4&nbsp;MB each &middot; stored in SharePoint</small>
+        </div>
+        <input type="file" id="mFile" multiple hidden>
+        <div class="attmsg" id="mAttMsg"></div>
+      </div>
     </div>
     <div class="modacts">
       <button class="danger" id="mDelete">Delete</button>
@@ -380,6 +413,8 @@ const SP_DRIVE = '/sites/nemla.sharepoint.com,03c13251-4cec-4fd0-a9fc-ed0896c457
 const DATA_DIR  = 'Nemla/Apps/nemla-dashboards-app/AppData/Todo';  // path within the SharePoint Documents library
 const DATA_FILE = 'tasks.json';
 const DATA_PATH = DATA_DIR + '/' + DATA_FILE;
+const ATTACH_DIR = DATA_DIR + '/attachments';
+const MAX_ATTACH = 4 * 1024 * 1024;   // Graph simple upload tops out at 4 MB
 
 const DEFAULT_PROJECTS = ["DCJ","Boeing","Data#3"];
 const PROJ_COLORS = ["#2f6fed","#7b4dff","#0f9d8f","#dd7a00","#d93025","#1a8f4a","#c2185b","#00838f"];
@@ -526,25 +561,94 @@ async function listDriveChildren(folderPath){
     throw e;
   }
 }
-/* Create DATA_DIR if it isn't there yet (parents must already exist). */
-async function ensureDataDir(){
-  var segments = DATA_DIR.split('/').filter(Boolean);
+async function ensureDataDir(){ return ensurePath(DATA_DIR); }
+
+/* Folders we have already confirmed this session, so repeat uploads don't re-walk
+   the whole tree from the drive root every time. */
+var knownFolders = {};
+
+/* Create every missing folder along `path`. */
+async function ensurePath(path){
+  if(knownFolders[path]) return;
+  var segments = path.split('/').filter(Boolean);
   var currentPath = '';
   for(var i=0;i<segments.length;i++){
     var seg = segments[i];
     var parentPath = currentPath;
     currentPath = currentPath ? currentPath + '/' + seg : seg;
+    if(knownFolders[currentPath]) continue;
     var items = await listDriveChildren(parentPath);
     if(items === null) throw new Error('Folder "/' + parentPath + '" does not exist in SharePoint.');
     var exists = items.some(function(it){ return it.name === seg && it.folder; });
+    if(exists){ knownFolders[currentPath] = 1; }
     if(!exists){
       await graphFetch('/me/drive/root:/' + encodePath(parentPath) + ':/children', {
         method:'POST',
         headers:{'Content-Type':'application/json'},
         body: JSON.stringify({ name: seg, folder:{}, '@microsoft.graph.conflictBehavior':'fail' })
       });
+      knownFolders[currentPath] = 1;
     }
   }
+  knownFolders[path] = 1;
+}
+
+/* ============================================================
+   ATTACHMENTS  —  files live beside tasks.json in SharePoint
+   ============================================================ */
+function fmtSize(n){
+  if(n < 1024) return n + ' B';
+  if(n < 1024*1024) return (n/1024).toFixed(0) + ' KB';
+  return (n/1024/1024).toFixed(1) + ' MB';
+}
+/* SharePoint rejects " * : < > ? / \ | and leading/trailing dots or spaces. */
+function safeFileName(name){
+  var n = String(name).replace(/["*:<>?\/\\|]/g, '-').replace(/^[.\s]+|[.\s]+$/g, '');
+  if(!n) n = 'file';
+  if(n.length > 120) n = n.slice(0, 120);
+  return n;
+}
+function taskFolder(taskId){ return ATTACH_DIR + '/' + taskId; }
+
+async function uploadAttachment(task, file){
+  if(file.size > MAX_ATTACH){
+    throw new Error(file.name + ' is ' + fmtSize(file.size) + ' — the limit is 4 MB.');
+  }
+  if(file.size === 0) throw new Error(file.name + ' is empty.');
+  await ensurePath(taskFolder(task.id));
+  var path = taskFolder(task.id) + '/' + safeFileName(file.name);
+  // conflictBehavior=rename means a second upload of the same name won't clobber the first
+  var res = await graphFetch('/me/drive/root:/' + encodePath(path) +
+      ':/content?@microsoft.graph.conflictBehavior=rename', {
+    method: 'PUT',
+    headers: { 'Content-Type': file.type || 'application/octet-stream' },
+    body: file
+  });
+  var item = await res.json();
+  task.attachments.push({
+    itemId: item.id, name: item.name, size: item.size || file.size,
+    webUrl: item.webUrl || '', added: Date.now()
+  });
+  touch(task);
+  return item;
+}
+
+async function deleteAttachment(task, itemId){
+  try{
+    await graphFetch('/me/drive/items/' + encodeURIComponent(itemId), { method:'DELETE' });
+  }catch(e){
+    if(e.status !== 404) throw e;   // already gone is fine
+  }
+  task.attachments = task.attachments.filter(function(a){ return a.itemId !== itemId; });
+  if(task.attRemoved.indexOf(itemId) === -1) task.attRemoved.push(itemId);
+  touch(task);
+}
+
+/* Best effort — a leftover folder is harmless, a blocked delete is not. */
+function deleteTaskFolder(taskId){
+  delete knownFolders[taskFolder(taskId)];
+  graphFetch('/me/drive/root:/' + encodePath(taskFolder(taskId)), { method:'DELETE' })
+    .catch(function(){ /* nothing to clean up, or offline */ });
 }
 
 /* ============================================================
@@ -562,6 +666,8 @@ function normalise(doc){
     t.priority = (p>=1 && p<=4) ? p : 3;
     t.done = !!t.done;
     if(!t.project) t.project = out.projects[0];
+    if(!Array.isArray(t.attachments)) t.attachments = [];
+    if(!Array.isArray(t.attRemoved))  t.attRemoved  = [];
     // Never let a task reference a project that has no tab, or it becomes unreachable.
     if(out.projects.indexOf(t.project) === -1) out.projects.push(t.project);
   });
@@ -586,8 +692,21 @@ function mergeRemote(remote){
   state.tasks.forEach(function(t){ byId[t.id] = t; });
   r.tasks.forEach(function(rt){
     var lt = byId[rt.id];
-    if(!lt) byId[rt.id] = rt;
-    else if((rt.updated||0) > (lt.updated||0)) byId[rt.id] = rt;
+    if(!lt){ byId[rt.id] = rt; return; }
+    // Newest edit wins the task's fields, but attachments are unioned: an upload made on
+    // one device must not be dropped just because the other device edited the task later.
+    var win = ((rt.updated||0) > (lt.updated||0)) ? rt : lt;
+    var removed = (lt.attRemoved||[]).concat(rt.attRemoved||[]);
+    var seen = {}, merged = [];
+    (lt.attachments||[]).concat(rt.attachments||[]).forEach(function(a){
+      if(!a || !a.itemId) return;
+      if(seen[a.itemId]) return;
+      if(removed.indexOf(a.itemId) > -1) return;   // deleted on one side, don't resurrect
+      seen[a.itemId] = 1; merged.push(a);
+    });
+    win.attachments = merged;
+    win.attRemoved = removed.filter(function(id,i){ return removed.indexOf(id) === i; });
+    byId[rt.id] = win;
   });
 
   var tombs = {};
@@ -921,6 +1040,8 @@ function tagsHTML(t){
   if(ui.project==="all") h += '<span class="tag" style="color:'+projColor(t.project)+'">'+esc(t.project)+'</span>';
   if(t.due) h += '<span class="tag due '+dueCls(t.due)+'">'+dueText(t.due)+'</span>';
   if(t.notes) h += '<span class="tag" title="Has notes">&#128221;</span>';
+  if(t.attachments && t.attachments.length)
+    h += '<span class="tag" title="'+t.attachments.length+' attachment(s)">&#128206; '+t.attachments.length+'</span>';
   return h;
 }
 function cardHTML(t){
@@ -1009,6 +1130,7 @@ $("addForm").addEventListener("submit", function(e){
     project: $("addProject").value || state.projects[0],
     priority: parseInt($("addPriority").value,10),
     due: $("addDue").value || "", notes:"", done:false,
+    attachments: [], attRemoved: [],
     created: now, updated: now
   });
   markDirty();
@@ -1125,6 +1247,8 @@ function openModal(id){
   $("mDue").value = t.due || "";
   $("mNotes").value = t.notes || "";
   $("mDone").value = t.done ? "1" : "0";
+  renderAttachments();
+  attMsg("");
   $("back").classList.add("open");
   $("mTitle").focus();
   $("mTitle").setSelectionRange(t.title.length, t.title.length);
@@ -1160,6 +1284,9 @@ $("mDelete").addEventListener("click", function(){
 });
 function removeTasks(ids){
   var now = Date.now();
+  state.tasks.forEach(function(t){
+    if(ids.indexOf(t.id) > -1 && t.attachments && t.attachments.length) deleteTaskFolder(t.id);
+  });
   state.tasks = state.tasks.filter(function(t){ return ids.indexOf(t.id) === -1; });
   ids.forEach(function(id){ state.deleted.push({ id:id, at:now }); });
   markDirty();
@@ -1167,6 +1294,111 @@ function removeTasks(ids){
 $("back").addEventListener("click", function(e){ if(e.target === $("back")) closeModal(); });
 $("modal").addEventListener("keydown", function(e){
   if(e.key==="Enter" && e.target.id!=="mNotes"){ e.preventDefault(); closeModal(); }
+});
+
+/* ---------- attachments UI ---------- */
+function attMsg(text, isErr){
+  var el = $("mAttMsg");
+  el.textContent = text || "";
+  el.className = "attmsg" + (isErr ? " err" : "");
+}
+function renderAttachments(){
+  var t = byId(ui.editId);
+  var list = $("mAttList");
+  if(!t){ list.innerHTML = ""; return; }
+  list.innerHTML = (t.attachments || []).map(function(a){
+    return '<div class="attrow" data-att="'+esc(a.itemId)+'">'+
+      (a.webUrl ? '<a class="nm" href="'+esc(a.webUrl)+'" target="_blank" rel="noopener">'+esc(a.name)+'</a>'
+                : '<span class="nm">'+esc(a.name)+'</span>')+
+      '<span class="sz">'+fmtSize(a.size||0)+'</span>'+
+      '<button class="x" data-remove="'+esc(a.itemId)+'" title="Remove">&times;</button></div>';
+  }).join("");
+}
+function pendingRow(name){
+  var row = document.createElement('div');
+  row.className = 'attrow busy';
+  row.innerHTML = '<span class="nm">'+esc(name)+'</span><span class="sz">uploading&hellip;</span>';
+  $("mAttList").appendChild(row);
+  return row;
+}
+
+async function addFiles(fileList){
+  var t = byId(ui.editId);
+  if(!t) return;
+  if(!state.loaded){ attMsg("Still loading — try again in a moment.", true); return; }
+  var files = Array.prototype.slice.call(fileList);
+  if(!files.length) return;
+  attMsg("");
+  var failed = [], added = 0;
+  for(var i=0;i<files.length;i++){
+    var f = files[i];
+    var row = pendingRow(f.name);
+    try{
+      await uploadAttachment(t, f);
+      added++;
+    }catch(e){
+      failed.push(e.message || String(e));
+      row.className = 'attrow fail';
+      row.innerHTML = '<span class="nm">'+esc(f.name)+'</span><span class="sz">failed</span>';
+    }
+    if(row.parentNode && row.className.indexOf('fail') === -1) row.remove();
+  }
+  renderAttachments();
+  render();
+  if(failed.length) attMsg(failed.join('  '), true);
+  else if(added) attMsg(added + ' file' + (added>1?'s':'') + ' attached.');
+}
+
+$("mDrop").addEventListener("click", function(){ $("mFile").click(); });
+$("mDrop").addEventListener("keydown", function(e){
+  if(e.key === 'Enter' || e.key === ' '){ e.preventDefault(); $("mFile").click(); }
+});
+$("mFile").addEventListener("change", function(e){
+  addFiles(e.target.files); e.target.value = "";
+});
+["dragenter","dragover"].forEach(function(ev){
+  $("mDrop").addEventListener(ev, function(e){
+    if(!hasFiles(e)) return;
+    e.preventDefault(); e.stopPropagation();
+    e.dataTransfer.dropEffect = 'copy';
+    $("mDrop").classList.add('over');
+  });
+});
+["dragleave","dragend"].forEach(function(ev){
+  $("mDrop").addEventListener(ev, function(){ $("mDrop").classList.remove('over'); });
+});
+$("mDrop").addEventListener("drop", function(e){
+  if(!hasFiles(e)) return;
+  e.preventDefault(); e.stopPropagation();
+  $("mDrop").classList.remove('over');
+  addFiles(e.dataTransfer.files);
+});
+$("mAttList").addEventListener("click", async function(e){
+  var b = e.target.closest("[data-remove]");
+  if(!b) return;
+  var t = byId(ui.editId); if(!t) return;
+  var id = b.dataset.remove;
+  var att = (t.attachments||[]).filter(function(a){ return a.itemId===id; })[0];
+  if(!att) return;
+  if(!confirm('Remove "' + att.name + '"? The file is deleted from SharePoint.')) return;
+  b.disabled = true;
+  try{
+    await deleteAttachment(t, id);
+    renderAttachments(); render(); attMsg("Removed " + att.name + ".");
+  }catch(err){
+    attMsg("Could not remove: " + (err.message || err), true);
+    b.disabled = false;
+  }
+});
+function hasFiles(e){
+  var dt = e.dataTransfer;
+  if(!dt) return false;
+  if(dt.types){ for(var i=0;i<dt.types.length;i++){ if(dt.types[i] === 'Files') return true; } }
+  return false;
+}
+/* Dropping a file anywhere else would make the browser navigate to it and lose the page. */
+["dragover","drop"].forEach(function(ev){
+  window.addEventListener(ev, function(e){ if(hasFiles(e)) e.preventDefault(); });
 });
 
 /* overflow menu */
@@ -1270,7 +1502,9 @@ async function runLoad(){
 /* expose a couple of internals for local smoke-testing only */
 window.__todo = { state:state, ui:ui, render:render, normalise:normalise, mergeRemote:mergeRemote,
                   appRedirectUri:appRedirectUri, loadAll:loadAll, runLoad:runLoad, ensureDataDir:ensureDataDir,
-                  listDriveChildren:listDriveChildren, DATA_DIR:DATA_DIR, DATA_PATH:DATA_PATH };
+                  listDriveChildren:listDriveChildren, DATA_DIR:DATA_DIR, DATA_PATH:DATA_PATH,
+                  addFiles:addFiles, uploadAttachment:uploadAttachment,
+                  deleteAttachment:deleteAttachment, safeFileName:safeFileName, fmtSize:fmtSize };
 
 })();
 </script>
