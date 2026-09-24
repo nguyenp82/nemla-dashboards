@@ -511,6 +511,7 @@ async function signIn(){
     // fragment off the popup's URL, which fails behind EasyAuth (hash_empty_error). A top-level
     // navigation carries the session cookie and brings the response back to this page.
     // No prompt is requested, so an existing Entra session completes it without any interaction.
+    try{ localStorage.setItem(SIGNIN_MARK, String(Date.now())); }catch(err){}
     await state.msal.loginRedirect({ scopes: GRAPH_SCOPES });
     return;   // the browser is navigating away; handleRedirectPromise() finishes on the way back
   }catch(e){
@@ -1505,15 +1506,42 @@ async function runLoad(){
   }
 }
 
+/* Snapshot the landing URL now: handleRedirectPromise() strips the response off it, and we
+   want to be able to say what actually came back if sign-in ends up going nowhere. */
+var ARRIVAL_HASH   = window.location.hash || '';
+var ARRIVAL_SEARCH = window.location.search || '';
+var SIGNIN_MARK    = 'tasks.signinAttempt';
+
+function authResponseInUrl(url){ return /[#&?](code|error|state|id_token)=/.test(url); }
+
+/* Explain a sign-in that came back without producing an account. */
+function describeFailedReturn(){
+  var both = ARRIVAL_HASH + '&' + ARRIVAL_SEARCH;
+  var err  = /[#&?]error=([^&]+)/.exec(both);
+  var desc = /[#&?]error_description=([^&]+)/.exec(both);
+  if(err){
+    var d = desc ? decodeURIComponent(desc[1]).replace(/\+/g, ' ') : '';
+    return 'Microsoft returned an error: ' + decodeURIComponent(err[1]) + (d ? ' — ' + d.slice(0,200) : '');
+  }
+  if(!authResponseInUrl(both)){
+    return 'The sign-in response never reached this page — it came back with no token in the URL. ' +
+           'Something redirected the page in between.';
+  }
+  return 'A sign-in response arrived but no account came out of it.';
+}
+
 /* MSAL runs its silent and popup flows by loading the redirect URI — this very page — in a
    hidden iframe or a popup window. If the app booted there it would consume the response hash
    before MSAL could read it, which surfaces as hash_empty_error. Stay out of the way. */
 function inAuthContext(){
+  var framed = false;
   try{
-    if(window.opener && window.opener !== window) return true;
-    if(window.parent && window.parent !== window) return true;
-  }catch(e){ return true; }   // cross-origin parent: assume framed
-  return false;
+    if(window.opener && window.opener !== window) framed = true;
+    if(window.parent && window.parent !== window) framed = true;
+  }catch(e){ framed = true; }   // cross-origin parent: assume framed
+  // Being in a frame or a new tab is not itself a reason to stay silent — only do so when this
+  // really is MSAL's response landing, or opening the app in a new tab would leave a dead page.
+  return framed && authResponseInUrl(ARRIVAL_HASH);
 }
 
 /* This site already put us behind Entra, so ask it who we are and aim the silent
@@ -1569,6 +1597,9 @@ function offerSignIn(){
   }catch(e){
     if(e.errorCode !== 'hash_empty_error') gateError('Sign-in could not start: ' + (e.message || e));
   }
+  var mark = null;
+  try{ mark = localStorage.getItem(SIGNIN_MARK); localStorage.removeItem(SIGNIN_MARK); }catch(e){}
+  if(mark && Date.now() - parseInt(mark, 10) < 300000) gateError(describeFailedReturn());
   offerSignIn();
 })();
 
