@@ -344,6 +344,8 @@ button,input,select,textarea{font:inherit;color:inherit}
           <div class="sep"></div>
           <button data-m="dashboards">&#8599;&nbsp; All dashboards</button>
           <button data-m="signout">&#8618;&nbsp; Sign out</button>
+          <div class="sep"></div>
+          <div class="who" id="menuBuild"></div>
         </div>
       </div>
       <input type="file" id="fileIn" accept="application/json" hidden>
@@ -451,6 +453,7 @@ const SP_DRIVE = '/sites/nemla.sharepoint.com,03c13251-4cec-4fd0-a9fc-ed0896c457
 const DATA_DIR  = 'Nemla/Apps/nemla-dashboards-app/AppData/Todo';  // path within the SharePoint Documents library
 const DATA_FILE = 'tasks.json';
 const DATA_PATH = DATA_DIR + '/' + DATA_FILE;
+const BUILD = '2026-09-25.5';
 const ATTACH_DIR = DATA_DIR + '/attachments';
 const MAX_ATTACH = 4 * 1024 * 1024;   // Graph simple upload tops out at 4 MB
 
@@ -1658,6 +1661,7 @@ document.addEventListener("keydown", function(e){
    BOOT
    ============================================================ */
 $("btnSignIn").addEventListener("click", signIn);
+(function(){ var m = $("menuBuild"); if(m) m.textContent = 'build ' + BUILD; })();
 
 async function enterApp(){
   $("gate").classList.add("hidden");
