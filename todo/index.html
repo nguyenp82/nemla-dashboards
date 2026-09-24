@@ -49,6 +49,9 @@ button,input,select,textarea{font:inherit;color:inherit}
 .gatecard .btn{width:100%;padding:12px}
 .gateerr{background:var(--p1-bg);color:var(--p1);border-radius:9px;padding:10px 12px;font-size:13px;
   margin-bottom:16px;text-align:left;word-break:break-word}
+#gateChecking{display:flex;align-items:center;justify-content:center;gap:9px;color:var(--muted);
+  font-size:14px;padding:12px 0}
+#gateChecking .spin{border-color:var(--line);border-top-color:var(--accent);margin:0}
 .gatefoot{margin-top:18px;font-size:12.5px;color:var(--muted)}
 .gatefoot a{color:var(--accent);text-decoration:none}
 .spin{width:17px;height:17px;border:2.5px solid rgba(255,255,255,.35);border-top-color:#fff;border-radius:50%;
@@ -286,7 +289,8 @@ button,input,select,textarea{font:inherit;color:inherit}
     <h1>Nemla Tasks</h1>
     <p>Sign in with your Nemla account to load your tasks.</p>
     <div class="gateerr hidden" id="gateErr"></div>
-    <button class="btn" id="btnSignIn">Sign in with Microsoft</button>
+    <div id="gateChecking"><span class="spin"></span>Checking your sign-in&hellip;</div>
+    <button class="btn hidden" id="btnSignIn">Sign in with Microsoft</button>
     <div class="gatefoot">Tasks are stored in SharePoint &middot; <a href="/">All dashboards</a></div>
   </div>
 </div>
@@ -469,10 +473,19 @@ async function initMsal(){
       authority: 'https://login.microsoftonline.com/' + AZURE_TENANT_ID,
       redirectUri: appRedirectUri()
     },
-    cache: { cacheLocation:'sessionStorage', storeAuthStateInCookie:false }
+    // localStorage, not sessionStorage: otherwise the token cache dies with the tab and
+    // every new browser session demands a fresh interactive sign-in.
+    cache: { cacheLocation:'localStorage', storeAuthStateInCookie:false },
+    // the silent attempt runs in a hidden iframe; don't wait the default ~11s for it
+    system: { loadFrameTimeout: 4000 }
   });
   await state.msal.initialize();
-  var resp = await state.msal.handleRedirectPromise();
+  var resp = null;
+  try{
+    resp = await state.msal.handleRedirectPromise();
+  }catch(e){
+    if(e.errorCode !== 'hash_empty_error') throw e;   // nothing to process; not a failure
+  }
   if(resp && resp.account){
     state.msal.setActiveAccount(resp.account);
     state.account = resp.account;
@@ -495,13 +508,15 @@ async function signIn(){
     var resp = await state.msal.loginPopup({ scopes: GRAPH_SCOPES, prompt:'select_account' });
     state.msal.setActiveAccount(resp.account);
     state.account = resp.account;
-    await enterApp();
+    await enterOnce();
   }catch(e){
     if(e.errorCode === 'popup_window_error' || e.errorCode === 'interaction_in_progress'){
       state.msal.loginRedirect({ scopes: GRAPH_SCOPES });
       return;
     }
-    if(e.errorCode !== 'user_cancelled') gateError(e.message || String(e));
+    var msg = e.message || String(e);
+    if(e.errorCode === 'hash_empty_error') msg = 'Sign-in did not complete. Please try again.';
+    if(e.errorCode !== 'user_cancelled') gateError(msg);
     btn.disabled = false; btn.textContent = 'Sign in with Microsoft';
   }
 }
@@ -1490,13 +1505,71 @@ async function runLoad(){
   }
 }
 
+/* MSAL runs its silent and popup flows by loading the redirect URI — this very page — in a
+   hidden iframe or a popup window. If the app booted there it would consume the response hash
+   before MSAL could read it, which surfaces as hash_empty_error. Stay out of the way. */
+function inAuthContext(){
+  try{
+    if(window.opener && window.opener !== window) return true;
+    if(window.parent && window.parent !== window) return true;
+  }catch(e){ return true; }   // cross-origin parent: assume framed
+  return false;
+}
+
+/* This site already put us behind Entra, so ask it who we are and aim the silent
+   token request at that account. Returns null anywhere /.auth/ isn't present. */
+async function easyAuthHint(){
+  try{
+    var r = await fetch('/.auth/me', { credentials:'same-origin' });
+    if(!r.ok) return null;
+    var j = await r.json();
+    var p = j && j.clientPrincipal;
+    return (p && p.userDetails) || null;
+  }catch(e){ return null; }
+}
+
+/* No cached account: try for a token with no UI at all, using the Entra session the browser
+   already holds. Fails harmlessly when consent or a real prompt is genuinely required. */
+function trySilentSignIn(){
+  var attempt = (async function(){
+    try{
+      var opts = { scopes: GRAPH_SCOPES };
+      var hint = await easyAuthHint();
+      if(hint) opts.loginHint = hint;
+      var r = await state.msal.ssoSilent(opts);
+      state.msal.setActiveAccount(r.account);
+      state.account = r.account;
+      return true;
+    }catch(e){ return false; }
+  })();
+  // If it lands after we've given up waiting, let the user in anyway.
+  attempt.then(function(ok){ if(ok) enterOnce(); });
+  // Never hold the sign-in button hostage to a slow or blocked iframe.
+  return Promise.race([attempt, new Promise(function(res){ setTimeout(function(){ res(false); }, 3500); })]);
+}
+
+var entered = false;
+async function enterOnce(){
+  if(entered) return;
+  entered = true;
+  await enterApp();
+}
+
+function offerSignIn(){
+  var c = $("gateChecking"); if(c) c.classList.add("hidden");
+  $("btnSignIn").classList.remove("hidden");
+}
+
 (async function boot(){
+  if(inAuthContext()) return;   // we are MSAL's own iframe or popup
   try{
     var signedIn = await initMsal();
-    if(signedIn) await enterApp();
+    if(signedIn){ await enterOnce(); return; }
+    if(await trySilentSignIn()) return;   // enterOnce() is called by the attempt itself
   }catch(e){
-    gateError('Sign-in could not start: ' + (e.message || e));
+    if(e.errorCode !== 'hash_empty_error') gateError('Sign-in could not start: ' + (e.message || e));
   }
+  offerSignIn();
 })();
 
 /* expose a couple of internals for local smoke-testing only */
