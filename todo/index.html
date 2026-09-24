@@ -471,7 +471,9 @@ async function initMsal(){
     auth: {
       clientId: AZURE_CLIENT_ID,
       authority: 'https://login.microsoftonline.com/' + AZURE_TENANT_ID,
-      redirectUri: appRedirectUri()
+      redirectUri: appRedirectUri(),
+      // the redirect URI is this same page, so there is nothing to navigate back to
+      navigateToLoginRequestUrl: false
     },
     // localStorage, not sessionStorage: otherwise the token cache dies with the tab and
     // every new browser session demands a fresh interactive sign-in.
@@ -505,15 +507,13 @@ async function signIn(){
   btn.innerHTML = '<span class="spin"></span>Signing in&hellip;';
   $("gateErr").classList.add("hidden");
   try{
-    var resp = await state.msal.loginPopup({ scopes: GRAPH_SCOPES, prompt:'select_account' });
-    state.msal.setActiveAccount(resp.account);
-    state.account = resp.account;
-    await enterOnce();
+    // A full-page redirect, not a popup. The popup flow needs the opening window to read the
+    // fragment off the popup's URL, which fails behind EasyAuth (hash_empty_error). A top-level
+    // navigation carries the session cookie and brings the response back to this page.
+    // No prompt is requested, so an existing Entra session completes it without any interaction.
+    await state.msal.loginRedirect({ scopes: GRAPH_SCOPES });
+    return;   // the browser is navigating away; handleRedirectPromise() finishes on the way back
   }catch(e){
-    if(e.errorCode === 'popup_window_error' || e.errorCode === 'interaction_in_progress'){
-      state.msal.loginRedirect({ scopes: GRAPH_SCOPES });
-      return;
-    }
     var msg = e.message || String(e);
     if(e.errorCode === 'hash_empty_error') msg = 'Sign-in did not complete. Please try again.';
     if(e.errorCode !== 'user_cancelled') gateError(msg);
