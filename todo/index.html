@@ -261,6 +261,30 @@ button,input,select,textarea{font:inherit;color:inherit}
 .dropzone small{display:block;margin-top:3px;font-size:11.5px;opacity:.85}
 .attmsg{font-size:12.5px;margin-top:7px;color:var(--muted)}
 .attmsg.err{color:var(--p1)}
+.plist{display:flex;flex-direction:column;gap:7px;margin-top:14px}
+.prow{display:flex;align-items:center;gap:9px;background:var(--panel-2);border:1px solid var(--line);
+  border-radius:9px;padding:8px 10px}
+.prow .swatch{width:10px;height:10px;border-radius:3px;flex:0 0 auto}
+.prow .pname{flex:1;min-width:0;border:1px solid transparent;background:transparent;border-radius:6px;
+  padding:5px 7px;font-size:14px}
+.prow .pname:hover{border-color:var(--line)}
+.prow .pname:focus{border-color:var(--accent);background:var(--panel);outline:none}
+.prow .pcount{font-size:12px;color:var(--muted);white-space:nowrap;font-variant-numeric:tabular-nums}
+.pmove{display:flex;gap:2px}
+.pmove button,.prow .del{background:none;border:1px solid var(--line);border-radius:7px;cursor:pointer;
+  width:28px;height:28px;line-height:1;font-size:13px;color:var(--muted);padding:0}
+.pmove button:hover:not(:disabled),.prow .del:hover{border-color:var(--accent);color:var(--accent)}
+.pmove button:disabled{opacity:.35;cursor:default}
+.prow .del{width:auto;padding:0 10px;color:var(--p1)}
+.prow .del:hover{border-color:var(--p1);background:var(--p1-bg)}
+.pask{display:flex;flex-wrap:wrap;align-items:center;gap:8px;background:var(--p1-bg);border:1px solid var(--p1);
+  border-radius:9px;padding:10px;font-size:13px;color:var(--p1)}
+.pask .grow{flex:1}
+.pask select{font-size:13px}
+.pask button{border-radius:7px;padding:6px 11px;cursor:pointer;font-size:13px;border:1px solid var(--line);
+  background:var(--panel)}
+.pask button.go{background:var(--p1);color:#fff;border-color:var(--p1);font-weight:600}
+.phint{font-size:12.5px;color:var(--muted);margin-top:12px}
 .toast{position:fixed;left:50%;bottom:26px;transform:translateX(-50%);background:var(--text);color:var(--bg);
   padding:11px 18px;border-radius:22px;font-size:13.5px;box-shadow:var(--shadow-lg);z-index:80;
   opacity:0;pointer-events:none;transition:opacity .25s}
@@ -311,6 +335,7 @@ button,input,select,textarea{font:inherit;color:inherit}
           <div class="who" id="whoAmI"></div>
           <div class="sep"></div>
           <button data-m="addproj">&#65291;&nbsp; New project</button>
+          <button data-m="manageproj">&#9881;&nbsp; Manage projects</button>
           <button data-m="refresh">&#8635;&nbsp; Refresh from SharePoint</button>
           <div class="sep"></div>
           <button data-m="export">&#11015;&nbsp; Download a copy (JSON)</button>
@@ -401,6 +426,15 @@ button,input,select,textarea{font:inherit;color:inherit}
   </div>
 </div>
 
+<div class="back" id="pback">
+  <div class="modal" id="pmodal">
+    <h2>Manage projects</h2>
+    <div class="plist" id="pList"></div>
+    <div class="phint">Rename by typing. Arrows move a project left or right in the tab row.</div>
+    <div class="modacts"><span class="grow"></span><button class="btn" id="pClose">Done</button></div>
+  </div>
+</div>
+
 <div class="toast" id="toast"></div>
 
 <script>
@@ -434,7 +468,7 @@ const TOMBSTONE_DAYS = 60;
 var state = {
   msal:null, account:null,
   projects: DEFAULT_PROJECTS.slice(),
-  tasks: [], deleted: [],
+  tasks: [], deleted: [], projectsRemoved: [],
   etag: null,            // Graph eTag of the last version we read/wrote
   loaded: false,
   saving: false, dirty: false, lastSaved: null, saveErr: null,
@@ -674,7 +708,8 @@ function normalise(doc){
   var out = {
     projects: (doc && doc.projects && doc.projects.length) ? doc.projects : DEFAULT_PROJECTS.slice(),
     tasks: (doc && doc.tasks) ? doc.tasks : [],
-    deleted: (doc && doc.deleted) ? doc.deleted : []
+    deleted: (doc && doc.deleted) ? doc.deleted : [],
+    projectsRemoved: (doc && doc.projectsRemoved) ? doc.projectsRemoved : []
   };
   out.tasks.forEach(function(t){
     if(!t.updated) t.updated = t.created || 0;      // migrate v1 files
@@ -696,7 +731,8 @@ function snapshot(){
     savedBy: state.account ? state.account.username : '',
     projects: state.projects,
     tasks: state.tasks,
-    deleted: state.deleted
+    deleted: state.deleted,
+    projectsRemoved: state.projectsRemoved
   };
 }
 
@@ -743,7 +779,20 @@ function mergeRemote(remote){
     .map(function(id){ return { id:id, at:tombs[id] }; });
 
   state.tasks = merged;
-  r.projects.forEach(function(p){ if(state.projects.indexOf(p) === -1) state.projects.push(p); });
+  // Union the project lists, but honour deletions: without this, a device still holding a
+  // deleted project would put it back on every merge.
+  var goneNames = {};
+  (state.projectsRemoved || []).concat(r.projectsRemoved || []).forEach(function(x){
+    if(!goneNames[x.name] || x.at > goneNames[x.name]) goneNames[x.name] = x.at;
+  });
+  state.projectsRemoved = Object.keys(goneNames).map(function(n){ return { name:n, at:goneNames[n] }; });
+  r.projects.forEach(function(p){
+    if(state.projects.indexOf(p) === -1 && !goneNames[p]) state.projects.push(p);
+  });
+  state.projects = state.projects.filter(function(p){
+    // a project that still holds tasks is never dropped, whatever the tombstones say
+    return !goneNames[p] || state.tasks.some(function(t){ return t.project === p; });
+  });
 }
 
 function setSync(kind, text, retryFn, detail){
@@ -1210,6 +1259,8 @@ function newProject(){
   if(!name || !name.trim()) return;
   name = name.trim();
   if(state.projects.indexOf(name)===-1){ state.projects.push(name); markDirty(); }
+  // a re-created project must shed its tombstone, or the next merge would remove it again
+  state.projectsRemoved = (state.projectsRemoved || []).filter(function(x){ return x.name !== name; });
   ui.project = name; renderProjectPicker(); render();
 }
 $("rings").addEventListener("click", function(e){
@@ -1417,6 +1468,129 @@ function hasFiles(e){
   window.addEventListener(ev, function(e){ if(hasFiles(e)) e.preventDefault(); });
 });
 
+/* ---------- manage projects ---------- */
+var pAsk = null;   // project currently asking what should happen to its tasks
+
+function projectStats(name){
+  var all = state.tasks.filter(function(t){ return t.project === name; });
+  return { total: all.length, open: all.filter(function(t){ return !t.done; }).length };
+}
+function openManage(){ pAsk = null; renderManage(); $("pback").classList.add("open"); }
+function closeManage(){ pAsk = null; $("pback").classList.remove("open"); }
+
+function renderManage(){
+  var last = state.projects.length <= 1;
+  $("pList").innerHTML = state.projects.map(function(p, i){
+    if(pAsk === p){
+      var st = projectStats(p);
+      var others = state.projects.filter(function(x){ return x !== p; });
+      return '<div class="pask" data-p="' + esc(p) + '">' +
+        '<div style="flex:1 1 100%"><b>' + esc(p) + '</b> still has ' + st.total +
+        ' task' + (st.total > 1 ? 's' : '') + ' (' + st.open + ' open). What should happen to them?</div>' +
+        '<select class="ctl" id="pMoveTo">' + others.map(function(o){
+          return '<option value="' + esc(o) + '">Move to ' + esc(o) + '</option>';
+        }).join('') + '</select>' +
+        '<button class="go" data-act="domove">Move &amp; delete project</button>' +
+        '<span class="grow"></span>' +
+        '<button data-act="dopurge">Delete tasks too</button>' +
+        '<button data-act="cancel">Cancel</button></div>';
+    }
+    var s = projectStats(p);
+    return '<div class="prow" data-p="' + esc(p) + '">' +
+      '<span class="swatch" style="background:' + projColor(p) + '"></span>' +
+      '<div class="pmove">' +
+        '<button data-act="left" title="Move left"' + (i === 0 ? ' disabled' : '') + '>&#8592;</button>' +
+        '<button data-act="right" title="Move right"' + (i === state.projects.length - 1 ? ' disabled' : '') + '>&#8594;</button>' +
+      '</div>' +
+      '<input class="pname" data-act="rename" value="' + esc(p) + '" spellcheck="false">' +
+      '<span class="pcount">' + s.total + ' task' + (s.total === 1 ? '' : 's') + ' &middot; ' + s.open + ' open</span>' +
+      '<button class="del" data-act="del"' + (last ? ' disabled title="Keep at least one project"' : '') + '>Delete</button>' +
+      '</div>';
+  }).join("");
+}
+
+function moveProject(name, dir){
+  var i = state.projects.indexOf(name), j = i + dir;
+  if(i < 0 || j < 0 || j >= state.projects.length) return;
+  state.projects.splice(j, 0, state.projects.splice(i, 1)[0]);
+  markDirty(); renderManage(); render();
+}
+
+function renameProject(oldName, newName){
+  newName = String(newName || "").trim();
+  if(!newName || newName === oldName) return false;
+  if(state.projects.indexOf(newName) > -1){ toast('A project called "' + newName + '" already exists.'); return false; }
+  var i = state.projects.indexOf(oldName);
+  if(i < 0) return false;
+  state.projects[i] = newName;
+  var now = Date.now();
+  state.tasks.forEach(function(t){ if(t.project === oldName){ t.project = newName; t.updated = now; } });
+  if(ui.project === oldName) ui.project = newName;
+  markDirty(); renderProjectPicker(); render(); renderManage();
+  toast('Renamed to "' + newName + '".');
+  return true;
+}
+
+function forgetProject(name){
+  state.projects = state.projects.filter(function(p){ return p !== name; });
+  state.projectsRemoved = state.projectsRemoved || [];
+  if(!state.projectsRemoved.some(function(x){ return x.name === name; }))
+    state.projectsRemoved.push({ name: name, at: Date.now() });
+  if(ui.project === name) ui.project = "all";
+  markDirty(); renderProjectPicker(); render(); renderManage();
+}
+
+function deleteProject(name){
+  if(state.projects.length <= 1){ toast('Keep at least one project.'); return; }
+  var st = projectStats(name);
+  if(st.total === 0){
+    if(!confirm('Delete the project "' + name + '"?')) return;
+    forgetProject(name);
+    toast('Deleted "' + name + '".');
+    return;
+  }
+  pAsk = name;          // it holds tasks: ask before touching anything
+  renderManage();
+}
+
+$("pList").addEventListener("click", function(e){
+  var b = e.target.closest("[data-act]");
+  if(!b || b.tagName === 'INPUT') return;
+  var host = e.target.closest("[data-p]");
+  if(!host) return;
+  var name = host.dataset.p, act = b.dataset.act;
+  if(act === "left")   moveProject(name, -1);
+  if(act === "right")  moveProject(name, 1);
+  if(act === "del")    deleteProject(name);
+  if(act === "cancel"){ pAsk = null; renderManage(); }
+  if(act === "domove"){
+    var target = $("pMoveTo").value, now = Date.now();
+    state.tasks.forEach(function(t){ if(t.project === name){ t.project = target; t.updated = now; } });
+    pAsk = null; forgetProject(name);
+    toast('Moved those tasks to "' + target + '" and deleted "' + name + '".');
+  }
+  if(act === "dopurge"){
+    var st = projectStats(name);
+    if(!confirm('Permanently delete "' + name + '" and its ' + st.total + ' task' +
+                (st.total > 1 ? 's' : '') + ', including any attached files?')) return;
+    removeTasks(state.tasks.filter(function(t){ return t.project === name; })
+                           .map(function(t){ return t.id; }));
+    pAsk = null; forgetProject(name);
+    toast('Deleted "' + name + '" and its tasks.');
+  }
+});
+$("pList").addEventListener("change", function(e){
+  var f = e.target.closest('[data-act="rename"]');
+  if(!f) return;
+  var host = e.target.closest("[data-p]");
+  if(!renameProject(host.dataset.p, f.value)) renderManage();   // restore the old name
+});
+$("pList").addEventListener("keydown", function(e){
+  if(e.key === "Enter" && e.target.closest('[data-act="rename"]')){ e.preventDefault(); e.target.blur(); }
+});
+$("pClose").addEventListener("click", closeManage);
+$("pback").addEventListener("click", function(e){ if(e.target === $("pback")) closeManage(); });
+
 /* overflow menu */
 $("btnMenu").addEventListener("click", function(e){ e.stopPropagation(); $("menu").classList.toggle("open"); });
 document.addEventListener("click", function(){ $("menu").classList.remove("open"); });
@@ -1425,6 +1599,7 @@ $("menu").addEventListener("click", function(e){
   $("menu").classList.remove("open");
   var m = b.dataset.m;
   if(m==="addproj")    newProject();
+  if(m==="manageproj") openManage();
   if(m==="refresh")    refreshIfStale(true);
   if(m==="export")     doExport();
   if(m==="import")     $("fileIn").click();
@@ -1470,6 +1645,7 @@ function clearDone(){
 /* shortcuts */
 document.addEventListener("keydown", function(e){
   if($("app").classList.contains("hidden")) return;
+  if(e.key==="Escape" && $("pback").classList.contains("open")){ closeManage(); return; }
   if(e.key==="Escape" && $("back").classList.contains("open")){ closeModal(); return; }
   var tag = (e.target.tagName||"").toLowerCase();
   if(tag==="input"||tag==="textarea"||tag==="select") return;
@@ -1604,7 +1780,9 @@ function offerSignIn(){
 })();
 
 /* expose a couple of internals for local smoke-testing only */
-window.__todo = { state:state, ui:ui, render:render, normalise:normalise, mergeRemote:mergeRemote,
+window.__todo = { state:state, ui:ui, render:render, normalise:normalise, mergeRemote:mergeRemote, openManage:openManage, renderManage:renderManage,
+                  moveProject:moveProject, renameProject:renameProject,
+                  deleteProject:deleteProject, projectStats:projectStats,
                   appRedirectUri:appRedirectUri, loadAll:loadAll, runLoad:runLoad, ensureDataDir:ensureDataDir,
                   listDriveChildren:listDriveChildren, DATA_DIR:DATA_DIR, DATA_PATH:DATA_PATH,
                   addFiles:addFiles, uploadAttachment:uploadAttachment,
