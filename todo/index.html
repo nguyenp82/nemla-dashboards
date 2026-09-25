@@ -453,7 +453,7 @@ const SP_DRIVE = '/sites/nemla.sharepoint.com,03c13251-4cec-4fd0-a9fc-ed0896c457
 const DATA_DIR  = 'Nemla/Apps/nemla-dashboards-app/AppData/Todo';  // path within the SharePoint Documents library
 const DATA_FILE = 'tasks.json';
 const DATA_PATH = DATA_DIR + '/' + DATA_FILE;
-const BUILD = '2026-09-25.5';
+const BUILD = '2026-09-25.6';
 const ATTACH_DIR = DATA_DIR + '/attachments';
 const MAX_ATTACH = 4 * 1024 * 1024;   // Graph simple upload tops out at 4 MB
 
@@ -1012,6 +1012,7 @@ function renderTabs(){
          '<span class="dot"></span>'+esc(p)+'<span class="n">'+n+'</span></button>';
   });
   h += '<button class="tab add" data-p="__add">&#65291; New project</button>';
+  h += '<button class="tab add" data-p="__manage" title="Reorder, rename or delete projects">&#9881; Manage</button>';
   $("tabs").innerHTML = h;
 }
 function renderRings(){
@@ -1255,6 +1256,7 @@ $("content").addEventListener("drop", function(e){
 $("tabs").addEventListener("click", function(e){
   var b = e.target.closest(".tab"); if(!b) return;
   if(b.dataset.p === "__add"){ newProject(); return; }
+  if(b.dataset.p === "__manage"){ openManage(); return; }
   ui.project = b.dataset.p; renderProjectPicker(); render();
 });
 function newProject(){
