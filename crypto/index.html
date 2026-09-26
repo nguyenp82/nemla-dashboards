@@ -187,11 +187,11 @@ table.dash tbody tr:hover td{background:var(--panel-2)}
 .metric .s{font-size:11.5px;color:var(--faint);margin-top:auto;padding-top:3px}
 .metric .s a{color:inherit}
 
-.secs{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.secs{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:12px}
 .sec{background:var(--panel-2);border-radius:10px;padding:12px 14px}
 .sec h3{margin:0 0 6px;font-size:13.5px;display:flex;justify-content:space-between;gap:8px;align-items:center}
 .sec p{margin:0;font-size:14px}
-.cols3{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
+.cols3{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}
 .listcard{border-radius:10px;padding:12px 14px;border:1px solid var(--line)}
 .listcard h3{margin:0 0 8px;font-size:13.5px}
 .listcard ul{margin:0;padding-left:18px;font-size:14px}
@@ -218,7 +218,82 @@ table.plain th{font-size:11.5px;color:var(--muted);text-transform:uppercase;lett
   padding:10px 16px;border-radius:10px;font-size:14px;opacity:0;pointer-events:none;transition:.2s}
 .toast.on{opacity:1;transform:translateX(-50%)}
 
+/* ---------- visual overview ---------- */
+.grid2{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:18px;margin-top:18px}
+.grid2 .panel{margin-top:0}
+.cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(235px,1fr));gap:12px}
+.ccard{background:var(--panel-2);border:1px solid var(--line);border-radius:12px;padding:12px 13px;cursor:pointer;
+  display:flex;flex-direction:column;gap:8px;border-top:4px solid var(--na);transition:border-color .15s,transform .15s}
+.ccard:hover{transform:translateY(-2px);border-color:var(--accent)}
+.ccard .row{display:flex;align-items:center;gap:8px}
+.ccard img{width:26px;height:26px;border-radius:50%}
+.ccard .sym{font-weight:750;font-size:15px}
+.ccard .px{margin-left:auto;text-align:right;font-weight:700;font-size:14px;line-height:1.2}
+.ccard .px .small{font-weight:600}
+.spark{width:100%;height:42px;display:block}
+.minitrack{display:grid;grid-template-columns:repeat(6,1fr);gap:2px}
+.minitrack span{height:6px;border-radius:3px;background:var(--line)}
+.minitrack+.pl{font-size:11.5px;color:var(--muted);margin-top:-4px}
+.dots{display:flex;gap:10px;font-size:11px;color:var(--muted)}
+.dots span{display:flex;align-items:center;gap:4px}
+.dots i{width:9px;height:9px;border-radius:50%;display:inline-block}
+.bg-good{background:var(--good)} .bg-mid{background:var(--mid)} .bg-bad{background:var(--bad)} .bg-na{background:var(--line)}
+
+.cyclemap{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:6px}
+.cyclemap .col{border-radius:10px;padding:8px 6px;min-height:118px;display:flex;flex-direction:column;align-items:center;gap:6px}
+.cyclemap .col .nm{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.3px;text-align:center}
+.cyclemap .chip{display:flex;align-items:center;gap:4px;background:var(--panel);border-radius:999px;padding:2px 8px 2px 3px;
+  font-size:12px;font-weight:700;cursor:pointer;box-shadow:var(--shadow)}
+.cyclemap .chip img{width:16px;height:16px;border-radius:50%}
+.cyclecap{font-size:12px;color:var(--muted);margin-top:10px}
+
+.bars{display:flex;flex-direction:column;gap:7px}
+.bar{display:grid;grid-template-columns:48px minmax(0,1fr) 62px;align-items:center;gap:8px;font-size:13px;cursor:pointer}
+.bar .b{position:relative;height:16px;background:var(--panel-2);border-radius:4px}
+.bar .b::before{content:"";position:absolute;left:50%;top:-3px;bottom:-3px;border-left:1px dashed var(--faint)}
+.bar .f{position:absolute;top:0;bottom:0;border-radius:4px}
+.bar .v{text-align:right;font-weight:650}
+.bar .s{font-weight:700}
+
+.mkt{display:grid;grid-template-columns:170px minmax(0,1fr);gap:16px;align-items:center}
+.gauge{text-align:center}
+.gauge svg{width:170px;height:100px;display:block}
+.gauge .gv{font-size:26px;font-weight:800;margin-top:-34px}
+.gauge .gl{font-size:12px;color:var(--muted)}
+details.more{margin-top:12px;font-size:13.5px;color:var(--muted)}
+details.more summary{cursor:pointer;color:var(--accent);font-weight:600}
+details.more p{margin:8px 0 0}
+
+table.heat td.h{padding:6px 5px}
+table.heat .cell{display:block;text-align:center;border-radius:6px;padding:5px 6px;font-size:12px;font-weight:650;white-space:nowrap}
+
+/* ---------- coin page: key points, scorecard, section cards ---------- */
+.keypts{margin:14px 0 0;padding:12px 14px 12px 32px;border-radius:10px;background:var(--panel-2);font-size:14.5px}
+.keypts li{margin:4px 0}
+.score{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:8px 22px;margin-top:14px}
+.srow{display:grid;grid-template-columns:96px minmax(0,1fr) auto;align-items:center;gap:10px;font-size:13px}
+.srow .k{color:var(--muted)}
+.segs{display:grid;grid-template-columns:repeat(4,1fr);gap:3px}
+.segs i{height:10px;border-radius:3px;background:var(--line)}
+.segs i.bg-good{background:var(--good)} .segs i.bg-mid{background:var(--mid)} .segs i.bg-bad{background:var(--bad)}
+.srow .w{font-size:12px;font-weight:650;min-width:92px;text-align:right}
+.scards{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:12px}
+.scard{background:var(--panel-2);border-radius:10px;padding:11px 13px;border-left:4px solid var(--line)}
+.scard.good{border-left-color:var(--good)} .scard.mid{border-left-color:var(--mid)} .scard.bad{border-left-color:var(--bad)}
+.scard h3{margin:0 0 6px;font-size:13.5px;display:flex;justify-content:space-between;gap:8px;align-items:center}
+.scard ul{margin:0;padding-left:17px;font-size:13.5px}
+.scard li{margin:3px 0}
+.scard details{margin-top:6px;font-size:12.5px;color:var(--muted)}
+.scard details summary{cursor:pointer;color:var(--accent)}
+.scard details p{margin:6px 0 0}
+.alerts.compact .alert{padding:8px 11px}
+
 @media (max-width:900px){
+  .grid2{grid-template-columns:minmax(0,1fr)}
+  .score{grid-template-columns:minmax(0,1fr)}
+  .mkt{grid-template-columns:minmax(0,1fr)}
+  .gauge svg{margin:0 auto}
+  .cyclemap{grid-template-columns:repeat(3,minmax(0,1fr))}
   .hero{grid-template-columns:1fr}
   .secs,.cols3{grid-template-columns:1fr}
   .ratings{grid-template-columns:repeat(2,1fr)}
@@ -291,7 +366,7 @@ const AZURE_TENANT_ID = '91faaa92-6633-43b2-a302-8122e930e674';
 const GRAPH_SCOPES    = ['Files.ReadWrite', 'Sites.ReadWrite.All', 'User.Read'];
 const SP_DRIVE = '/sites/nemla.sharepoint.com,03c13251-4cec-4fd0-a9fc-ed0896c45745,4ae31160-74d6-4b1a-bbaf-89cd88ca1da2/drive';
 const DATA_DIR = 'Nemla/Apps/nemla-dashboards-app/AppData/Crypto';  // path within the SharePoint Documents library
-const BUILD = '2026-09-26.1';
+const BUILD = '2026-09-27.1';
 /* Local preview only: on localhost, ?local=1 reads the synced AppData folder over plain HTTP
    instead of going through Entra + Graph. Never active on the real site. */
 const LOCAL = /^(localhost|127\.0\.0\.1)$/.test(location.hostname) && /[?&]local=1/.test(location.search);
@@ -528,7 +603,7 @@ function ratingPill(word, invert){
   return '<span class="pill t-' + t + '">' + esc(word) + '</span>';
 }
 function riskPill(word){
-  var t = {'low':'good','medium':'mid','high':'bad','very high':'bad'}[String(word||'').toLowerCase()] || 'na';
+  var t = {'low':'good','medium':'mid','high':'bad','very high':'bad'}[String(word||'').toLowerCase().replace(/ risk$/,'')] || 'na';
   return '<span class="pill t-' + t + '">' + esc(word || '—') + '</span>';
 }
 function actionBadge(a){
@@ -595,93 +670,153 @@ function destroyCharts(){
    OVERVIEW
    ============================================================ */
 function renderOverview(){
-  var r = state.report, m = r.market || {}, ex = r.executive || {};
+  var r = state.report, m = r.market || {};
+  var coins = r.coins || [];
   var h = '';
 
-  /* executive summary + market */
-  h += '<div class="hero">';
-  h += '<section class="panel exec"><h2>Executive summary <span class="hint">' + esc(fmtDate(r.date)) + '</span></h2>';
-  h += '<p>' + esc(ex.summary || '') + '</p>';
-  var groups = [
-    ['improving','Improving'],['deteriorating','Deteriorating'],['attention','Needs attention'],
-    ['accumulation','Accumulation'],['distribution','Distribution'],['nearTop','Approaching a top'],['dying','Possibly dying']
-  ];
-  h += '<div class="groups">';
-  groups.forEach(function(g){
-    var arr = ex[g[0]] || [];
-    if(!arr.length) return;
-    h += '<div class="group"><span class="lbl">' + g[1] + '</span>' +
-      arr.map(function(s){ return '<span class="coinchip" data-go="' + esc(s) + '">' + esc(s) + '</span>'; }).join('') + '</div>';
+  /* 1. one card per holding */
+  h += '<section class="panel"><h2>Holdings at a glance <span class="hint">' + esc(fmtDate(r.date)) + ' · click a card for detail</span></h2><div class="cards">';
+  coins.forEach(function(c){
+    var k = c.market || {}, g = c.ratings || {};
+    var pi = PHASES.indexOf(g.cyclePhase);
+    var moved = actionMoved(c);
+    h += '<div class="ccard" data-go="' + esc(c.symbol) + '" style="border-top-color:' + actionColor(g.action) + '">' +
+      '<div class="row">' + coinImg(c) + '<div><div class="sym">' + esc(c.symbol) + '</div><div class="small muted">' + esc(c.name) + '</div></div>' +
+        '<div class="px num">' + fmtUsd(k.price) + '<div class="small">' + fmtPct(k.chg30d) + ' <span class="muted">30d</span></div></div></div>' +
+      '<svg class="spark" data-spark="' + esc(c.coingeckoId || '') + '" viewBox="0 0 200 42" preserveAspectRatio="none"></svg>' +
+      '<div class="row">' + actionBadge(g.action) + (moved ? '<span class="conf">was ' + esc(moved) + '</span>' : '') +
+        '<span class="grow"></span>' + riskPill(g.risk ? g.risk + ' risk' : null) + '</div>' +
+      '<div class="minitrack" title="Cycle phase: ' + esc(g.cyclePhase || '—') + '">' + PHASES.map(function(p, i){
+        return '<span' + (i === pi ? ' style="background:' + PHASE_COLORS[i] + '"' : (i < pi ? ' style="background:' + PHASE_COLORS[i] + ';opacity:.25"' : '')) + '></span>';
+      }).join('') + '</div><div class="pl">' + esc(g.cyclePhase || 'Phase unknown') + '</div>' +
+      '<div class="dots">' + [['Fund', g.fundamental], ['Chain', g.onchain], ['Comm', g.community], ['Dev', g.developer], ['TA', g.ta]].map(function(d){
+        return '<span title="' + esc(d[0] + ': ' + (d[1] || '—')) + '"><i class="bg-' + tone(d[1]) + '"></i>' + d[0] + '</span>';
+      }).join('') + '</div></div>';
   });
   h += '</div></section>';
 
-  h += '<section class="panel"><h2>Market backdrop</h2><div class="stats">';
+  /* 2. cycle map + relative performance */
+  h += '<div class="grid2"><section class="panel"><h2>Cycle map <span class="hint">where each coin sits</span></h2><div class="cyclemap">';
+  PHASES.forEach(function(p, i){
+    var here = coins.filter(function(c){ return (c.ratings || {}).cyclePhase === p; });
+    h += '<div class="col" style="background:' + hexA(PHASE_COLORS[i], .12) + '"><div class="nm" style="color:' + PHASE_COLORS[i] + '">' + esc(p) + '</div>' +
+      here.map(function(c){ return '<span class="chip" data-go="' + esc(c.symbol) + '">' + (c.image ? '<img src="' + esc(c.image) + '" alt="">' : '') + esc(c.symbol) + '</span>'; }).join('') + '</div>';
+  });
+  h += '</div><div class="cyclecap">Accumulation → Expansion → Euphoria → Distribution → Decline. Profit-taking becomes relevant from Euphoria onward; exit checks focus on Decline.</div></section>';
+
+  var perf = coins.map(function(c){ return {s:c.symbol, v:(c.market || {}).vsBtc30d}; })
+    .filter(function(x){ return x.v != null; }).sort(function(a,b){ return b.v - a.v; });
+  var maxAbs = Math.max.apply(null, perf.map(function(x){ return Math.abs(x.v); }).concat([10]));
+  h += '<section class="panel"><h2>Strength vs BTC <span class="hint">30-day relative performance</span></h2><div class="bars">';
+  perf.forEach(function(x){
+    var w = Math.abs(x.v) / maxAbs * 50;
+    var style = x.v >= 0 ? 'left:50%;width:' + w + '%;background:var(--good)' : 'right:50%;width:' + w + '%;background:var(--bad)';
+    h += '<div class="bar" data-go="' + esc(x.s) + '"><span class="s">' + esc(x.s) + '</span><div class="b"><div class="f" style="' + style + '"></div></div><span class="v">' + fmtPct(x.v) + '</span></div>';
+  });
+  h += '</div><div class="cyclecap">Right of centre = beating Bitcoin. BTC itself: ' + fmtPct(m.btcChg30d) + ' over 30 days.</div></section></div>';
+
+  /* 3. market backdrop */
+  h += '<section class="panel"><h2>Market backdrop</h2><div class="mkt">' + gauge(m.fearGreed, m.fearGreedLabel) + '<div class="stats">';
   h += stat('BTC', fmtUsd(m.btcPrice), m.btcChg30d != null ? fmtPct(m.btcChg30d) + ' <span class="muted">30d</span>' : '');
   h += stat('BTC dominance', m.btcDominance != null ? m.btcDominance.toFixed(1) + '%' : '—', '');
   h += stat('ETH / BTC', m.ethBtc != null ? m.ethBtc.toFixed(4) : '—', '');
   h += stat('Total market cap', fmtUsd(m.totalMarketCap), m.totalMarketCapChg30d != null ? fmtPct(m.totalMarketCapChg30d) + ' <span class="muted">30d</span>' : '');
   h += stat('Stablecoins', fmtUsd(m.stablecoinSupply), m.stablecoinChg30d != null ? fmtPct(m.stablecoinChg30d) + ' <span class="muted">30d</span>' : '');
-  h += stat('Fear & Greed', m.fearGreed != null ? m.fearGreed : '—', esc(m.fearGreedLabel || ''));
-  h += '</div>';
-  if(m.summary) h += '<p class="mkt-text">' + esc(m.summary) + '</p>';
-  if(m.cycle) h += '<p class="mkt-text"><b>Cycle:</b> ' + esc(m.cycle) + '</p>';
-  h += '</section></div>';
+  h += stat('BTC vs 200D', esc(m.btcVs200d ? (m.btcVs200d.charAt(0).toUpperCase() + m.btcVs200d.slice(1)) : '—'), '');
+  h += '</div></div>';
+  if(m.summary || m.cycle) h += '<details class="more"><summary>Market read</summary>' +
+    (m.summary ? '<p>' + esc(m.summary) + '</p>' : '') + (m.cycle ? '<p><b>Cycle:</b> ' + esc(m.cycle) + '</p>' : '') + '</details>';
+  h += '</section>';
 
-  /* dashboard table */
-  h += '<section class="panel"><h2>Portfolio dashboard <span class="hint">click a row for the full analysis</span></h2><div class="tablewrap"><table class="dash"><thead><tr>' +
-    '<th>Asset</th><th class="num">Price</th><th class="opt">30d</th><th class="opt">vs BTC 30d</th><th>Fundamental</th><th>On-chain</th>' +
-    '<th class="opt">Community</th><th class="opt">Developer</th><th class="opt">TA</th><th>Cycle phase</th><th class="opt">Risk</th><th>Action</th></tr></thead><tbody>';
-  (r.coins || []).forEach(function(c){
-    var k = c.market || {}, g = c.ratings || {};
-    var moved = actionMoved(c);
-    h += '<tr data-go="' + esc(c.symbol) + '">' +
-      '<td><div class="asset">' + coinImg(c) + '<div><div class="sym">' + esc(c.symbol) + '</div><div class="nm">' + esc(c.name) + '</div></div></div></td>' +
-      '<td class="num">' + fmtUsd(k.price) + '</td>' +
-      '<td class="opt">' + fmtPct(k.chg30d) + '</td>' +
-      '<td class="opt">' + fmtPct(k.vsBtc30d) + '</td>' +
-      '<td>' + ratingPill(g.fundamental) + '</td>' +
-      '<td>' + ratingPill(g.onchain) + '</td>' +
-      '<td class="opt">' + ratingPill(g.community) + '</td>' +
-      '<td class="opt">' + ratingPill(g.developer) + '</td>' +
-      '<td class="opt" title="' + esc(g.taNote || '') + '">' + ratingPill(g.ta) + '</td>' +
-      '<td>' + phasePill(g.cyclePhase) + '</td>' +
-      '<td class="opt">' + riskPill(g.risk) + '</td>' +
-      '<td>' + actionBadge(g.action) + (moved ? '<div class="conf">was ' + esc(moved) + '</div>' : '') + '</td></tr>';
+  /* 4. health heatmap (the dashboard table) */
+  h += '<section class="panel"><h2>Health heatmap</h2><div class="tablewrap"><table class="dash heat"><thead><tr>' +
+    '<th>Asset</th><th>Fundamental</th><th>On-chain</th><th>Community</th><th>Developer</th><th>TA</th><th>Cycle</th><th>Risk</th><th>Action</th></tr></thead><tbody>';
+  coins.forEach(function(c){
+    var g = c.ratings || {};
+    h += '<tr data-go="' + esc(c.symbol) + '"><td><div class="asset">' + coinImg(c) + '<span class="sym">' + esc(c.symbol) + '</span></div></td>' +
+      [g.fundamental, g.onchain, g.community, g.developer, g.ta].map(function(w){
+        var txt = w === 'Insufficient data' ? 'No data' : (w || '—');
+        return '<td class="h"><span class="cell t-' + tone(w) + '" title="' + esc(w || '') + '">' + esc(txt) + '</span></td>';
+      }).join('') +
+      '<td class="h">' + phasePill(g.cyclePhase) + '</td><td class="h">' + riskPill(g.risk) + '</td><td class="h">' + actionBadge(g.action) + '</td></tr>';
   });
-  h += '</tbody></table></div>' +
-    '<p class="muted small" style="margin:12px 0 0">Actions are decision-support categories from the evidence in each report, not guarantees and not financial advice.</p></section>';
+  h += '</tbody></table></div><p class="muted small" style="margin:10px 0 0">Actions are decision-support categories from the evidence, not guarantees and not financial advice.</p></section>';
 
-  /* alerts */
-  var alerts = [];
-  (r.coins || []).forEach(function(c){
-    (c.alerts || []).forEach(function(a){ alerts.push(Object.assign({sym:c.symbol}, a)); });
-  });
-  var order = {warning:0, positive:1, watch:2};
-  alerts.sort(function(a,b){ return (order[a.type]==null?3:order[a.type]) - (order[b.type]==null?3:order[b.type]); });
-  h += '<section class="panel"><h2>Alerts</h2>' + renderAlerts(alerts, true) + '</section>';
-
-  /* changes since previous */
+  /* 5. changes since previous */
   var ch = [];
-  (r.coins || []).forEach(function(c){ (c.changes || []).forEach(function(x){ ch.push([c.symbol, x]); }); });
-  h += '<section class="panel"><h2>What changed since the previous review' +
-    (r.previous ? ' <span class="hint">vs ' + esc(fmtDate(r.previous)) + '</span>' : '') + '</h2>';
-  if(!r.previous) h += '<p class="muted" style="margin:0">This is the baseline report. From the next daily review this section lists what moved: activity, flows, structure, ratings and actions.</p>';
+  coins.forEach(function(c){ (c.changes || []).forEach(function(x){ ch.push([c.symbol, x]); }); });
+  h += '<section class="panel"><h2>What changed' + (r.previous ? ' <span class="hint">vs ' + esc(fmtDate(r.previous)) + '</span>' : '') + '</h2>';
+  if(!r.previous) h += '<p class="muted" style="margin:0">Baseline report. From the next daily review this lists what moved.</p>';
   else if(!ch.length) h += '<p class="muted" style="margin:0">No material changes recorded.</p>';
   else h += '<ul class="changes">' + ch.map(function(x){
     return '<li><span class="coinchip" data-go="' + esc(x[0]) + '">' + esc(x[0]) + '</span> ' + esc(x[1]) + '</li>';
   }).join('') + '</ul>';
   h += '</section>';
 
-  /* upcoming events */
+  /* 6. upcoming events */
   if(m.events && m.events.length){
-    h += '<section class="panel"><h2>Market events to watch</h2><table class="plain"><thead><tr><th>Date</th><th>Event</th><th>Why it matters</th></tr></thead><tbody>' +
-      m.events.map(function(e){ return '<tr><td style="white-space:nowrap">' + esc(fmtDate(e.date) || e.date) + '</td><td>' + esc(e.title) + '</td><td class="muted">' + esc(e.impact || '') + '</td></tr>'; }).join('') +
+    h += '<section class="panel"><h2>Coming up</h2><table class="plain"><tbody>' +
+      m.events.map(function(e){ return '<tr><td style="white-space:nowrap;width:1%"><b>' + esc(fmtDate(e.date) || e.date) + '</b></td><td>' + esc(e.title) + '</td></tr>'; }).join('') +
       '</tbody></table></section>';
   }
 
   h += footer();
   $("main").innerHTML = h;
   wireGo($("main"));
+  drawSparks();
+}
+function actionColor(a){
+  var cls = (ACTIONS[a] || ACTIONS['INSUFFICIENT DATA']).cls;
+  return {'t-good':'var(--good)','t-mid':'var(--mid)','t-info':'var(--info)','t-bad':'var(--bad)','t-na':'var(--na)'}[cls];
+}
+function hexA(hex, a){
+  var n = parseInt(hex.slice(1), 16);
+  return 'rgba(' + (n >> 16) + ',' + ((n >> 8) & 255) + ',' + (n & 255) + ',' + a + ')';
+}
+/* Fear & Greed as a half-dial: red (fear) to green (greed) */
+function gauge(v, label){
+  var val = v == null ? null : Math.max(0, Math.min(100, +v));
+  var pt = function(t, rad){ var ang = Math.PI * (1 - t / 100); return [85 + rad * Math.cos(ang), 88 - rad * Math.sin(ang)]; };
+  var arc = function(from, to, col){
+    var a = pt(from, 70), b = pt(to, 70);
+    return '<path d="M' + a[0].toFixed(1) + ' ' + a[1].toFixed(1) + ' A70 70 0 0 1 ' + b[0].toFixed(1) + ' ' + b[1].toFixed(1) + '" stroke="' + col + '" stroke-width="14" fill="none"/>';
+  };
+  var s = '<svg viewBox="0 0 170 100">' + arc(0, 24.5, '#d93025') + arc(25.5, 44.5, '#e8710a') + arc(45.5, 54.5, '#b0a300') + arc(55.5, 74.5, '#7cb342') + arc(75.5, 100, '#1a8f4a');
+  if(val != null){
+    var tip = pt(val, 56);
+    s += '<line x1="85" y1="88" x2="' + tip[0].toFixed(1) + '" y2="' + tip[1].toFixed(1) + '" stroke="currentColor" stroke-width="3" stroke-linecap="round"/><circle cx="85" cy="88" r="5" fill="currentColor"/>';
+  }
+  s += '</svg>';
+  return '<div class="gauge">' + s + '<div class="gv num">' + (val == null ? '—' : val) + '</div><div class="gl">Fear &amp; Greed' + (label ? ' · ' + esc(label) : '') + '</div></div>';
+}
+/* 7-day sparklines for every card in one CoinGecko call */
+async function fetchSparks(ids){
+  var key = 'crypto.spark.' + ids.join(','), cached = null;
+  try{ cached = JSON.parse(sessionStorage.getItem(key) || 'null'); }catch(e){}
+  if(cached && Date.now() - cached.t < 1800000) return cached.d;
+  var r = await fetch('https://api.coingecko.com/api/v3/coins/markets?vs_currency=usd&sparkline=true&ids=' + ids.map(encodeURIComponent).join(','));
+  if(!r.ok) throw new Error('CoinGecko ' + r.status);
+  var d = {};
+  (await r.json()).forEach(function(c){ d[c.id] = (c.sparkline_in_7d || {}).price || []; });
+  try{ sessionStorage.setItem(key, JSON.stringify({t:Date.now(), d:d})); }catch(e){}
+  return d;
+}
+async function drawSparks(){
+  var els = Array.prototype.slice.call(document.querySelectorAll('svg[data-spark]'));
+  var ids = els.map(function(e){ return e.getAttribute('data-spark'); }).filter(Boolean);
+  if(!ids.length) return;
+  var data;
+  try{ data = await fetchSparks(ids); }catch(e){ els.forEach(function(e){ e.style.display = 'none'; }); return; }
+  els.forEach(function(el){
+    var p = data[el.getAttribute('data-spark')] || [];
+    if(p.length < 2){ el.style.display = 'none'; return; }
+    var lo = Math.min.apply(null, p), hi = Math.max.apply(null, p), span = (hi - lo) || 1;
+    var pts = p.map(function(v, i){ return (i / (p.length - 1) * 200).toFixed(1) + ',' + (40 - (v - lo) / span * 38).toFixed(1); });
+    var col = p[p.length - 1] >= p[0] ? 'var(--good)' : 'var(--bad)';
+    el.innerHTML = '<polyline points="0,42 ' + pts.join(' ') + ' 200,42" fill="' + col + '" fill-opacity=".12" stroke="none"/>' +
+      '<polyline points="' + pts.join(' ') + '" fill="none" stroke="' + col + '" stroke-width="1.6" vector-effect="non-scaling-stroke"/>' +
+      '<title>Last 7 days (live)</title>';
+  });
 }
 function stat(k, v, d){
   return '<div class="stat"><div class="k">' + esc(k) + '</div><div class="v num">' + v + '</div><div class="d">' + (d || '&nbsp;') + '</div></div>';
@@ -731,7 +866,8 @@ function renderCoin(c){
   if(c.headline) h += '<p class="headline"><b>' + esc(c.headline) + '</b></p>';
   h += '<div class="verdict">' + actionBadge(g.action) + confLbl(g.confidence) +
     (actionMoved(c) ? '<span class="pill t-mid">changed from ' + esc(actionMoved(c)) + '</span>' : '') + '</div>';
-  if(c.assessment) h += '<div class="assess">' + esc(c.assessment) + '</div>';
+  if(c.keyPoints && c.keyPoints.length) h += '<ul class="keypts">' + c.keyPoints.map(function(x){ return '<li>' + esc(x) + '</li>'; }).join('') + '</ul>';
+  else if(c.assessment) h += '<div class="assess">' + esc(c.assessment) + '</div>';
 
   /* cycle track */
   var pi = PHASES.indexOf(g.cyclePhase);
@@ -740,17 +876,16 @@ function renderCoin(c){
       return '<div class="phase' + (i === pi ? ' on' : '') + '"' + (i === pi ? ' style="background:' + PHASE_COLORS[i] + '"' : '') + '>' + esc(p) + '</div>';
     }).join('') + '</div>';
 
-  h += '<div class="ratings">' +
-    rating('Fundamental', ratingPill(g.fundamental)) + rating('On-chain', ratingPill(g.onchain)) +
-    rating('Community', ratingPill(g.community)) + rating('Developer', ratingPill(g.developer)) +
-    rating('Technical', ratingPill(g.ta) + (g.taNote ? '<div class="small muted" style="margin-top:4px">' + esc(g.taNote) + '</div>' : '')) +
-    rating('Risk', riskPill(g.risk)) +
-    rating('Relative to BTC', '30d ' + fmtPct(k.vsBtc30d) + ' · 90d ' + fmtPct(k.vsBtc90d)) +
-    rating('Next unlock', nextUnlock(c)) +
-    '</div></section>';
+  h += '<div class="score">' +
+    srow('Fundamental', g.fundamental) + srow('On-chain', g.onchain) +
+    srow('Community', g.community) + srow('Developer', g.developer) +
+    srow('Technical', g.ta, g.taNote) + srow('Safety', g.risk, 'risk: ' + (g.risk || '—'), true) +
+    '</div><div class="levels small">' +
+    '<span><b>vs BTC</b> 30d ' + fmtPct(k.vsBtc30d) + ' · 90d ' + fmtPct(k.vsBtc90d) + '</span>' +
+    '<span><b>Next unlock</b> ' + nextUnlock(c) + '</span></div></section>';
 
   /* alerts for this coin */
-  if(c.alerts && c.alerts.length) h += '<section class="panel"><h2>Alerts</h2>' + renderAlerts(c.alerts, false) + '</section>';
+  if(c.alerts && c.alerts.length) h += '<section class="panel"><h2>Alerts</h2>' + renderAlerts(c.alerts, false).replace('class="alerts"', 'class="alerts compact"') + '</section>';
 
   /* changes */
   h += '<section class="panel"><h2>What changed since the previous review</h2>' +
@@ -786,9 +921,13 @@ function renderCoin(c){
 
   /* sections */
   var secs = c.sections || {};
-  h += '<section class="panel"><h2>Analysis</h2><div class="secs">' + Object.keys(SECTION_TITLES).filter(function(key){ return secs[key]; }).map(function(key){
-    var s = secs[key];
-    return '<div class="sec"><h3>' + SECTION_TITLES[key] + confLbl(s.confidence) + '</h3><p>' + esc(s.text) + '</p></div>';
+  h += '<section class="panel"><h2>Analysis <span class="hint">key points · expand for detail</span></h2><div class="scards">' + Object.keys(SECTION_TITLES).filter(function(key){ return secs[key]; }).map(function(key){
+    var sc = secs[key];
+    var body = sc.points && sc.points.length
+      ? '<ul>' + sc.points.map(function(x){ return '<li>' + esc(x) + '</li>'; }).join('') + '</ul>' +
+        (sc.text ? '<details><summary>Detail</summary><p>' + esc(sc.text) + '</p></details>' : '')
+      : '<p style="margin:0;font-size:13.5px">' + esc(sc.text || '') + '</p>';
+    return '<div class="scard ' + esc(sc.signal || '') + '"><h3>' + SECTION_TITLES[key] + confLbl(sc.confidence) + '</h3>' + body + '</div>';
   }).join('') + '</div></section>';
 
   /* top vs death signals */
@@ -839,6 +978,21 @@ function renderCoin(c){
     };
   });
   drawPrice(c);
+}
+var SCORE = {
+  'strong':4,'healthy':4,'improving':4,'growing':4,'bullish':4,'low':4,
+  'mixed':2,'stable':3,'neutral':2,'medium':3,'speculative':2,
+  'weak':1,'deteriorating':1,'weakening':1,'severely deteriorating':1,'declining':1,'bearish':1,'high':2,'very high':1
+};
+/* one scorecard row: label, four segments filled by score, the rating word */
+function srow(label, word, note, isRisk){
+  var w = String(word || '').toLowerCase();
+  var n = SCORE[w] || 0;
+  var t = isRisk ? ({'low':'good','medium':'mid','high':'bad','very high':'bad'}[w] || 'na') : tone(word);
+  var segs = '';
+  for(var i = 1; i <= 4; i++) segs += '<i' + (i <= n ? ' class="bg-' + t + '"' : '') + '></i>';
+  return '<div class="srow" title="' + esc(note || word || '') + '"><span class="k">' + esc(label) + '</span><div class="segs">' + segs + '</div>' +
+    '<span class="w pill t-' + t + '">' + esc(isRisk ? (word ? word + ' risk' : '—') : (word === 'Insufficient data' ? 'No data' : (word || '—'))) + '</span></div>';
 }
 function rating(k, v){ return '<div class="rating"><div class="k">' + esc(k) + '</div>' + v + '</div>'; }
 function nextUnlock(c){
