@@ -267,6 +267,38 @@ details.more p{margin:8px 0 0}
 table.heat td.h{padding:6px 5px}
 table.heat .cell{display:block;text-align:center;border-radius:6px;padding:5px 6px;font-size:12px;font-weight:650;white-space:nowrap}
 
+/* ---------- technical analysis ---------- */
+.tiles{display:grid;grid-template-columns:repeat(auto-fill,minmax(185px,1fr));gap:10px;margin-bottom:16px}
+.tile{background:var(--panel-2);border-radius:10px;padding:10px 12px;border-left:4px solid var(--line);color:var(--text)}
+.tile.t-good{border-left-color:var(--good);background:var(--panel-2)} .tile.t-mid{border-left-color:var(--mid);background:var(--panel-2)}
+.tile.t-bad{border-left-color:var(--bad);background:var(--panel-2)} .tile.t-na{background:var(--panel-2)}
+.tile .k{font-size:11.5px;color:var(--muted);text-transform:uppercase;letter-spacing:.4px}
+.tile .v{font-size:16px;font-weight:700;margin-top:2px}
+.tile .v .z{font-size:12px;font-weight:600;color:var(--muted)}
+.tile .tsub{font-size:12px;color:var(--muted);margin-top:3px}
+.segs5{display:inline-grid;grid-template-columns:repeat(5,10px);gap:2px;margin-right:6px;vertical-align:middle}
+.segs5 i{height:8px;border-radius:2px;background:var(--line)}
+.segs5 i.bg-good{background:var(--good)} .segs5 i.bg-mid{background:var(--mid)} .segs5 i.bg-bad{background:var(--bad)}
+.meter{position:relative;height:6px;border-radius:3px;margin:7px 0 5px;background:linear-gradient(90deg,var(--good-bg),var(--mid-bg),var(--bad-bg));border:1px solid var(--line)}
+.meter .mk{position:absolute;top:-3px;bottom:-3px;border-left:1px dashed var(--faint)}
+.meter .pt{position:absolute;top:50%;width:11px;height:11px;border-radius:50%;background:var(--text);transform:translate(-50%,-50%);border:2px solid var(--panel)}
+.charthead{display:flex;gap:10px;align-items:center;margin-bottom:8px}
+.seg{display:inline-flex;border:1px solid var(--line);border-radius:8px;overflow:hidden}
+.seg button{border:0;background:var(--panel-2);padding:4px 12px;font-size:12.5px;cursor:pointer}
+.seg button.on{background:var(--accent);color:#fff}
+.subbox{position:relative;height:110px;margin-top:6px}
+.ta-foot{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.3fr);gap:16px;margin-top:14px}
+.lvls{display:flex;flex-direction:column;gap:10px}
+.lvls .k,.read .k{font-size:11.5px;color:var(--muted);text-transform:uppercase;letter-spacing:.4px;margin-bottom:4px;display:flex;gap:8px;align-items:center}
+.lv{display:inline-block;border-radius:6px;padding:3px 8px;margin:0 5px 4px 0;font-size:13px;font-weight:650}
+.read{background:var(--panel-2);border-radius:10px;padding:11px 13px}
+.read ul{margin:0;padding-left:17px;font-size:13.5px}
+.read li{margin:3px 0}
+.read details{margin-top:6px;font-size:12.5px;color:var(--muted)}
+.read details summary{cursor:pointer;color:var(--accent)}
+.chartnote .grow{flex:1}
+@media (max-width:900px){ .ta-foot{grid-template-columns:minmax(0,1fr)} }
+
 /* ---------- coin page: key points, scorecard, section cards ---------- */
 .keypts{margin:14px 0 0;padding:12px 14px 12px 32px;border-radius:10px;background:var(--panel-2);font-size:14.5px}
 .keypts li{margin:4px 0}
@@ -366,7 +398,7 @@ const AZURE_TENANT_ID = '91faaa92-6633-43b2-a302-8122e930e674';
 const GRAPH_SCOPES    = ['Files.ReadWrite', 'Sites.ReadWrite.All', 'User.Read'];
 const SP_DRIVE = '/sites/nemla.sharepoint.com,03c13251-4cec-4fd0-a9fc-ed0896c45745,4ae31160-74d6-4b1a-bbaf-89cd88ca1da2/drive';
 const DATA_DIR = 'Nemla/Apps/nemla-dashboards-app/AppData/Crypto';  // path within the SharePoint Documents library
-const BUILD = '2026-09-27.1';
+const BUILD = '2026-09-27.2';
 /* Local preview only: on localhost, ?local=1 reads the synced AppData folder over plain HTTP
    instead of going through Entra + Graph. Never active on the real site. */
 const LOCAL = /^(localhost|127\.0\.0\.1)$/.test(location.hostname) && /[?&]local=1/.test(location.search);
@@ -394,7 +426,7 @@ const SECTION_TITLES = {
 };
 
 var state = { msal:null, account:null, index:null, report:null, prev:null, date:null, charts:{}, priceCache:{} };
-var ui = { view:'overview', range:365 };
+var ui = { view:'overview', range:365, tf:'d' };
 
 var $ = function(id){ return document.getElementById(id); };
 function esc(s){
@@ -742,6 +774,9 @@ function renderOverview(){
   });
   h += '</tbody></table></div><p class="muted small" style="margin:10px 0 0">Actions are decision-support categories from the evidence, not guarantees and not financial advice.</p></section>';
 
+  /* 4b. technical snapshot */
+  h += renderTASnapshot(coins);
+
   /* 5. changes since previous */
   var ch = [];
   coins.forEach(function(c){ (c.changes || []).forEach(function(x){ ch.push([c.symbol, x]); }); });
@@ -884,6 +919,9 @@ function renderCoin(c){
     '<span><b>vs BTC</b> 30d ' + fmtPct(k.vsBtc30d) + ' · 90d ' + fmtPct(k.vsBtc90d) + '</span>' +
     '<span><b>Next unlock</b> ' + nextUnlock(c) + '</span></div></section>';
 
+  /* technical analysis */
+  h += renderTA(c);
+
   /* alerts for this coin */
   if(c.alerts && c.alerts.length) h += '<section class="panel"><h2>Alerts</h2>' + renderAlerts(c.alerts, false).replace('class="alerts"', 'class="alerts compact"') + '</section>';
 
@@ -892,21 +930,6 @@ function renderCoin(c){
     (c.changes && c.changes.length ? '<ul class="changes">' + c.changes.map(function(x){ return '<li>' + esc(x) + '</li>'; }).join('') + '</ul>'
       : '<p class="muted" style="margin:0">' + (state.report.previous ? 'No material changes recorded.' : 'Baseline report: nothing to compare against yet.') + '</p>') +
     '</section>';
-
-  /* price chart */
-  h += '<section class="panel"><h2>Price, 1D <span class="hint">live from CoinGecko</span>' +
-    '<span class="rangebtns">' + [90,180,365].map(function(d){ return '<button data-range="' + d + '"' + (ui.range === d ? ' class="on"' : '') + '>' + (d === 365 ? '1Y' : d + 'D') + '</button>'; }).join('') + '</span></h2>' +
-    '<div class="chartbox"><canvas id="pxChart"></canvas></div>' +
-    '<div class="chartnote"><span><span class="sw" style="background:var(--accent)"></span>Price</span>' +
-    '<span><span class="sw" style="background:#dd7a00"></span>50-day MA</span>' +
-    '<span><span class="sw" style="background:#6a3fd6"></span>200-day MA</span>' +
-    '<span><span class="sw" style="background:var(--good)"></span>Support</span>' +
-    '<span><span class="sw" style="background:var(--bad)"></span>Resistance</span></div>';
-  var lv = c.levels || {};
-  h += '<div class="levels">' +
-    '<span><b>Support</b> ' + ((lv.support || []).map(fmtUsd).join(' · ') || '—') + '</span>' +
-    '<span><b>Resistance</b> ' + ((lv.resistance || []).map(fmtUsd).join(' · ') || '—') + '</span>' +
-    (lv.invalidation != null ? '<span><b>Thesis invalidation</b> ' + fmtUsd(lv.invalidation) + '</span>' : '') + '</div></section>';
 
   /* metrics */
   if(c.metrics && c.metrics.length){
@@ -921,7 +944,7 @@ function renderCoin(c){
 
   /* sections */
   var secs = c.sections || {};
-  h += '<section class="panel"><h2>Analysis <span class="hint">key points · expand for detail</span></h2><div class="scards">' + Object.keys(SECTION_TITLES).filter(function(key){ return secs[key]; }).map(function(key){
+  h += '<section class="panel"><h2>Analysis <span class="hint">key points · expand for detail</span></h2><div class="scards">' + Object.keys(SECTION_TITLES).filter(function(key){ return secs[key] && !(key === 'technical' && c.ta); }).map(function(key){
     var sc = secs[key];
     var body = sc.points && sc.points.length
       ? '<ul>' + sc.points.map(function(x){ return '<li>' + esc(x) + '</li>'; }).join('') + '</ul>' +
@@ -970,14 +993,7 @@ function renderCoin(c){
   h += footer();
   $("main").innerHTML = h;
   wireGo($("main"));
-  Array.prototype.forEach.call($("main").querySelectorAll('[data-range]'), function(b){
-    b.onclick = function(){
-      ui.range = +b.getAttribute('data-range');
-      Array.prototype.forEach.call($("main").querySelectorAll('[data-range]'), function(x){ x.classList.toggle('on', x === b); });
-      drawPrice(c);
-    };
-  });
-  drawPrice(c);
+  wireTA(c);
 }
 var SCORE = {
   'strong':4,'healthy':4,'improving':4,'growing':4,'bullish':4,'low':4,
@@ -1002,7 +1018,167 @@ function nextUnlock(c){
   return '<span class="small">' + esc(fmtDate(u.date)) + (u.pctSupply != null ? ' · ' + esc(u.pctSupply) + '% of supply' : '') + '</span>';
 }
 
-/* ---------- price chart (CoinGecko public API, 365 daily closes) ---------- */
+/* ============================================================
+   TECHNICAL ANALYSIS  (coin.ta is computed by ta.py from Binance candles)
+   ============================================================ */
+function signTone(v){ return v == null ? 'na' : (v > 0 ? 'good' : 'bad'); }
+function rsiTone(z){ return {'Overbought':'bad','Strong':'good','Neutral':'mid','Weak':'bad','Oversold':'mid'}[z] || 'na'; }
+function trendTone(t){ return {'Uptrend':'good','Transition':'mid','Downtrend':'bad'}[t] || 'na'; }
+function structTone(s){ return /^Higher highs/.test(s) ? 'good' : /^Lower highs/.test(s) ? 'bad' : 'mid'; }
+function taTile(k, v, sub, t){
+  return '<div class="tile ' + (t || '') + '"><div class="k">' + k + '</div><div class="v">' + v + '</div>' + (sub ? '<div class="tsub">' + sub + '</div>' : '') + '</div>';
+}
+function meter(v, marks){
+  /* 0-100 bar with a marker; marks = [[pos,label],...] */
+  if(v == null) return '';
+  return '<div class="meter">' + (marks || []).map(function(m){ return '<span class="mk" style="left:' + m[0] + '%"></span>'; }).join('') +
+    '<span class="pt" style="left:' + Math.max(0, Math.min(100, v)) + '%"></span></div>';
+}
+function macdTxt(m){
+  if(!m) return '—';
+  return (m.bull ? 'Bullish' : 'Bearish') + ' · histogram ' + (m.rising ? 'rising' : 'falling');
+}
+function macdTone(m){ return !m ? 'na' : (m.bull && m.rising ? 'good' : (!m.bull && !m.rising ? 'bad' : 'mid')); }
+
+function renderTA(c){
+  var t = c.ta, g = c.ratings || {}, lv = c.levels || {};
+  var sec = (c.sections || {}).technical || {};
+  var h = '<section class="panel" id="ta"><h2>Technical analysis ' + ratingPill(g.ta) +
+    (g.taNote ? '<span class="hint">' + esc(g.taNote) + '</span>' : '') + '</h2>';
+  if(!t){
+    h += '<div class="chartbox"><canvas id="pxChart"></canvas></div>';
+  } else {
+    var v = t.vsMa || {}, m = t.ma || {}, r = t.range52w || {}, vb = t.vsBtc || {}, vol = t.volume || {};
+    h += '<div class="tiles">' +
+      taTile('Trend', esc(t.trend), '<span class="segs5">' + [1,2,3,4,5].map(function(i){ return '<i' + (i <= t.trendScore ? ' class="bg-' + trendTone(t.trend) + '"' : '') + '></i>'; }).join('') + '</span>' + t.trendScore + '/5 trend checks', 't-' + trendTone(t.trend)) +
+      taTile('Structure · daily', esc(t.structure), 'Weekly: ' + esc(t.weeklyStructure || '—'), 't-' + structTone(t.structure)) +
+      taTile('vs 50D / 200D', fmtPct(v.d50) + ' / ' + fmtPct(v.d200), '50D ' + fmtUsd(m.d50) + ' · 200D ' + fmtUsd(m.d200), 't-' + (v.d50 > 0 && v.d200 > 0 ? 'good' : v.d50 < 0 && v.d200 < 0 ? 'bad' : 'mid')) +
+      taTile('vs 20W / 50W', fmtPct(v.w20) + ' / ' + fmtPct(v.w50), '20W ' + fmtUsd(m.w20) + ' · 50W ' + fmtUsd(m.w50), 't-' + (v.w20 > 0 && v.w50 > 0 ? 'good' : v.w20 < 0 && v.w50 < 0 ? 'bad' : 'mid')) +
+      taTile('RSI daily', t.rsiD + ' <span class="z">' + esc(t.rsiDZone || '') + '</span>', meter(t.rsiD, [[30],[70]]), 't-' + rsiTone(t.rsiDZone)) +
+      taTile('RSI weekly', t.rsiW + ' <span class="z">' + esc(t.rsiWZone || '') + '</span>', meter(t.rsiW, [[30],[70]]), 't-' + rsiTone(t.rsiWZone)) +
+      taTile('MACD daily', macdTxt(t.macdD).split(' · ')[0], macdTxt(t.macdD).split(' · ')[1] + (t.macdD && t.macdD.aboveZero ? ' · above zero' : ' · below zero'), 't-' + macdTone(t.macdD)) +
+      taTile('MACD weekly', macdTxt(t.macdW).split(' · ')[0], macdTxt(t.macdW).split(' · ')[1] + (t.macdW && t.macdW.aboveZero ? ' · above zero' : ' · below zero'), 't-' + macdTone(t.macdW)) +
+      taTile('MA cross', t.cross ? esc(t.cross.type) : 'None recent', t.cross ? esc(fmtDate(t.cross.date)) + ' (50D vs 200D)' : 'no 50/200D cross in 120 days', 't-' + (t.cross ? (t.cross.type === 'Golden cross' ? 'good' : 'bad') : 'na')) +
+      taTile('52-week range', (r.position != null ? r.position + '%' : '—') + ' <span class="z">of range</span>', meter(r.position) + fmtUsd(r.low) + ' – ' + fmtUsd(r.high), 't-na') +
+      taTile('Volume 30d vs 90d', fmtPct(vol.chg), 'avg ' + fmtUsd(vol.avg30d) + '/day (Binance spot)', 't-' + (vol.chg > 10 ? 'good' : vol.chg < -10 ? 'bad' : 'mid')) +
+      taTile('vs BTC', esc(vb.trend || '—'), '30d ' + fmtPct(vb.chg30d) + ' · 90d ' + fmtPct(vb.chg90d), 't-' + ({'Outperforming':'good','Underperforming':'bad','Mixed':'mid'}[vb.trend] || 'na')) +
+      '</div>';
+    h += '<div class="charthead"><span class="seg"><button data-tf="d" class="' + (ui.tf === 'w' ? '' : 'on') + '">Daily</button><button data-tf="w" class="' + (ui.tf === 'w' ? 'on' : '') + '">Weekly</button></span>' +
+      '<span class="rangebtns' + (ui.tf === 'w' ? ' hidden' : '') + '">' + [90,180,365].map(function(d){ return '<button data-range="' + d + '"' + (ui.range === d ? ' class="on"' : '') + '>' + (d === 365 ? '1Y' : d + 'D') + '</button>'; }).join('') + '</span></div>' +
+      '<div class="chartbox"><canvas id="pxChart"></canvas></div>' +
+      '<div class="subbox"><canvas id="rsiChart"></canvas></div>' +
+      '<div class="subbox' + (ui.tf === 'w' ? ' hidden' : '') + '" id="macdBox"><canvas id="macdChart"></canvas></div>';
+  }
+  h += '<div class="chartnote"><span><span class="sw" style="background:var(--accent)"></span>Price</span>' +
+    '<span><span class="sw" style="background:#dd7a00"></span>' + (ui.tf === 'w' ? '20W' : '50D') + ' MA</span>' +
+    '<span><span class="sw" style="background:#6a3fd6"></span>' + (ui.tf === 'w' ? '50W' : '200D') + ' MA</span>' +
+    '<span><span class="sw" style="background:var(--good)"></span>Support</span>' +
+    '<span><span class="sw" style="background:var(--bad)"></span>Resistance</span>' +
+    (t ? '<span class="grow"></span><span>' + esc(t.source) + ', as of ' + esc(fmtDate(t.asOf)) + '</span>' : '') + '</div>';
+
+  h += '<div class="ta-foot"><div class="lvls">' +
+    '<div><div class="k">Resistance</div>' + ((lv.resistance || []).map(function(x){ return '<span class="lv t-bad">' + fmtUsd(x) + '</span>'; }).join('') || '—') + '</div>' +
+    '<div><div class="k">Support</div>' + ((lv.support || []).map(function(x){ return '<span class="lv t-good">' + fmtUsd(x) + '</span>'; }).join('') || '—') + '</div>' +
+    (lv.invalidation != null ? '<div><div class="k">Thesis invalidation</div><span class="lv t-na">' + fmtUsd(lv.invalidation) + '</span></div>' : '') +
+    (t && t.lastSwingHigh ? '<div><div class="k">Last swing high / low</div><span class="lv t-na">' + fmtUsd(t.lastSwingHigh) + '</span><span class="lv t-na">' + fmtUsd(t.lastSwingLow) + '</span></div>' : '') +
+    '</div>';
+  if(sec.points && sec.points.length) h += '<div class="read"><div class="k">Analyst read ' + confLbl(sec.confidence) + '</div><ul>' + sec.points.map(function(x){ return '<li>' + esc(x) + '</li>'; }).join('') + '</ul>' +
+    (sec.text ? '<details><summary>Detail</summary><p>' + esc(sec.text) + '</p></details>' : '') + '</div>';
+  else if(sec.text) h += '<div class="read"><div class="k">Analyst read</div><p>' + esc(sec.text) + '</p></div>';
+  h += '</div></section>';
+  return h;
+}
+
+function wireTA(c){
+  Array.prototype.forEach.call($("main").querySelectorAll('[data-range]'), function(b){
+    b.onclick = function(){
+      ui.range = +b.getAttribute('data-range');
+      Array.prototype.forEach.call($("main").querySelectorAll('[data-range]'), function(x){ x.classList.toggle('on', x === b); });
+      drawTA(c);
+    };
+  });
+  Array.prototype.forEach.call($("main").querySelectorAll('[data-tf]'), function(b){
+    b.onclick = function(){ ui.tf = b.getAttribute('data-tf'); var y = window.scrollY; renderCoin(c); window.scrollTo(0, y); };
+  });
+  if(c.ta) drawTA(c); else drawPrice(c);
+}
+
+function chartColors(){
+  var css = getComputedStyle(document.documentElement);
+  var g = function(n){ return css.getPropertyValue(n).trim(); };
+  return {accent:g('--accent'), good:g('--good'), bad:g('--bad'), line:g('--line'), muted:g('--muted')};
+}
+function drawTA(c){
+  var s = c.ta.series, lv = c.levels || {}, col = chartColors();
+  var weekly = ui.tf === 'w';
+  var start = weekly ? 0 : Math.max(0, s.t.length - ui.range);
+  var T = weekly ? s.wt : s.t.slice(start);
+  var P = weekly ? s.wc : s.c.slice(start);
+  var A = weekly ? s.w20 : s.d50.slice(start);
+  var B = weekly ? s.w50 : s.d200.slice(start);
+  var R = weekly ? s.wrsi : s.rsi.slice(start);
+  var labels = T.map(function(d){ var p = d.split('-'); return new Date(+p[0], +p[1]-1, +p[2]).toLocaleDateString('en-AU', {day:'numeric', month:'short', year: weekly ? '2-digit' : undefined}); });
+  var n = labels.length, flat = function(v){ var a = []; for(var i = 0; i < n; i++) a.push(v); return a; };
+  var ds = [
+    {label:'Price', data:P, borderColor:col.accent, borderWidth:2, pointRadius:0, tension:.15},
+    {label:weekly ? '20W MA' : '50D MA', data:A, borderColor:'#dd7a00', borderWidth:1.5, pointRadius:0},
+    {label:weekly ? '50W MA' : '200D MA', data:B, borderColor:'#6a3fd6', borderWidth:1.5, pointRadius:0}
+  ];
+  (lv.support || []).forEach(function(v){ ds.push({label:'Support ' + fmtUsd(v), data:flat(v), borderColor:col.good, borderWidth:1, borderDash:[5,4], pointRadius:0}); });
+  (lv.resistance || []).forEach(function(v){ ds.push({label:'Resistance ' + fmtUsd(v), data:flat(v), borderColor:col.bad, borderWidth:1, borderDash:[5,4], pointRadius:0}); });
+  var small = P[P.length - 1] < 0.01;
+  var baseOpts = function(extra){
+    return Object.assign({responsive:true, maintainAspectRatio:false, animation:false, interaction:{mode:'index', intersect:false},
+      plugins:{legend:{display:false}}}, extra);
+  };
+  ['px','rsi','macd'].forEach(function(k){ if(state.charts[k]){ state.charts[k].destroy(); delete state.charts[k]; } });
+  state.charts.px = new Chart($("pxChart"), {type:'line', data:{labels:labels, datasets:ds}, options:baseOpts({
+    plugins:{legend:{display:false}, tooltip:{callbacks:{label:function(ctx){ return ctx.dataset.label.split(' $')[0] + ': ' + fmtUsd(ctx.parsed.y); }}}},
+    scales:{x:{ticks:{color:col.muted, maxTicksLimit:8, maxRotation:0}, grid:{display:false}},
+            y:{type:small ? 'logarithmic' : 'linear', ticks:{color:col.muted, callback:function(v){ return fmtUsd(v); }}, grid:{color:col.line}}}
+  })});
+  state.charts.rsi = new Chart($("rsiChart"), {type:'line', data:{labels:labels, datasets:[
+    {label:'RSI', data:R, borderColor:'#6a3fd6', borderWidth:1.5, pointRadius:0},
+    {label:'70', data:flat(70), borderColor:col.bad, borderWidth:1, borderDash:[4,4], pointRadius:0},
+    {label:'30', data:flat(30), borderColor:col.good, borderWidth:1, borderDash:[4,4], pointRadius:0}
+  ]}, options:baseOpts({scales:{x:{display:false}, y:{min:0, max:100, ticks:{color:col.muted, stepSize:30, callback:function(v){ return v === 0 ? '' : v; }}, grid:{color:col.line},
+    title:{display:true, text:weekly ? 'RSI (W)' : 'RSI (D)', color:col.muted, font:{size:11}}}}})});
+  if(!weekly){
+    var H = s.hist.slice(start);
+    state.charts.macd = new Chart($("macdChart"), {type:'bar', data:{labels:labels, datasets:[
+      {type:'line', label:'MACD', data:s.macd.slice(start), borderColor:col.accent, borderWidth:1.2, pointRadius:0},
+      {type:'line', label:'Signal', data:s.signal.slice(start), borderColor:'#dd7a00', borderWidth:1.2, pointRadius:0},
+      {label:'Histogram', data:H, backgroundColor:H.map(function(v){ return v >= 0 ? col.good : col.bad; })}
+    ]}, options:baseOpts({scales:{x:{display:false}, y:{ticks:{display:false}, grid:{color:col.line},
+      title:{display:true, text:'MACD (D)', color:col.muted, font:{size:11}}}}})});
+  }
+}
+
+/* overview: one row per coin of the computed indicators */
+function renderTASnapshot(coins){
+  var rows = coins.filter(function(c){ return c.ta; });
+  if(!rows.length) return '';
+  var cell = function(txt, t){ return '<td class="h"><span class="cell t-' + t + '">' + txt + '</span></td>'; };
+  var h = '<section class="panel"><h2>Technical snapshot <span class="hint">daily &amp; weekly, computed from exchange candles</span></h2><div class="tablewrap"><table class="dash heat"><thead><tr>' +
+    '<th>Asset</th><th>Trend</th><th>Structure</th><th>vs 50D</th><th>vs 200D</th><th>vs 50W</th><th>RSI D</th><th>RSI W</th><th>MACD W</th><th>vs BTC</th><th>52w range</th><th>TA</th></tr></thead><tbody>';
+  rows.forEach(function(c){
+    var t = c.ta, v = t.vsMa || {}, vb = t.vsBtc || {};
+    h += '<tr data-go="' + esc(c.symbol) + '"><td><div class="asset">' + coinImg(c) + '<span class="sym">' + esc(c.symbol) + '</span></div></td>' +
+      cell(esc(t.trend), trendTone(t.trend)) +
+      cell(esc(t.structure.replace(' & ', '/').replace('Higher highs/higher lows', 'HH / HL').replace('Lower highs/lower lows', 'LH / LL').replace(/Higher lows, lower high.*/, 'HL, LH').replace(/Higher high, lower low.*/, 'HH, LL')), structTone(t.structure)) +
+      cell(fmtPctPlain(v.d50), signTone(v.d50)) + cell(fmtPctPlain(v.d200), signTone(v.d200)) + cell(fmtPctPlain(v.w50), signTone(v.w50)) +
+      cell(t.rsiD + '', rsiTone(t.rsiDZone)) + cell(t.rsiW + '', rsiTone(t.rsiWZone)) +
+      cell(t.macdW ? (t.macdW.bull ? 'Bull' : 'Bear') + (t.macdW.rising ? ' ↑' : ' ↓') : '—', macdTone(t.macdW)) +
+      cell(esc(vb.trend || '—'), {'Outperforming':'good','Underperforming':'bad','Mixed':'mid'}[vb.trend] || 'na') +
+      '<td class="h" style="min-width:90px">' + meter((t.range52w || {}).position) + '</td>' +
+      '<td class="h">' + ratingPill((c.ratings || {}).ta) + '</td></tr>';
+  });
+  h += '</tbody></table></div><p class="muted small" style="margin:10px 0 0">RSI above 70 is shown red (overbought), 55–70 green (strong). Overbought alone is not a sell signal; look for it together with other top signals.</p></section>';
+  return h;
+}
+function fmtPctPlain(v){ return v == null ? '—' : (v > 0 ? '+' : '') + v.toFixed(0) + '%'; }
+
+/* ---------- fallback price chart (CoinGecko public API) for reports without coin.ta ---------- */
 async function fetchPrices(id){
   if(state.priceCache[id]) return state.priceCache[id];
   var key = 'crypto.px.' + id, cached = null;
