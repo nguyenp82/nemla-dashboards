@@ -1,0 +1,1016 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Crypto · Nemla</title>
+<script src="https://cdn.jsdelivr.net/npm/@azure/msal-browser@3/lib/msal-browser.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<style>
+:root{
+  --bg:#eef1f6; --panel:#ffffff; --panel-2:#f6f8fb; --line:#e0e5ec;
+  --text:#141a23; --muted:#69758a; --faint:#98a2b3; --accent:#2f6fed;
+  --good:#1a8f4a; --good-bg:#e6f5ec;
+  --mid:#b26a00;  --mid-bg:#fff4e2;
+  --bad:#d93025;  --bad-bg:#fdecea;
+  --info:#6a3fd6; --info-bg:#f0eafd;
+  --na:#78849a;   --na-bg:#f0f2f5;
+  --shadow:0 1px 2px rgba(16,24,40,.05),0 6px 16px rgba(16,24,40,.06);
+  --shadow-lg:0 12px 40px rgba(16,24,40,.18);
+  --r:12px;
+}
+@media (prefers-color-scheme: dark){
+  :root{
+    --bg:#0f1319; --panel:#181d25; --panel-2:#141920; --line:#28303b;
+    --text:#e8edf4; --muted:#94a1b4; --faint:#6b778a; --accent:#5d95ff;
+    --good:#5fd18a; --good-bg:#172c1f;
+    --mid:#ffb35c;  --mid-bg:#3a2b16;
+    --bad:#ff6f61;  --bad-bg:#3a1e1c;
+    --info:#b39bff; --info-bg:#271f3f;
+    --na:#95a2b5;   --na-bg:#212832;
+    --shadow:0 1px 2px rgba(0,0,0,.4),0 6px 18px rgba(0,0,0,.3);
+    --shadow-lg:0 16px 48px rgba(0,0,0,.6);
+  }
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--text);
+  font:15px/1.5 "Segoe UI",system-ui,-apple-system,Roboto,Arial,sans-serif;}
+button,input,select{font:inherit;color:inherit}
+a{color:var(--accent)}
+.wrap{max-width:1240px;margin:0 auto;padding:0 22px 70px}
+.hidden{display:none !important}
+.num{font-variant-numeric:tabular-nums}
+
+/* ---------- sign-in gate ---------- */
+.gate{min-height:100vh;display:grid;place-items:center;padding:24px}
+.gatecard{background:var(--panel);border:1px solid var(--line);border-radius:16px;box-shadow:var(--shadow-lg);
+  padding:34px 32px;max-width:430px;width:100%;text-align:center}
+.gatecard .mark{width:52px;height:52px;border-radius:15px;margin:0 auto 16px;font-size:25px}
+.gatecard h1{margin:0 0 6px;font-size:23px;letter-spacing:-.4px}
+.gatecard p{margin:0 0 22px;color:var(--muted);font-size:14px}
+.gatecard .btn{width:100%;padding:12px}
+.gateerr{background:var(--bad-bg);color:var(--bad);border-radius:9px;padding:10px 12px;font-size:13px;
+  margin-bottom:16px;text-align:left;word-break:break-word}
+#gateChecking{display:flex;align-items:center;justify-content:center;gap:9px;color:var(--muted);font-size:14px;padding:12px 0}
+#gateChecking .spin{border-color:var(--line);border-top-color:var(--accent);margin:0}
+.gatefoot{margin-top:18px;font-size:12.5px;color:var(--muted)}
+.gatefoot a{text-decoration:none}
+.spin{width:17px;height:17px;border:2.5px solid rgba(255,255,255,.35);border-top-color:#fff;border-radius:50%;
+  display:inline-block;vertical-align:-3px;margin-right:8px;animation:sp .7s linear infinite}
+@keyframes sp{to{transform:rotate(360deg)}}
+.btn{background:var(--accent);color:#fff;border:0;border-radius:9px;padding:9px 17px;font-weight:650;cursor:pointer}
+.btn:hover{filter:brightness(1.08)}
+.btn:disabled{opacity:.6;cursor:default}
+.mark{display:grid;place-items:center;color:#fff;background:linear-gradient(135deg,#f7931a,#6a3fd6)}
+
+/* ---------- header ---------- */
+.top{background:var(--panel);border-bottom:1px solid var(--line);position:sticky;top:0;z-index:40}
+.topin{max-width:1240px;margin:0 auto;padding:0 22px}
+.topbar{display:flex;align-items:center;gap:12px;padding:13px 0}
+.brand{display:flex;align-items:center;gap:10px;font-weight:750;font-size:18px;letter-spacing:-.3px;color:inherit;text-decoration:none}
+.brand .mark{width:26px;height:26px;border-radius:8px;font-size:14px}
+.sub{color:var(--muted);font-size:13px;padding-left:10px;border-left:1px solid var(--line)}
+.grow{flex:1}
+.ctl{border:1px solid var(--line);background:var(--panel-2);border-radius:9px;padding:7px 10px;outline:none}
+.ctl:focus{border-color:var(--accent)}
+.iconbtn{border:1px solid var(--line);background:var(--panel-2);border-radius:9px;width:38px;height:38px;cursor:pointer;font-size:17px;line-height:1}
+.iconbtn:hover{border-color:var(--accent)}
+.menuwrap{position:relative}
+.menu{position:absolute;right:0;top:44px;background:var(--panel);border:1px solid var(--line);border-radius:10px;
+  box-shadow:var(--shadow-lg);padding:6px;min-width:230px;display:none;z-index:50}
+.menu.open{display:block}
+.menu .who{padding:8px 11px;font-size:12.5px;color:var(--muted);border-bottom:1px solid var(--line);margin-bottom:4px;word-break:break-all}
+.menu a,.menu button{display:block;width:100%;text-align:left;background:none;border:0;padding:9px 11px;border-radius:7px;
+  cursor:pointer;color:inherit;text-decoration:none;font-size:14px}
+.menu a:hover,.menu button:hover{background:var(--panel-2)}
+.menu .build{padding:6px 11px;font-size:11.5px;color:var(--faint)}
+.tabs{display:flex;gap:4px;overflow-x:auto;scrollbar-width:none;margin-bottom:-1px}
+.tabs::-webkit-scrollbar{display:none}
+.tab{border:0;background:none;padding:9px 13px;border-bottom:2px solid transparent;cursor:pointer;color:var(--muted);
+  font-weight:600;font-size:14px;white-space:nowrap;display:flex;align-items:center;gap:7px}
+.tab:hover{color:var(--text)}
+.tab.on{color:var(--text);border-bottom-color:var(--accent)}
+.tab .dot{width:8px;height:8px;border-radius:50%}
+
+/* ---------- generic ---------- */
+.panel{background:var(--panel);border:1px solid var(--line);border-radius:var(--r);box-shadow:var(--shadow);padding:18px 20px;margin-top:18px}
+.panel h2{margin:0 0 12px;font-size:15px;letter-spacing:-.1px;display:flex;align-items:center;gap:8px}
+.panel h2 .hint{font-weight:400;color:var(--muted);font-size:13px}
+.muted{color:var(--muted)}
+.small{font-size:13px}
+.pill{display:inline-flex;align-items:center;gap:5px;border-radius:999px;padding:2px 9px;font-size:12px;font-weight:650;white-space:nowrap}
+.t-good{color:var(--good);background:var(--good-bg)}
+.t-mid{color:var(--mid);background:var(--mid-bg)}
+.t-bad{color:var(--bad);background:var(--bad-bg)}
+.t-info{color:var(--info);background:var(--info-bg)}
+.t-na{color:var(--na);background:var(--na-bg)}
+.up{color:var(--good)} .down{color:var(--bad)}
+.action{display:inline-block;border-radius:7px;padding:4px 9px;font-size:11.5px;font-weight:750;letter-spacing:.3px;white-space:nowrap}
+.conf{font-size:11.5px;color:var(--muted);white-space:nowrap}
+.conf b{font-weight:650}
+.notice{border-radius:10px;padding:12px 14px;font-size:14px;margin-top:18px}
+
+/* ---------- overview ---------- */
+.hero{display:grid;grid-template-columns:1.35fr 1fr;gap:18px;margin-top:18px}
+.hero .panel{margin-top:0}
+.exec p{margin:0 0 14px}
+.groups{display:flex;flex-wrap:wrap;gap:8px 18px}
+.group{font-size:13px}
+.group .lbl{color:var(--muted);margin-right:6px}
+.coinchip{display:inline-block;border:1px solid var(--line);border-radius:6px;padding:1px 7px;margin:0 3px 3px 0;
+  font-weight:650;font-size:12.5px;cursor:pointer;background:var(--panel-2)}
+.coinchip:hover{border-color:var(--accent)}
+.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+.stat{background:var(--panel-2);border-radius:10px;padding:10px 12px}
+.stat .k{font-size:11.5px;color:var(--muted);text-transform:uppercase;letter-spacing:.5px}
+.stat .v{font-size:18px;font-weight:700;margin-top:2px}
+.stat .d{font-size:12px}
+.mkt-text{margin:14px 0 0;font-size:13.5px;color:var(--muted)}
+
+table.dash{width:100%;border-collapse:collapse;font-size:13.5px}
+table.dash th{text-align:left;font-size:11.5px;text-transform:uppercase;letter-spacing:.5px;color:var(--muted);font-weight:650;
+  padding:8px 8px;border-bottom:1px solid var(--line);white-space:nowrap}
+table.dash td{padding:10px 8px;border-bottom:1px solid var(--line);vertical-align:middle}
+table.dash tr:last-child td{border-bottom:0}
+table.dash tbody tr{cursor:pointer}
+table.dash tbody tr:hover td{background:var(--panel-2)}
+.asset{display:flex;align-items:center;gap:9px}
+.asset img{width:24px;height:24px;border-radius:50%}
+.asset .sym{font-weight:750}
+.asset .nm{font-size:12px;color:var(--muted)}
+.tablewrap{overflow-x:auto}
+
+.alerts{display:flex;flex-direction:column;gap:8px}
+.alert{display:grid;grid-template-columns:auto 1fr;gap:4px 10px;padding:10px 12px;border-radius:10px;border:1px solid var(--line);background:var(--panel-2)}
+.alert .ic{font-size:15px;line-height:1.35}
+.alert .ttl{font-weight:650;font-size:14px}
+.alert .det{grid-column:2;font-size:13px;color:var(--muted)}
+.alert.warning{border-left:4px solid var(--bad)}
+.alert.positive{border-left:4px solid var(--good)}
+.alert.watch{border-left:4px solid var(--mid)}
+.alert .src{font-size:12px}
+.changes{margin:0;padding-left:0;list-style:none}
+.changes li{padding:6px 0;border-bottom:1px dashed var(--line);font-size:14px}
+.changes li:last-child{border-bottom:0}
+
+/* ---------- coin view ---------- */
+.coinhead{display:flex;gap:16px;align-items:flex-start;flex-wrap:wrap}
+.coinhead img{width:44px;height:44px;border-radius:50%}
+.coinhead h1{margin:0;font-size:24px;letter-spacing:-.4px}
+.coinhead .sector{color:var(--muted);font-size:13px}
+.coinhead .price{margin-left:auto;text-align:right}
+.coinhead .price .v{font-size:24px;font-weight:750}
+.headline{font-size:15.5px;margin:14px 0 0}
+.verdict{display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin-top:14px}
+.verdict .action{font-size:13px;padding:6px 12px}
+.assess{margin:12px 0 0;padding:12px 14px;border-radius:10px;background:var(--panel-2);font-size:14.5px}
+
+.phases{display:grid;grid-template-columns:repeat(6,1fr);gap:4px;margin-top:6px}
+.phase{text-align:center;font-size:12px;padding:8px 4px;border-radius:7px;background:var(--panel-2);color:var(--faint);font-weight:600}
+.phase.on{color:#fff}
+.ratings{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-top:14px}
+.rating{background:var(--panel-2);border-radius:10px;padding:10px 12px}
+.rating .k{font-size:11.5px;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;margin-bottom:5px}
+
+.chartbox{position:relative;height:320px}
+.chartnote{font-size:12px;color:var(--muted);margin-top:8px;display:flex;gap:14px;flex-wrap:wrap}
+.chartnote .sw{display:inline-block;width:14px;height:3px;border-radius:2px;vertical-align:middle;margin-right:5px}
+.rangebtns{margin-left:auto;display:flex;gap:4px}
+.rangebtns button{border:1px solid var(--line);background:var(--panel-2);border-radius:7px;padding:2px 9px;font-size:12px;cursor:pointer}
+.rangebtns button.on{border-color:var(--accent);color:var(--accent)}
+
+.metrics{display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:10px}
+.metric{background:var(--panel-2);border-radius:10px;padding:10px 12px;display:flex;flex-direction:column;gap:2px}
+.metric .k{font-size:12px;color:var(--muted)}
+.metric .v{font-size:17px;font-weight:700}
+.metric .c{font-size:12.5px}
+.metric .s{font-size:11.5px;color:var(--faint);margin-top:auto;padding-top:3px}
+.metric .s a{color:inherit}
+
+.secs{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.sec{background:var(--panel-2);border-radius:10px;padding:12px 14px}
+.sec h3{margin:0 0 6px;font-size:13.5px;display:flex;justify-content:space-between;gap:8px;align-items:center}
+.sec p{margin:0;font-size:14px}
+.cols3{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
+.listcard{border-radius:10px;padding:12px 14px;border:1px solid var(--line)}
+.listcard h3{margin:0 0 8px;font-size:13.5px}
+.listcard ul{margin:0;padding-left:18px;font-size:14px}
+.listcard li{margin:4px 0}
+.listcard.bull{border-top:3px solid var(--good)}
+.listcard.bear{border-top:3px solid var(--bad)}
+.listcard.kill{border-top:3px solid var(--text)}
+.listcard.top{border-top:3px solid var(--mid)}
+.listcard.death{border-top:3px solid var(--bad)}
+.levels{display:flex;flex-wrap:wrap;gap:16px;font-size:14px;margin-top:10px}
+.levels b{font-weight:650}
+table.plain{width:100%;border-collapse:collapse;font-size:13.5px}
+table.plain th,table.plain td{text-align:left;padding:7px 8px;border-bottom:1px solid var(--line)}
+table.plain th{font-size:11.5px;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;font-weight:650}
+.hist{display:flex;gap:4px;flex-wrap:wrap}
+.hist .h{font-size:11.5px;border-radius:6px;padding:4px 7px;text-align:center;min-width:74px}
+.hist .h .dt{display:block;opacity:.8;font-weight:400}
+.sources{margin:0;padding-left:18px;font-size:13px}
+.sources li{margin:3px 0}
+.gaps{margin:0;padding-left:18px;font-size:13px;color:var(--muted)}
+.foot{margin-top:28px;font-size:12.5px;color:var(--faint);text-align:center}
+
+.toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%) translateY(20px);background:var(--text);color:var(--bg);
+  padding:10px 16px;border-radius:10px;font-size:14px;opacity:0;pointer-events:none;transition:.2s}
+.toast.on{opacity:1;transform:translateX(-50%)}
+
+@media (max-width:900px){
+  .hero{grid-template-columns:1fr}
+  .secs,.cols3{grid-template-columns:1fr}
+  .ratings{grid-template-columns:repeat(2,1fr)}
+  .phases{grid-template-columns:repeat(3,1fr)}
+}
+@media (max-width:600px){
+  .wrap,.topin{padding-left:16px;padding-right:16px}
+  .sub{display:none}
+  .stats{grid-template-columns:repeat(2,1fr)}
+  .coinhead .price{margin-left:0;text-align:left;width:100%}
+  table.dash .opt{display:none}
+}
+</style>
+</head>
+<body>
+
+<!-- ============ SIGN-IN GATE ============ -->
+<div class="gate" id="gate">
+  <div class="gatecard">
+    <div class="mark">&#8383;</div>
+    <h1>Nemla Crypto</h1>
+    <p>Sign in with your Nemla account to load the daily portfolio review.</p>
+    <div class="gateerr hidden" id="gateErr"></div>
+    <div id="gateChecking"><span class="spin"></span>Checking your sign-in&hellip;</div>
+    <button class="btn hidden" id="btnSignIn">Sign in with Microsoft</button>
+    <div class="gatefoot">Reports are stored in SharePoint &middot; <a href="/">All dashboards</a></div>
+  </div>
+</div>
+
+<!-- ============ APP ============ -->
+<div id="app" class="hidden">
+<header class="top">
+  <div class="topin">
+    <div class="topbar">
+      <a class="brand" href="/"><span class="mark">&#8383;</span> Crypto</a>
+      <span class="sub" id="subLbl"></span>
+      <span class="grow"></span>
+      <select class="ctl" id="reportSel" title="Report date"></select>
+      <div class="menuwrap">
+        <button class="iconbtn" id="menuBtn" title="Menu">&#9776;</button>
+        <div class="menu" id="menu">
+          <div class="who" id="whoAmI"></div>
+          <button id="mReload">Reload report</button>
+          <a href="/">All dashboards</a>
+          <button id="mSignOut">Sign out</button>
+          <div class="build" id="menuBuild"></div>
+        </div>
+      </div>
+    </div>
+    <nav class="tabs" id="tabs"></nav>
+  </div>
+</header>
+
+<main class="wrap" id="main">
+  <div class="notice t-na" id="loading">Loading the latest report&hellip;</div>
+</main>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+(function(){
+"use strict";
+
+/* ============================================================
+   CONFIG  — same Entra app registration as the other dashboards
+   ============================================================ */
+const AZURE_CLIENT_ID = 'f455b7f0-a8ad-4d17-8752-7a8b709607d1';
+const AZURE_TENANT_ID = '91faaa92-6633-43b2-a302-8122e930e674';
+const GRAPH_SCOPES    = ['Files.ReadWrite', 'Sites.ReadWrite.All', 'User.Read'];
+const SP_DRIVE = '/sites/nemla.sharepoint.com,03c13251-4cec-4fd0-a9fc-ed0896c45745,4ae31160-74d6-4b1a-bbaf-89cd88ca1da2/drive';
+const DATA_DIR = 'Nemla/Apps/nemla-dashboards-app/AppData/Crypto';  // path within the SharePoint Documents library
+const BUILD = '2026-09-26.1';
+/* Local preview only: on localhost, ?local=1 reads the synced AppData folder over plain HTTP
+   instead of going through Entra + Graph. Never active on the real site. */
+const LOCAL = /^(localhost|127\.0\.0\.1)$/.test(location.hostname) && /[?&]local=1/.test(location.search);
+
+const ACTIONS = {
+  'HOLD':                   {cls:'t-good', short:'Hold'},
+  'WATCH':                  {cls:'t-mid',  short:'Watch'},
+  'CONSIDER TAKING PROFIT': {cls:'t-info', short:'Consider taking profit'},
+  'CONSIDER EXITING':       {cls:'t-bad',  short:'Consider exiting'},
+  'INSUFFICIENT DATA':      {cls:'t-na',   short:'Insufficient data'}
+};
+const PHASES = ['Accumulation','Early expansion','Expansion','Euphoria','Distribution','Decline'];
+const PHASE_COLORS = ['#2f6fed','#0f9d8f','#1a8f4a','#dd7a00','#d9534f','#a3261c'];
+const TONE = {
+  'strong':'good','healthy':'good','improving':'good','growing':'good','bullish':'good','low':'good',
+  'mixed':'mid','stable':'mid','neutral':'mid','medium':'mid','speculative':'mid',
+  'weak':'bad','deteriorating':'bad','weakening':'bad','severely deteriorating':'bad','declining':'bad',
+  'bearish':'bad','high':'bad','very high':'bad',
+  'insufficient data':'na'
+};
+const SECTION_TITLES = {
+  fundamental:'Fundamental health', onchain:'On-chain health', community:'Community health',
+  developer:'Developer & ecosystem', tokenomics:'Tokenomics', liquidity:'Liquidity & market structure',
+  technical:'Technical structure', relative:'Relative strength', cycle:'Cycle position'
+};
+
+var state = { msal:null, account:null, index:null, report:null, prev:null, date:null, charts:{}, priceCache:{} };
+var ui = { view:'overview', range:365 };
+
+var $ = function(id){ return document.getElementById(id); };
+function esc(s){
+  return String(s==null?"":s).replace(/[&<>"']/g,function(c){
+    return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c];
+  });
+}
+var toastTimer=null;
+function toast(msg){
+  var t=$("toast"); t.textContent=msg; t.classList.add("on");
+  clearTimeout(toastTimer); toastTimer=setTimeout(function(){ t.classList.remove("on"); },2600);
+}
+
+/* ============================================================
+   AUTH (MSAL)  — copied from /todo; see the notes there
+   ============================================================ */
+function appRedirectUri(){
+  var path = window.location.pathname.replace(/index\.html$/i, '');
+  if(path.charAt(path.length-1) !== '/') path += '/';
+  return window.location.origin + path;
+}
+
+async function initMsal(){
+  state.msal = new msal.PublicClientApplication({
+    auth: {
+      clientId: AZURE_CLIENT_ID,
+      authority: 'https://login.microsoftonline.com/' + AZURE_TENANT_ID,
+      redirectUri: appRedirectUri(),
+      navigateToLoginRequestUrl: false
+    },
+    cache: { cacheLocation:'localStorage', storeAuthStateInCookie:false },
+    system: { loadFrameTimeout: 4000 }
+  });
+  await state.msal.initialize();
+  var resp = null;
+  try{
+    resp = await state.msal.handleRedirectPromise();
+  }catch(e){
+    if(e.errorCode !== 'hash_empty_error') throw e;
+  }
+  if(resp && resp.account){
+    state.msal.setActiveAccount(resp.account);
+    state.account = resp.account;
+  } else {
+    var accounts = state.msal.getAllAccounts();
+    if(accounts.length){
+      state.msal.setActiveAccount(accounts[0]);
+      state.account = accounts[0];
+    }
+  }
+  return !!state.account;
+}
+
+async function signIn(){
+  var btn = $("btnSignIn");
+  btn.disabled = true;
+  btn.innerHTML = '<span class="spin"></span>Signing in&hellip;';
+  $("gateErr").classList.add("hidden");
+  try{
+    try{ localStorage.setItem(SIGNIN_MARK, String(Date.now())); }catch(err){}
+    await state.msal.loginRedirect({ scopes: GRAPH_SCOPES });
+    return;
+  }catch(e){
+    var msg = e.message || String(e);
+    if(e.errorCode === 'hash_empty_error') msg = 'Sign-in did not complete. Please try again.';
+    if(e.errorCode !== 'user_cancelled') gateError(msg);
+    btn.disabled = false; btn.textContent = 'Sign in with Microsoft';
+  }
+}
+function gateError(msg){
+  var el = $("gateErr");
+  el.textContent = msg;
+  el.classList.remove("hidden");
+}
+async function signOut(){
+  if(LOCAL){ location.href = '/'; return; }
+  await state.msal.logoutPopup({ account: state.account });
+}
+
+async function getToken(){
+  var account = state.msal.getActiveAccount();
+  if(!account) throw new Error('Not signed in');
+  try{
+    var r = await state.msal.acquireTokenSilent({ scopes: GRAPH_SCOPES, account: account });
+    return r.accessToken;
+  }catch(e){
+    var r2 = await state.msal.acquireTokenPopup({ scopes: GRAPH_SCOPES });
+    return r2.accessToken;
+  }
+}
+
+async function graphFetch(path, options){
+  options = options || {};
+  var token = await getToken();
+  if(path.indexOf('/me/drive') === 0) path = SP_DRIVE + path.slice(9);  // route to SharePoint, not personal OneDrive
+  var res = await fetch('https://graph.microsoft.com/v1.0' + path, Object.assign({}, options, {
+    headers: Object.assign({ 'Authorization':'Bearer ' + token }, options.headers || {})
+  }));
+  if(!res.ok){
+    var text = await res.text().catch(function(){ return ''; });
+    var err = new Error('Graph ' + res.status + ': ' + text.slice(0,200));
+    err.status = res.status;
+    throw err;
+  }
+  return res;
+}
+function encodePath(p){ return p.split('/').map(encodeURIComponent).join('/'); }
+
+/* Read a JSON file under DATA_DIR. Returns null when it does not exist. */
+async function readJson(rel){
+  if(LOCAL){
+    var r = await fetch('../AppData/Crypto/' + rel + '?t=' + Date.now());
+    if(r.status === 404) return null;
+    if(!r.ok) throw new Error('HTTP ' + r.status + ' reading ' + rel);
+    return r.json();
+  }
+  try{
+    var res = await graphFetch('/me/drive/root:/' + encodePath(DATA_DIR + '/' + rel) + ':/content');
+    return JSON.parse(await res.text());
+  }catch(e){
+    if(e.status === 404) return null;
+    throw e;
+  }
+}
+
+/* ============================================================
+   DATA
+   ============================================================ */
+async function loadIndex(){
+  state.index = await readJson('index.json');
+  var sel = $("reportSel");
+  sel.innerHTML = '';
+  var dates = (state.index && state.index.reports) || [];
+  dates.forEach(function(d, i){
+    var o = document.createElement('option');
+    o.value = d; o.textContent = fmtDate(d) + (i === 0 ? ' (latest)' : '');
+    sel.appendChild(o);
+  });
+  sel.classList.toggle('hidden', dates.length < 2);
+  return dates;
+}
+
+async function loadReport(date){
+  $("main").innerHTML = '<div class="notice t-na">Loading the ' + esc(fmtDate(date)) + ' report&hellip;</div>';
+  var rep = await readJson('reports/' + date + '.json');
+  if(!rep) throw new Error('Report ' + date + ' is listed in index.json but the file is missing.');
+  state.report = rep;
+  state.date = date;
+  state.prev = null;
+  if(rep.previous){
+    try{ state.prev = await readJson('reports/' + rep.previous + '.json'); }catch(e){ state.prev = null; }
+  }
+  $("reportSel").value = date;
+  $("subLbl").textContent = 'Daily review · ' + fmtDate(date);
+  renderTabs();
+  route();
+}
+
+async function runLoad(){
+  try{
+    var dates = await loadIndex();
+    if(!dates.length){
+      $("main").innerHTML = '<div class="panel"><h2>No reports yet</h2><p class="muted">The first daily review has not been written to ' +
+        '<code>AppData/Crypto/reports/</code> yet. It appears here as soon as it lands.</p></div>';
+      return;
+    }
+    await loadReport(dates[0]);
+  }catch(e){
+    $("main").innerHTML = '<div class="notice t-bad">Could not load the report: ' + esc(e.message) +
+      ' <button class="btn" id="retry" style="margin-left:10px">Retry</button></div>';
+    $("retry").onclick = runLoad;
+  }
+}
+
+/* ============================================================
+   FORMATTING
+   ============================================================ */
+function fmtDate(d){
+  if(!d) return '';
+  var p = d.split('-');
+  return new Date(+p[0], +p[1]-1, +p[2]).toLocaleDateString('en-AU', {day:'numeric', month:'short', year:'numeric'});
+}
+function fmtUsd(v){
+  if(v == null || isNaN(v)) return '—';
+  var a = Math.abs(v);
+  if(a >= 1e12) return '$' + (v/1e12).toFixed(2) + 'T';
+  if(a >= 1e9)  return '$' + (v/1e9).toFixed(2) + 'B';
+  if(a >= 1e6)  return '$' + (v/1e6).toFixed(1) + 'M';
+  if(a >= 1000) return '$' + v.toLocaleString('en-US', {maximumFractionDigits:0});
+  if(a >= 1)    return '$' + v.toFixed(2);
+  if(a >= 0.01) return '$' + v.toFixed(4);
+  return '$' + v.toPrecision(3);
+}
+function fmtPct(v, digits){
+  if(v == null || isNaN(v)) return '<span class="muted">—</span>';
+  var cls = v > 0 ? 'up' : (v < 0 ? 'down' : '');
+  return '<span class="num ' + cls + '">' + (v > 0 ? '+' : '') + v.toFixed(digits == null ? 1 : digits) + '%</span>';
+}
+function tone(word){
+  if(!word) return 'na';
+  return TONE[String(word).toLowerCase()] || 'na';
+}
+function ratingPill(word, invert){
+  if(!word) return '<span class="pill t-na">—</span>';
+  var t = tone(word);
+  return '<span class="pill t-' + t + '">' + esc(word) + '</span>';
+}
+function riskPill(word){
+  var t = {'low':'good','medium':'mid','high':'bad','very high':'bad'}[String(word||'').toLowerCase()] || 'na';
+  return '<span class="pill t-' + t + '">' + esc(word || '—') + '</span>';
+}
+function actionBadge(a){
+  var m = ACTIONS[a] || ACTIONS['INSUFFICIENT DATA'];
+  return '<span class="action ' + m.cls + '">' + esc(a || 'INSUFFICIENT DATA') + '</span>';
+}
+function phasePill(p){
+  var i = PHASES.indexOf(p);
+  if(i < 0) return '<span class="pill t-na">' + esc(p || '—') + '</span>';
+  return '<span class="pill" style="color:#fff;background:' + PHASE_COLORS[i] + '">' + esc(p) + '</span>';
+}
+function confLbl(c){ return c ? '<span class="conf">Confidence: <b>' + esc(c) + '</b></span>' : ''; }
+function coinImg(c){
+  return c.image ? '<img src="' + esc(c.image) + '" alt="" loading="lazy">' : '';
+}
+function linkify(title, url){
+  return url ? '<a href="' + esc(url) + '" target="_blank" rel="noopener">' + esc(title || url) + '</a>' : esc(title || '');
+}
+function list(items){
+  if(!items || !items.length) return '<p class="muted small" style="margin:0">None recorded.</p>';
+  return '<ul>' + items.map(function(x){ return '<li>' + esc(x) + '</li>'; }).join('') + '</ul>';
+}
+function coinBySym(sym){
+  return (state.report.coins || []).filter(function(c){ return c.symbol === sym; })[0];
+}
+
+/* ============================================================
+   TABS + ROUTING  (#overview, #ETH, #SOL ...)
+   ============================================================ */
+function renderTabs(){
+  var html = '<button class="tab" data-v="overview">Overview</button>';
+  (state.report.coins || []).forEach(function(c){
+    var a = ACTIONS[c.ratings && c.ratings.action] || ACTIONS['INSUFFICIENT DATA'];
+    var col = {'t-good':'var(--good)','t-mid':'var(--mid)','t-info':'var(--info)','t-bad':'var(--bad)','t-na':'var(--na)'}[a.cls];
+    html += '<button class="tab" data-v="' + esc(c.symbol) + '"><span class="dot" style="background:' + col + '"></span>' + esc(c.symbol) + '</button>';
+  });
+  $("tabs").innerHTML = html;
+  Array.prototype.forEach.call($("tabs").querySelectorAll('.tab'), function(b){
+    b.onclick = function(){ go(b.getAttribute('data-v')); };
+  });
+}
+function go(v){
+  if(('#' + v) === location.hash) route(); else location.hash = v;
+}
+function route(){
+  if(!state.report) return;
+  var v = decodeURIComponent((location.hash || '#overview').slice(1)) || 'overview';
+  if(v !== 'overview' && !coinBySym(v)) v = 'overview';
+  ui.view = v;
+  Array.prototype.forEach.call($("tabs").querySelectorAll('.tab'), function(b){
+    b.classList.toggle('on', b.getAttribute('data-v') === v);
+  });
+  destroyCharts();
+  if(v === 'overview') renderOverview(); else renderCoin(coinBySym(v));
+  window.scrollTo(0, 0);
+}
+window.addEventListener('hashchange', route);
+function destroyCharts(){
+  Object.keys(state.charts).forEach(function(k){ try{ state.charts[k].destroy(); }catch(e){} });
+  state.charts = {};
+}
+
+/* ============================================================
+   OVERVIEW
+   ============================================================ */
+function renderOverview(){
+  var r = state.report, m = r.market || {}, ex = r.executive || {};
+  var h = '';
+
+  /* executive summary + market */
+  h += '<div class="hero">';
+  h += '<section class="panel exec"><h2>Executive summary <span class="hint">' + esc(fmtDate(r.date)) + '</span></h2>';
+  h += '<p>' + esc(ex.summary || '') + '</p>';
+  var groups = [
+    ['improving','Improving'],['deteriorating','Deteriorating'],['attention','Needs attention'],
+    ['accumulation','Accumulation'],['distribution','Distribution'],['nearTop','Approaching a top'],['dying','Possibly dying']
+  ];
+  h += '<div class="groups">';
+  groups.forEach(function(g){
+    var arr = ex[g[0]] || [];
+    if(!arr.length) return;
+    h += '<div class="group"><span class="lbl">' + g[1] + '</span>' +
+      arr.map(function(s){ return '<span class="coinchip" data-go="' + esc(s) + '">' + esc(s) + '</span>'; }).join('') + '</div>';
+  });
+  h += '</div></section>';
+
+  h += '<section class="panel"><h2>Market backdrop</h2><div class="stats">';
+  h += stat('BTC', fmtUsd(m.btcPrice), m.btcChg30d != null ? fmtPct(m.btcChg30d) + ' <span class="muted">30d</span>' : '');
+  h += stat('BTC dominance', m.btcDominance != null ? m.btcDominance.toFixed(1) + '%' : '—', '');
+  h += stat('ETH / BTC', m.ethBtc != null ? m.ethBtc.toFixed(4) : '—', '');
+  h += stat('Total market cap', fmtUsd(m.totalMarketCap), m.totalMarketCapChg30d != null ? fmtPct(m.totalMarketCapChg30d) + ' <span class="muted">30d</span>' : '');
+  h += stat('Stablecoins', fmtUsd(m.stablecoinSupply), m.stablecoinChg30d != null ? fmtPct(m.stablecoinChg30d) + ' <span class="muted">30d</span>' : '');
+  h += stat('Fear & Greed', m.fearGreed != null ? m.fearGreed : '—', esc(m.fearGreedLabel || ''));
+  h += '</div>';
+  if(m.summary) h += '<p class="mkt-text">' + esc(m.summary) + '</p>';
+  if(m.cycle) h += '<p class="mkt-text"><b>Cycle:</b> ' + esc(m.cycle) + '</p>';
+  h += '</section></div>';
+
+  /* dashboard table */
+  h += '<section class="panel"><h2>Portfolio dashboard <span class="hint">click a row for the full analysis</span></h2><div class="tablewrap"><table class="dash"><thead><tr>' +
+    '<th>Asset</th><th class="num">Price</th><th class="opt">30d</th><th class="opt">vs BTC 30d</th><th>Fundamental</th><th>On-chain</th>' +
+    '<th class="opt">Community</th><th class="opt">Developer</th><th class="opt">TA</th><th>Cycle phase</th><th class="opt">Risk</th><th>Action</th></tr></thead><tbody>';
+  (r.coins || []).forEach(function(c){
+    var k = c.market || {}, g = c.ratings || {};
+    var moved = actionMoved(c);
+    h += '<tr data-go="' + esc(c.symbol) + '">' +
+      '<td><div class="asset">' + coinImg(c) + '<div><div class="sym">' + esc(c.symbol) + '</div><div class="nm">' + esc(c.name) + '</div></div></div></td>' +
+      '<td class="num">' + fmtUsd(k.price) + '</td>' +
+      '<td class="opt">' + fmtPct(k.chg30d) + '</td>' +
+      '<td class="opt">' + fmtPct(k.vsBtc30d) + '</td>' +
+      '<td>' + ratingPill(g.fundamental) + '</td>' +
+      '<td>' + ratingPill(g.onchain) + '</td>' +
+      '<td class="opt">' + ratingPill(g.community) + '</td>' +
+      '<td class="opt">' + ratingPill(g.developer) + '</td>' +
+      '<td class="opt" title="' + esc(g.taNote || '') + '">' + ratingPill(g.ta) + '</td>' +
+      '<td>' + phasePill(g.cyclePhase) + '</td>' +
+      '<td class="opt">' + riskPill(g.risk) + '</td>' +
+      '<td>' + actionBadge(g.action) + (moved ? '<div class="conf">was ' + esc(moved) + '</div>' : '') + '</td></tr>';
+  });
+  h += '</tbody></table></div>' +
+    '<p class="muted small" style="margin:12px 0 0">Actions are decision-support categories from the evidence in each report, not guarantees and not financial advice.</p></section>';
+
+  /* alerts */
+  var alerts = [];
+  (r.coins || []).forEach(function(c){
+    (c.alerts || []).forEach(function(a){ alerts.push(Object.assign({sym:c.symbol}, a)); });
+  });
+  var order = {warning:0, positive:1, watch:2};
+  alerts.sort(function(a,b){ return (order[a.type]==null?3:order[a.type]) - (order[b.type]==null?3:order[b.type]); });
+  h += '<section class="panel"><h2>Alerts</h2>' + renderAlerts(alerts, true) + '</section>';
+
+  /* changes since previous */
+  var ch = [];
+  (r.coins || []).forEach(function(c){ (c.changes || []).forEach(function(x){ ch.push([c.symbol, x]); }); });
+  h += '<section class="panel"><h2>What changed since the previous review' +
+    (r.previous ? ' <span class="hint">vs ' + esc(fmtDate(r.previous)) + '</span>' : '') + '</h2>';
+  if(!r.previous) h += '<p class="muted" style="margin:0">This is the baseline report. From the next daily review this section lists what moved: activity, flows, structure, ratings and actions.</p>';
+  else if(!ch.length) h += '<p class="muted" style="margin:0">No material changes recorded.</p>';
+  else h += '<ul class="changes">' + ch.map(function(x){
+    return '<li><span class="coinchip" data-go="' + esc(x[0]) + '">' + esc(x[0]) + '</span> ' + esc(x[1]) + '</li>';
+  }).join('') + '</ul>';
+  h += '</section>';
+
+  /* upcoming events */
+  if(m.events && m.events.length){
+    h += '<section class="panel"><h2>Market events to watch</h2><table class="plain"><thead><tr><th>Date</th><th>Event</th><th>Why it matters</th></tr></thead><tbody>' +
+      m.events.map(function(e){ return '<tr><td style="white-space:nowrap">' + esc(fmtDate(e.date) || e.date) + '</td><td>' + esc(e.title) + '</td><td class="muted">' + esc(e.impact || '') + '</td></tr>'; }).join('') +
+      '</tbody></table></section>';
+  }
+
+  h += footer();
+  $("main").innerHTML = h;
+  wireGo($("main"));
+}
+function stat(k, v, d){
+  return '<div class="stat"><div class="k">' + esc(k) + '</div><div class="v num">' + v + '</div><div class="d">' + (d || '&nbsp;') + '</div></div>';
+}
+function actionMoved(c){
+  if(!state.prev) return null;
+  var p = (state.prev.coins || []).filter(function(x){ return x.symbol === c.symbol; })[0];
+  if(!p || !p.ratings || !c.ratings) return null;
+  return p.ratings.action !== c.ratings.action ? p.ratings.action : null;
+}
+function renderAlerts(alerts, withSym){
+  if(!alerts.length) return '<p class="muted" style="margin:0">No alerts.</p>';
+  var icon = {warning:'🚨', positive:'🟢', watch:'🟡'};
+  var label = {warning:'MAJOR WARNING', positive:'POSITIVE DEVELOPMENT', watch:'WATCH'};
+  return '<div class="alerts">' + alerts.map(function(a){
+    return '<div class="alert ' + esc(a.type) + '"><span class="ic">' + (icon[a.type] || '•') + '</span>' +
+      '<div class="ttl">' + (withSym ? '<span class="coinchip" data-go="' + esc(a.sym) + '">' + esc(a.sym) + '</span> ' : '') +
+      '<span class="muted small">' + (label[a.type] || '') + ' ·</span> ' + esc(a.title) + '</div>' +
+      '<div class="det">' + esc(a.detail || '') + (a.source || a.url ? ' <span class="src">— ' + linkify(a.source || 'source', a.url) + '</span>' : '') + '</div></div>';
+  }).join('') + '</div>';
+}
+function wireGo(root){
+  Array.prototype.forEach.call(root.querySelectorAll('[data-go]'), function(el){
+    el.addEventListener('click', function(e){ e.stopPropagation(); go(el.getAttribute('data-go')); });
+  });
+}
+function footer(){
+  var r = state.report;
+  return '<div class="foot">Generated ' + esc(r.generatedAt ? new Date(r.generatedAt).toLocaleString('en-AU') : fmtDate(r.date)) +
+    ' · Decision support from public data, not financial advice · build ' + BUILD + '</div>';
+}
+
+/* ============================================================
+   COIN DETAIL
+   ============================================================ */
+function renderCoin(c){
+  var k = c.market || {}, g = c.ratings || {}, h = '';
+
+  h += '<section class="panel"><div class="coinhead">' + (c.image ? '<img src="' + esc(c.image) + '" alt="">' : '') +
+    '<div><h1>' + esc(c.name) + ' <span class="muted" style="font-weight:500">' + esc(c.symbol) + '</span></h1>' +
+    '<div class="sector">' + esc(c.sector || '') + '</div></div>' +
+    '<div class="price"><div class="v num">' + fmtUsd(k.price) + '</div><div class="small">' +
+      '7d ' + fmtPct(k.chg7d) + ' · 30d ' + fmtPct(k.chg30d) + ' · 90d ' + fmtPct(k.chg90d) + ' · 1y ' + fmtPct(k.chg1y) + '</div>' +
+      '<div class="small muted">MC ' + fmtUsd(k.marketCap) + ' · FDV ' + fmtUsd(k.fdv) + ' · 24h vol ' + fmtUsd(k.volume24h) + '</div>' +
+      '<div class="small muted">ATH ' + fmtUsd(k.ath) + (k.athDate ? ' (' + esc(fmtDate(k.athDate)) + ')' : '') + ' · ' + (k.fromAthPct != null ? fmtPct(k.fromAthPct) + ' from ATH' : '') + '</div>' +
+    '</div></div>';
+  if(c.headline) h += '<p class="headline"><b>' + esc(c.headline) + '</b></p>';
+  h += '<div class="verdict">' + actionBadge(g.action) + confLbl(g.confidence) +
+    (actionMoved(c) ? '<span class="pill t-mid">changed from ' + esc(actionMoved(c)) + '</span>' : '') + '</div>';
+  if(c.assessment) h += '<div class="assess">' + esc(c.assessment) + '</div>';
+
+  /* cycle track */
+  var pi = PHASES.indexOf(g.cyclePhase);
+  h += '<div style="margin-top:16px" class="small muted">Cycle phase (a framework, not a certainty)</div><div class="phases">' +
+    PHASES.map(function(p, i){
+      return '<div class="phase' + (i === pi ? ' on' : '') + '"' + (i === pi ? ' style="background:' + PHASE_COLORS[i] + '"' : '') + '>' + esc(p) + '</div>';
+    }).join('') + '</div>';
+
+  h += '<div class="ratings">' +
+    rating('Fundamental', ratingPill(g.fundamental)) + rating('On-chain', ratingPill(g.onchain)) +
+    rating('Community', ratingPill(g.community)) + rating('Developer', ratingPill(g.developer)) +
+    rating('Technical', ratingPill(g.ta) + (g.taNote ? '<div class="small muted" style="margin-top:4px">' + esc(g.taNote) + '</div>' : '')) +
+    rating('Risk', riskPill(g.risk)) +
+    rating('Relative to BTC', '30d ' + fmtPct(k.vsBtc30d) + ' · 90d ' + fmtPct(k.vsBtc90d)) +
+    rating('Next unlock', nextUnlock(c)) +
+    '</div></section>';
+
+  /* alerts for this coin */
+  if(c.alerts && c.alerts.length) h += '<section class="panel"><h2>Alerts</h2>' + renderAlerts(c.alerts, false) + '</section>';
+
+  /* changes */
+  h += '<section class="panel"><h2>What changed since the previous review</h2>' +
+    (c.changes && c.changes.length ? '<ul class="changes">' + c.changes.map(function(x){ return '<li>' + esc(x) + '</li>'; }).join('') + '</ul>'
+      : '<p class="muted" style="margin:0">' + (state.report.previous ? 'No material changes recorded.' : 'Baseline report: nothing to compare against yet.') + '</p>') +
+    '</section>';
+
+  /* price chart */
+  h += '<section class="panel"><h2>Price, 1D <span class="hint">live from CoinGecko</span>' +
+    '<span class="rangebtns">' + [90,180,365].map(function(d){ return '<button data-range="' + d + '"' + (ui.range === d ? ' class="on"' : '') + '>' + (d === 365 ? '1Y' : d + 'D') + '</button>'; }).join('') + '</span></h2>' +
+    '<div class="chartbox"><canvas id="pxChart"></canvas></div>' +
+    '<div class="chartnote"><span><span class="sw" style="background:var(--accent)"></span>Price</span>' +
+    '<span><span class="sw" style="background:#dd7a00"></span>50-day MA</span>' +
+    '<span><span class="sw" style="background:#6a3fd6"></span>200-day MA</span>' +
+    '<span><span class="sw" style="background:var(--good)"></span>Support</span>' +
+    '<span><span class="sw" style="background:var(--bad)"></span>Resistance</span></div>';
+  var lv = c.levels || {};
+  h += '<div class="levels">' +
+    '<span><b>Support</b> ' + ((lv.support || []).map(fmtUsd).join(' · ') || '—') + '</span>' +
+    '<span><b>Resistance</b> ' + ((lv.resistance || []).map(fmtUsd).join(' · ') || '—') + '</span>' +
+    (lv.invalidation != null ? '<span><b>Thesis invalidation</b> ' + fmtUsd(lv.invalidation) + '</span>' : '') + '</div></section>';
+
+  /* metrics */
+  if(c.metrics && c.metrics.length){
+    h += '<section class="panel"><h2>Key metrics</h2><div class="metrics">' + c.metrics.map(function(x){
+      var arrow = {up:'▲', down:'▼', flat:'■'}[x.trend] || '';
+      var col = x.good === true ? 'up' : (x.good === false ? 'down' : 'muted');
+      return '<div class="metric"><div class="k">' + esc(x.label) + '</div><div class="v num">' + esc(x.value == null ? '—' : x.value) + '</div>' +
+        (x.change ? '<div class="c ' + col + '">' + arrow + ' ' + esc(x.change) + '</div>' : '') +
+        (x.source ? '<div class="s">' + linkify(x.source, x.url) + '</div>' : '') + '</div>';
+    }).join('') + '</div></section>';
+  }
+
+  /* sections */
+  var secs = c.sections || {};
+  h += '<section class="panel"><h2>Analysis</h2><div class="secs">' + Object.keys(SECTION_TITLES).filter(function(key){ return secs[key]; }).map(function(key){
+    var s = secs[key];
+    return '<div class="sec"><h3>' + SECTION_TITLES[key] + confLbl(s.confidence) + '</h3><p>' + esc(s.text) + '</p></div>';
+  }).join('') + '</div></section>';
+
+  /* top vs death signals */
+  h += '<section class="panel"><h2>Signals present today</h2><div class="cols3" style="grid-template-columns:1fr 1fr">' +
+    '<div class="listcard top"><h3>Top / distribution signals</h3>' + list(c.topSignals) + '</div>' +
+    '<div class="listcard death"><h3>Dying-project signals</h3>' + list(c.deathSignals) + '</div></div></section>';
+
+  /* bull / bear / kill */
+  h += '<section class="panel"><h2>Thesis</h2><div class="cols3">' +
+    '<div class="listcard bull"><h3>Bull case</h3>' + list(c.bull) + '</div>' +
+    '<div class="listcard bear"><h3>Bear case</h3>' + list(c.bear) + '</div>' +
+    '<div class="listcard kill"><h3>Kill criteria</h3>' + list(c.kill) + '</div></div></section>';
+
+  /* unlocks */
+  if(c.unlocks && c.unlocks.length){
+    h += '<section class="panel"><h2>Upcoming supply unlocks</h2><table class="plain"><thead><tr><th>Date</th><th>Amount</th><th>% supply</th><th>Note</th></tr></thead><tbody>' +
+      c.unlocks.map(function(u){ return '<tr><td style="white-space:nowrap">' + esc(fmtDate(u.date) || u.date || '') + '</td><td>' + esc(u.amount || '') + '</td><td class="num">' + (u.pctSupply != null ? esc(u.pctSupply) + '%' : '—') + '</td><td class="muted">' + esc(u.note || '') + '</td></tr>'; }).join('') +
+      '</tbody></table></section>';
+  }
+
+  /* history */
+  var hist = (state.index && state.index.history && state.index.history[c.symbol]) || [];
+  if(hist.length){
+    h += '<section class="panel"><h2>Review history</h2><div class="hist">' + hist.slice(-30).map(function(x){
+      var a = ACTIONS[x.action] || ACTIONS['INSUFFICIENT DATA'];
+      return '<div class="h ' + a.cls + '" title="' + esc((x.phase || '') + ' · ' + fmtUsd(x.price)) + '"><span class="dt">' + esc(fmtDate(x.date)) + '</span>' + esc(a.short) + '</div>';
+    }).join('') + '</div></section>';
+  }
+
+  /* gaps + sources */
+  h += '<section class="panel"><h2>Data gaps</h2>' + (c.dataGaps && c.dataGaps.length
+    ? '<ul class="gaps">' + c.dataGaps.map(function(x){ return '<li>' + esc(x) + '</li>'; }).join('') + '</ul>'
+    : '<p class="muted small" style="margin:0">None recorded.</p>') + '</section>';
+  if(c.sources && c.sources.length){
+    h += '<section class="panel"><h2>Sources</h2><ol class="sources">' + c.sources.map(function(s){
+      return '<li>' + linkify(s.title, s.url) + (s.date ? ' <span class="muted">' + esc(s.date) + '</span>' : '') + '</li>';
+    }).join('') + '</ol></section>';
+  }
+
+  h += footer();
+  $("main").innerHTML = h;
+  wireGo($("main"));
+  Array.prototype.forEach.call($("main").querySelectorAll('[data-range]'), function(b){
+    b.onclick = function(){
+      ui.range = +b.getAttribute('data-range');
+      Array.prototype.forEach.call($("main").querySelectorAll('[data-range]'), function(x){ x.classList.toggle('on', x === b); });
+      drawPrice(c);
+    };
+  });
+  drawPrice(c);
+}
+function rating(k, v){ return '<div class="rating"><div class="k">' + esc(k) + '</div>' + v + '</div>'; }
+function nextUnlock(c){
+  var today = new Date().toISOString().slice(0,10);
+  var u = (c.unlocks || []).filter(function(x){ return x.date && x.date >= today; }).sort(function(a,b){ return a.date < b.date ? -1 : 1; })[0];
+  if(!u) return '<span class="muted small">None scheduled</span>';
+  return '<span class="small">' + esc(fmtDate(u.date)) + (u.pctSupply != null ? ' · ' + esc(u.pctSupply) + '% of supply' : '') + '</span>';
+}
+
+/* ---------- price chart (CoinGecko public API, 365 daily closes) ---------- */
+async function fetchPrices(id){
+  if(state.priceCache[id]) return state.priceCache[id];
+  var key = 'crypto.px.' + id, cached = null;
+  try{ cached = JSON.parse(sessionStorage.getItem(key) || 'null'); }catch(e){}
+  if(cached && Date.now() - cached.t < 3600000){ state.priceCache[id] = cached.p; return cached.p; }
+  var r = await fetch('https://api.coingecko.com/api/v3/coins/' + encodeURIComponent(id) + '/market_chart?vs_currency=usd&days=365&interval=daily');
+  if(!r.ok) throw new Error('CoinGecko ' + r.status);
+  var j = await r.json();
+  var p = (j.prices || []).map(function(x){ return [x[0], x[1]]; });
+  state.priceCache[id] = p;
+  try{ sessionStorage.setItem(key, JSON.stringify({t:Date.now(), p:p})); }catch(e){}
+  return p;
+}
+function sma(vals, n){
+  return vals.map(function(_, i){
+    if(i < n - 1) return null;
+    var s = 0; for(var j = i - n + 1; j <= i; j++) s += vals[j];
+    return s / n;
+  });
+}
+async function drawPrice(c){
+  var cv = $("pxChart");
+  if(!cv || !window.Chart) return;
+  var box = cv.parentNode;
+  var id = c.coingeckoId;
+  if(!id){ box.innerHTML = '<p class="muted">No CoinGecko id for this coin.</p>'; return; }
+  var px;
+  try{ px = await fetchPrices(id); }
+  catch(e){ box.innerHTML = '<p class="muted">Live price history unavailable right now (' + esc(e.message) + '). Try again in a minute; CoinGecko rate-limits the free API.</p>'; return; }
+  if(!$("pxChart") || ui.view !== c.symbol) return;   // user moved on while we waited
+  var vals = px.map(function(x){ return x[1]; });
+  var ma50 = sma(vals, 50), ma200 = sma(vals, 200);
+  var start = Math.max(0, px.length - ui.range);
+  var labels = px.slice(start).map(function(x){ return new Date(x[0]).toLocaleDateString('en-AU', {day:'numeric', month:'short'}); });
+  var n = labels.length, lv = c.levels || {};
+  var css = getComputedStyle(document.documentElement);
+  var accent = css.getPropertyValue('--accent').trim(), good = css.getPropertyValue('--good').trim(),
+      bad = css.getPropertyValue('--bad').trim(), line = css.getPropertyValue('--line').trim(), muted = css.getPropertyValue('--muted').trim();
+  var flat = function(v){ var a = []; for(var i = 0; i < n; i++) a.push(v); return a; };
+  var ds = [
+    {label:'Price', data:vals.slice(start), borderColor:accent, borderWidth:2, pointRadius:0, tension:.15},
+    {label:'50D MA', data:ma50.slice(start), borderColor:'#dd7a00', borderWidth:1.5, pointRadius:0},
+    {label:'200D MA', data:ma200.slice(start), borderColor:'#6a3fd6', borderWidth:1.5, pointRadius:0}
+  ];
+  (lv.support || []).forEach(function(v){ ds.push({label:'Support ' + fmtUsd(v), data:flat(v), borderColor:good, borderWidth:1, borderDash:[5,4], pointRadius:0}); });
+  (lv.resistance || []).forEach(function(v){ ds.push({label:'Resistance ' + fmtUsd(v), data:flat(v), borderColor:bad, borderWidth:1, borderDash:[5,4], pointRadius:0}); });
+  if(state.charts.px) state.charts.px.destroy();
+  state.charts.px = new Chart(cv, {
+    type:'line',
+    data:{labels:labels, datasets:ds},
+    options:{
+      responsive:true, maintainAspectRatio:false, animation:false,
+      interaction:{mode:'index', intersect:false},
+      plugins:{legend:{display:false}, tooltip:{callbacks:{label:function(ctx){ return ctx.dataset.label.split(' $')[0] + ': ' + fmtUsd(ctx.parsed.y); }}}},
+      scales:{
+        x:{ticks:{color:muted, maxTicksLimit:8, maxRotation:0}, grid:{display:false}},
+        y:{type:vals[vals.length-1] < 0.01 ? 'logarithmic' : 'linear', ticks:{color:muted, callback:function(v){ return fmtUsd(v); }}, grid:{color:line}}
+      }
+    }
+  });
+}
+
+/* ============================================================
+   BOOT
+   ============================================================ */
+$("btnSignIn").addEventListener("click", signIn);
+$("menuBuild").textContent = 'build ' + BUILD;
+$("menuBtn").addEventListener('click', function(e){ e.stopPropagation(); $("menu").classList.toggle('open'); });
+document.addEventListener('click', function(){ $("menu").classList.remove('open'); });
+$("mSignOut").addEventListener('click', signOut);
+$("mReload").addEventListener('click', function(){ runLoad(); });
+$("reportSel").addEventListener('change', function(){
+  loadReport(this.value).catch(function(e){ toast('Could not load that report: ' + e.message); });
+});
+
+async function enterApp(){
+  $("gate").classList.add("hidden");
+  $("app").classList.remove("hidden");
+  $("whoAmI").textContent = state.account ? state.account.username : 'Local preview';
+  await runLoad();
+}
+
+var ARRIVAL_HASH   = window.location.hash || '';
+var ARRIVAL_SEARCH = window.location.search || '';
+var SIGNIN_MARK    = 'crypto.signinAttempt';
+
+function authResponseInUrl(url){ return /[#&?](code|error|state|id_token)=/.test(url); }
+function describeFailedReturn(){
+  var both = ARRIVAL_HASH + '&' + ARRIVAL_SEARCH;
+  var err  = /[#&?]error=([^&]+)/.exec(both);
+  var desc = /[#&?]error_description=([^&]+)/.exec(both);
+  if(err){
+    var d = desc ? decodeURIComponent(desc[1]).replace(/\+/g, ' ') : '';
+    return 'Microsoft returned an error: ' + decodeURIComponent(err[1]) + (d ? ' — ' + d.slice(0,200) : '');
+  }
+  if(!authResponseInUrl(both)){
+    return 'The sign-in response never reached this page — it came back with no token in the URL. ' +
+           'Something redirected the page in between.';
+  }
+  return 'A sign-in response arrived but no account came out of it.';
+}
+function inAuthContext(){
+  var framed = false;
+  try{
+    if(window.opener && window.opener !== window) framed = true;
+    if(window.parent && window.parent !== window) framed = true;
+  }catch(e){ framed = true; }
+  return framed && authResponseInUrl(ARRIVAL_HASH);
+}
+async function easyAuthHint(){
+  try{
+    var r = await fetch('/.auth/me', { credentials:'same-origin' });
+    if(!r.ok) return null;
+    var j = await r.json();
+    var p = j && j.clientPrincipal;
+    return (p && p.userDetails) || null;
+  }catch(e){ return null; }
+}
+function trySilentSignIn(){
+  var attempt = (async function(){
+    try{
+      var opts = { scopes: GRAPH_SCOPES };
+      var hint = await easyAuthHint();
+      if(hint) opts.loginHint = hint;
+      var r = await state.msal.ssoSilent(opts);
+      state.msal.setActiveAccount(r.account);
+      state.account = r.account;
+      return true;
+    }catch(e){ return false; }
+  })();
+  attempt.then(function(ok){ if(ok) enterOnce(); });
+  return Promise.race([attempt, new Promise(function(res){ setTimeout(function(){ res(false); }, 3500); })]);
+}
+
+var entered = false;
+async function enterOnce(){
+  if(entered) return;
+  entered = true;
+  await enterApp();
+}
+function offerSignIn(){
+  var c = $("gateChecking"); if(c) c.classList.add("hidden");
+  $("btnSignIn").classList.remove("hidden");
+}
+
+(async function boot(){
+  if(LOCAL){ await enterOnce(); return; }
+  if(inAuthContext()) return;   // we are MSAL's own iframe or popup
+  try{
+    var signedIn = await initMsal();
+    if(signedIn){ await enterOnce(); return; }
+    if(await trySilentSignIn()) return;
+  }catch(e){
+    if(e.errorCode !== 'hash_empty_error') gateError('Sign-in could not start: ' + (e.message || e));
+  }
+  var mark = null;
+  try{ mark = localStorage.getItem(SIGNIN_MARK); localStorage.removeItem(SIGNIN_MARK); }catch(e){}
+  if(mark && Date.now() - parseInt(mark, 10) < 300000) gateError(describeFailedReturn());
+  offerSignIn();
+})();
+
+})();
+</script>
+</body>
+</html>
