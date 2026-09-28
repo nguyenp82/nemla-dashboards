@@ -4,7 +4,6 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Crypto · Nemla</title>
-<script src="https://cdn.jsdelivr.net/npm/@azure/msal-browser@3/lib/msal-browser.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
 <style>
 :root{
@@ -41,20 +40,6 @@ a{color:var(--accent)}
 .hidden{display:none !important}
 .num{font-variant-numeric:tabular-nums}
 
-/* ---------- sign-in gate ---------- */
-.gate{min-height:100vh;display:grid;place-items:center;padding:24px}
-.gatecard{background:var(--panel);border:1px solid var(--line);border-radius:16px;box-shadow:var(--shadow-lg);
-  padding:34px 32px;max-width:430px;width:100%;text-align:center}
-.gatecard .mark{width:52px;height:52px;border-radius:15px;margin:0 auto 16px;font-size:25px}
-.gatecard h1{margin:0 0 6px;font-size:23px;letter-spacing:-.4px}
-.gatecard p{margin:0 0 22px;color:var(--muted);font-size:14px}
-.gatecard .btn{width:100%;padding:12px}
-.gateerr{background:var(--bad-bg);color:var(--bad);border-radius:9px;padding:10px 12px;font-size:13px;
-  margin-bottom:16px;text-align:left;word-break:break-word}
-#gateChecking{display:flex;align-items:center;justify-content:center;gap:9px;color:var(--muted);font-size:14px;padding:12px 0}
-#gateChecking .spin{border-color:var(--line);border-top-color:var(--accent);margin:0}
-.gatefoot{margin-top:18px;font-size:12.5px;color:var(--muted)}
-.gatefoot a{text-decoration:none}
 .spin{width:17px;height:17px;border:2.5px solid rgba(255,255,255,.35);border-top-color:#fff;border-radius:50%;
   display:inline-block;vertical-align:-3px;margin-right:8px;animation:sp .7s linear infinite}
 @keyframes sp{to{transform:rotate(360deg)}}
@@ -342,35 +327,19 @@ table.heat .cell{display:block;text-align:center;border-radius:6px;padding:5px 6
 </head>
 <body>
 
-<!-- ============ SIGN-IN GATE ============ -->
-<div class="gate" id="gate">
-  <div class="gatecard">
-    <div class="mark">&#8383;</div>
-    <h1>Nemla Crypto</h1>
-    <p>Sign in with your Nemla account to load the daily portfolio review.</p>
-    <div class="gateerr hidden" id="gateErr"></div>
-    <div id="gateChecking"><span class="spin"></span>Checking your sign-in&hellip;</div>
-    <button class="btn hidden" id="btnSignIn">Sign in with Microsoft</button>
-    <div class="gatefoot">Reports are stored in SharePoint &middot; <a href="/">All dashboards</a></div>
-  </div>
-</div>
-
 <!-- ============ APP ============ -->
-<div id="app" class="hidden">
+<div id="app">
 <header class="top">
   <div class="topin">
     <div class="topbar">
-      <a class="brand" href="/"><span class="mark">&#8383;</span> Crypto</a>
+      <a class="brand" href="./"><span class="mark">&#8383;</span> Crypto</a>
       <span class="sub" id="subLbl"></span>
       <span class="grow"></span>
       <select class="ctl" id="reportSel" title="Report date"></select>
       <div class="menuwrap">
         <button class="iconbtn" id="menuBtn" title="Menu">&#9776;</button>
         <div class="menu" id="menu">
-          <div class="who" id="whoAmI"></div>
           <button id="mReload">Reload report</button>
-          <a href="/">All dashboards</a>
-          <button id="mSignOut">Sign out</button>
           <div class="build" id="menuBuild"></div>
         </div>
       </div>
@@ -391,17 +360,10 @@ table.heat .cell{display:block;text-align:center;border-radius:6px;padding:5px 6
 "use strict";
 
 /* ============================================================
-   CONFIG  — same Entra app registration as the other dashboards
+   CONFIG  — public page: reports are static JSON published next to it in data/
    ============================================================ */
-const AZURE_CLIENT_ID = 'f455b7f0-a8ad-4d17-8752-7a8b709607d1';
-const AZURE_TENANT_ID = '91faaa92-6633-43b2-a302-8122e930e674';
-const GRAPH_SCOPES    = ['Files.ReadWrite', 'Sites.ReadWrite.All', 'User.Read'];
-const SP_DRIVE = '/sites/nemla.sharepoint.com,03c13251-4cec-4fd0-a9fc-ed0896c45745,4ae31160-74d6-4b1a-bbaf-89cd88ca1da2/drive';
-const DATA_DIR = 'Nemla/Apps/nemla-dashboards-app/AppData/Crypto';  // path within the SharePoint Documents library
-const BUILD = '2026-09-27.2';
-/* Local preview only: on localhost, ?local=1 reads the synced AppData folder over plain HTTP
-   instead of going through Entra + Graph. Never active on the real site. */
-const LOCAL = /^(localhost|127\.0\.0\.1)$/.test(location.hostname) && /[?&]local=1/.test(location.search);
+const DATA_URL = 'data/';
+const BUILD = '2026-09-28.1';
 
 const ACTIONS = {
   'HOLD':                   {cls:'t-good', short:'Hold'},
@@ -425,7 +387,7 @@ const SECTION_TITLES = {
   technical:'Technical structure', relative:'Relative strength', cycle:'Cycle position'
 };
 
-var state = { msal:null, account:null, index:null, report:null, prev:null, date:null, charts:{}, priceCache:{} };
+var state = { index:null, report:null, prev:null, date:null, charts:{}, priceCache:{} };
 var ui = { view:'overview', range:365, tf:'d' };
 
 var $ = function(id){ return document.getElementById(id); };
@@ -440,116 +402,12 @@ function toast(msg){
   clearTimeout(toastTimer); toastTimer=setTimeout(function(){ t.classList.remove("on"); },2600);
 }
 
-/* ============================================================
-   AUTH (MSAL)  — copied from /todo; see the notes there
-   ============================================================ */
-function appRedirectUri(){
-  var path = window.location.pathname.replace(/index\.html$/i, '');
-  if(path.charAt(path.length-1) !== '/') path += '/';
-  return window.location.origin + path;
-}
-
-async function initMsal(){
-  state.msal = new msal.PublicClientApplication({
-    auth: {
-      clientId: AZURE_CLIENT_ID,
-      authority: 'https://login.microsoftonline.com/' + AZURE_TENANT_ID,
-      redirectUri: appRedirectUri(),
-      navigateToLoginRequestUrl: false
-    },
-    cache: { cacheLocation:'localStorage', storeAuthStateInCookie:false },
-    system: { loadFrameTimeout: 4000 }
-  });
-  await state.msal.initialize();
-  var resp = null;
-  try{
-    resp = await state.msal.handleRedirectPromise();
-  }catch(e){
-    if(e.errorCode !== 'hash_empty_error') throw e;
-  }
-  if(resp && resp.account){
-    state.msal.setActiveAccount(resp.account);
-    state.account = resp.account;
-  } else {
-    var accounts = state.msal.getAllAccounts();
-    if(accounts.length){
-      state.msal.setActiveAccount(accounts[0]);
-      state.account = accounts[0];
-    }
-  }
-  return !!state.account;
-}
-
-async function signIn(){
-  var btn = $("btnSignIn");
-  btn.disabled = true;
-  btn.innerHTML = '<span class="spin"></span>Signing in&hellip;';
-  $("gateErr").classList.add("hidden");
-  try{
-    try{ localStorage.setItem(SIGNIN_MARK, String(Date.now())); }catch(err){}
-    await state.msal.loginRedirect({ scopes: GRAPH_SCOPES });
-    return;
-  }catch(e){
-    var msg = e.message || String(e);
-    if(e.errorCode === 'hash_empty_error') msg = 'Sign-in did not complete. Please try again.';
-    if(e.errorCode !== 'user_cancelled') gateError(msg);
-    btn.disabled = false; btn.textContent = 'Sign in with Microsoft';
-  }
-}
-function gateError(msg){
-  var el = $("gateErr");
-  el.textContent = msg;
-  el.classList.remove("hidden");
-}
-async function signOut(){
-  if(LOCAL){ location.href = '/'; return; }
-  await state.msal.logoutPopup({ account: state.account });
-}
-
-async function getToken(){
-  var account = state.msal.getActiveAccount();
-  if(!account) throw new Error('Not signed in');
-  try{
-    var r = await state.msal.acquireTokenSilent({ scopes: GRAPH_SCOPES, account: account });
-    return r.accessToken;
-  }catch(e){
-    var r2 = await state.msal.acquireTokenPopup({ scopes: GRAPH_SCOPES });
-    return r2.accessToken;
-  }
-}
-
-async function graphFetch(path, options){
-  options = options || {};
-  var token = await getToken();
-  if(path.indexOf('/me/drive') === 0) path = SP_DRIVE + path.slice(9);  // route to SharePoint, not personal OneDrive
-  var res = await fetch('https://graph.microsoft.com/v1.0' + path, Object.assign({}, options, {
-    headers: Object.assign({ 'Authorization':'Bearer ' + token }, options.headers || {})
-  }));
-  if(!res.ok){
-    var text = await res.text().catch(function(){ return ''; });
-    var err = new Error('Graph ' + res.status + ': ' + text.slice(0,200));
-    err.status = res.status;
-    throw err;
-  }
-  return res;
-}
-function encodePath(p){ return p.split('/').map(encodeURIComponent).join('/'); }
-
-/* Read a JSON file under DATA_DIR. Returns null when it does not exist. */
+/* Read a JSON file from data/. Returns null when it does not exist. */
 async function readJson(rel){
-  if(LOCAL){
-    var r = await fetch('../AppData/Crypto/' + rel + '?t=' + Date.now());
-    if(r.status === 404) return null;
-    if(!r.ok) throw new Error('HTTP ' + r.status + ' reading ' + rel);
-    return r.json();
-  }
-  try{
-    var res = await graphFetch('/me/drive/root:/' + encodePath(DATA_DIR + '/' + rel) + ':/content');
-    return JSON.parse(await res.text());
-  }catch(e){
-    if(e.status === 404) return null;
-    throw e;
-  }
+  var r = await fetch(DATA_URL + rel, { cache:'no-cache' });
+  if(r.status === 404) return null;
+  if(!r.ok) throw new Error('HTTP ' + r.status + ' reading ' + rel);
+  return r.json();
 }
 
 /* ============================================================
@@ -590,7 +448,7 @@ async function runLoad(){
     var dates = await loadIndex();
     if(!dates.length){
       $("main").innerHTML = '<div class="panel"><h2>No reports yet</h2><p class="muted">The first daily review has not been written to ' +
-        '<code>AppData/Crypto/reports/</code> yet. It appears here as soon as it lands.</p></div>';
+        '<code>crypto/data/</code> yet. It appears here as soon as it lands.</p></div>';
       return;
     }
     await loadReport(dates[0]);
@@ -705,6 +563,8 @@ function renderOverview(){
   var r = state.report, m = r.market || {};
   var coins = r.coins || [];
   var h = '';
+
+  h += '<p class="muted small" style="margin:14px 0 0">Personal research notes built from public data. Not financial advice.</p>';
 
   /* 1. one card per holding */
   h += '<section class="panel"><h2>Holdings at a glance <span class="hint">' + esc(fmtDate(r.date)) + ' · click a card for detail</span></h2><div class="cards">';
@@ -1244,101 +1104,15 @@ async function drawPrice(c){
 /* ============================================================
    BOOT
    ============================================================ */
-$("btnSignIn").addEventListener("click", signIn);
 $("menuBuild").textContent = 'build ' + BUILD;
 $("menuBtn").addEventListener('click', function(e){ e.stopPropagation(); $("menu").classList.toggle('open'); });
 document.addEventListener('click', function(){ $("menu").classList.remove('open'); });
-$("mSignOut").addEventListener('click', signOut);
 $("mReload").addEventListener('click', function(){ runLoad(); });
 $("reportSel").addEventListener('change', function(){
   loadReport(this.value).catch(function(e){ toast('Could not load that report: ' + e.message); });
 });
 
-async function enterApp(){
-  $("gate").classList.add("hidden");
-  $("app").classList.remove("hidden");
-  $("whoAmI").textContent = state.account ? state.account.username : 'Local preview';
-  await runLoad();
-}
-
-var ARRIVAL_HASH   = window.location.hash || '';
-var ARRIVAL_SEARCH = window.location.search || '';
-var SIGNIN_MARK    = 'crypto.signinAttempt';
-
-function authResponseInUrl(url){ return /[#&?](code|error|state|id_token)=/.test(url); }
-function describeFailedReturn(){
-  var both = ARRIVAL_HASH + '&' + ARRIVAL_SEARCH;
-  var err  = /[#&?]error=([^&]+)/.exec(both);
-  var desc = /[#&?]error_description=([^&]+)/.exec(both);
-  if(err){
-    var d = desc ? decodeURIComponent(desc[1]).replace(/\+/g, ' ') : '';
-    return 'Microsoft returned an error: ' + decodeURIComponent(err[1]) + (d ? ' — ' + d.slice(0,200) : '');
-  }
-  if(!authResponseInUrl(both)){
-    return 'The sign-in response never reached this page — it came back with no token in the URL. ' +
-           'Something redirected the page in between.';
-  }
-  return 'A sign-in response arrived but no account came out of it.';
-}
-function inAuthContext(){
-  var framed = false;
-  try{
-    if(window.opener && window.opener !== window) framed = true;
-    if(window.parent && window.parent !== window) framed = true;
-  }catch(e){ framed = true; }
-  return framed && authResponseInUrl(ARRIVAL_HASH);
-}
-async function easyAuthHint(){
-  try{
-    var r = await fetch('/.auth/me', { credentials:'same-origin' });
-    if(!r.ok) return null;
-    var j = await r.json();
-    var p = j && j.clientPrincipal;
-    return (p && p.userDetails) || null;
-  }catch(e){ return null; }
-}
-function trySilentSignIn(){
-  var attempt = (async function(){
-    try{
-      var opts = { scopes: GRAPH_SCOPES };
-      var hint = await easyAuthHint();
-      if(hint) opts.loginHint = hint;
-      var r = await state.msal.ssoSilent(opts);
-      state.msal.setActiveAccount(r.account);
-      state.account = r.account;
-      return true;
-    }catch(e){ return false; }
-  })();
-  attempt.then(function(ok){ if(ok) enterOnce(); });
-  return Promise.race([attempt, new Promise(function(res){ setTimeout(function(){ res(false); }, 3500); })]);
-}
-
-var entered = false;
-async function enterOnce(){
-  if(entered) return;
-  entered = true;
-  await enterApp();
-}
-function offerSignIn(){
-  var c = $("gateChecking"); if(c) c.classList.add("hidden");
-  $("btnSignIn").classList.remove("hidden");
-}
-
-(async function boot(){
-  if(LOCAL){ await enterOnce(); return; }
-  if(inAuthContext()) return;   // we are MSAL's own iframe or popup
-  try{
-    var signedIn = await initMsal();
-    if(signedIn){ await enterOnce(); return; }
-    if(await trySilentSignIn()) return;
-  }catch(e){
-    if(e.errorCode !== 'hash_empty_error') gateError('Sign-in could not start: ' + (e.message || e));
-  }
-  var mark = null;
-  try{ mark = localStorage.getItem(SIGNIN_MARK); localStorage.removeItem(SIGNIN_MARK); }catch(e){}
-  if(mark && Date.now() - parseInt(mark, 10) < 300000) gateError(describeFailedReturn());
-  offerSignIn();
-})();
+runLoad();
 
 })();
 </script>
