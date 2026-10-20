@@ -1134,9 +1134,9 @@ function buildCityColorMap(stops) {
   return map;
 }
 
-// Which folded (<12h) layovers get a transit-details bubble on the itinerary. Only the tight
-// self-connections are worth calling out; add a city here to annotate its layover.
-const TRANSIT_BUBBLE_CITIES = ['Bangkok'];
+// Which folded (<12h) layovers get a transit-details bubble on the itinerary. Add a city
+// here to annotate its layover; anything not listed (e.g. the HCMC hop home) stays hidden.
+const TRANSIT_BUBBLE_CITIES = ['Bangkok', 'Singapore'];
 
 function renderItinerary() {
   const panel = $('#itinerary-panel');
@@ -1177,10 +1177,14 @@ function renderItinerary() {
   // Step 3. Decide nights per visible stop. For Home bookends and stops with unknown dates, use fallbacks.
   const HOME_BUFFER = 2;
   const FALLBACK = 3;
+  // Cap how wide any one stay can be. A long stay (e.g. 14 nights in HCMC) would otherwise
+  // crowd out the busier stretch of the trip; the nights label and tick marks still show the
+  // real count, the bar just stops growing past this.
+  const MAX_STOP_UNITS = 7;
   merged.forEach((s) => {
     const isHome = s.city.toLowerCase() === 'home';
     if (isHome)            { s.unitWidth = HOME_BUFFER; return; }
-    if (s.knownBoth)       { s.unitWidth = Math.max(1, s.nights); return; }
+    if (s.knownBoth)       { s.unitWidth = Math.min(MAX_STOP_UNITS, Math.max(1, s.nights)); return; }
     s.unitWidth = FALLBACK;
   });
 
@@ -1243,9 +1247,11 @@ function renderItinerary() {
                   (rL ? `Q ${x} ${barY} ${x + rL} ${barY} ` : '') + 'Z';
     segEls.push(`<path d="${pathD}" fill="${fill}" />`);
 
-    if (!isHome && s.unitWidth > 0) {
-      for (let n = 1; n < s.unitWidth; n++) {
-        const tx = x + (n / s.unitWidth) * w;
+    // One tick per night, so a width-capped segment simply packs its ticks more tightly.
+    const tickCount = s.knownBoth ? s.nights : s.unitWidth;
+    if (!isHome && tickCount > 0) {
+      for (let n = 1; n < tickCount; n++) {
+        const tx = x + (n / tickCount) * w;
         tickEls.push(`<line x1="${tx}" x2="${tx}" y1="${barY + 6}" y2="${barY + barH - 6}" stroke="rgba(255,255,255,0.55)" stroke-width="1" />`);
       }
     }
@@ -1290,7 +1296,9 @@ function renderItinerary() {
     // Drawn in the SVG so the line meets the bar exactly at the join.
     (s.transits || []).forEach(t => {
       if (!TRANSIT_BUBBLE_CITIES.some(c => c.toLowerCase() === t.via.toLowerCase())) return;
-      const bw = 140, bh = 64, bx = x2 - bw / 2, by = 10, lx = bx + 8, rx = bx + bw - 8;
+      const bw = 140, bh = 64, by = 10;
+      const bx = Math.max(6, Math.min(width - bw - 6, x2 - bw / 2));   // keep the bubble on-canvas near the edges
+      const lx = bx + 8, rx = bx + bw - 8;
       transitEls.push(
         `<rect x="${bx}" y="${by}" width="${bw}" height="${bh}" rx="7" fill="#FDFBF7" stroke="#C9C0AB" stroke-width="1" />` +
         `<text x="${lx}" y="${by + 15}" font-family="Manrope, sans-serif" font-size="9" font-weight="700" fill="#B86842">${escapeHtml(t.via)} transit · ${fmtDur(t.depTime - t.landTime)}</text>` +
