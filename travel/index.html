@@ -83,16 +83,6 @@
   .hotel-callouts-below .hotel-callout-city { order: 1; }
   .hotel-callouts-below .hotel-callout-img { order: 2; }
   .hotel-callouts-below .hotel-callout-name { order: 3; }
-  /* Transit info bubble, pinned at the top over a folded (<12h) layover stop */
-  .transit-bubble {
-    position: absolute; top: 0; transform: translateX(-50%);
-    width: 150px; background: var(--surface); border: 1px solid var(--border);
-    border-radius: 8px; padding: 7px 9px; box-shadow: 0 2px 7px rgba(0,0,0,0.09);
-    font-family: 'Manrope', sans-serif; pointer-events: none; z-index: 2;
-  }
-  .transit-bubble-head { font-size: 11px; font-weight: 700; color: #B86842; margin-bottom: 5px; white-space: nowrap; }
-  .transit-bubble-row { display: flex; justify-content: space-between; gap: 8px; font-size: 11px; color: var(--text-faint); line-height: 1.55; }
-  .transit-bubble-row b { color: var(--text); font-weight: 600; white-space: nowrap; }
 
   /* ---------- top bar ---------- */
   .topbar {
@@ -642,7 +632,7 @@
           <h3 id="itinerary-title">Itinerary</h3>
           <div id="itinerary-meta" style="font-size: 12px; color: var(--text-faint); font-family: 'JetBrains Mono', monospace;"></div>
         </div>
-        <div id="itinerary-body" style="max-width: 80%; margin: 0 auto;"></div>
+        <div id="itinerary-body"></div>
         <div style="font-size: 12px; color: var(--text-faint); margin: 6px 2rem 0;">Bar length shows time in each city &middot; one tick = one night</div>
       </div>
 
@@ -1144,6 +1134,10 @@ function buildCityColorMap(stops) {
   return map;
 }
 
+// Which folded (<12h) layovers get a transit-details bubble on the itinerary. Only the tight
+// self-connections are worth calling out; add a city here to annotate its layover.
+const TRANSIT_BUBBLE_CITIES = ['Bangkok'];
+
 function renderItinerary() {
   const panel = $('#itinerary-panel');
   const trip = state.currentTrip;
@@ -1216,7 +1210,7 @@ function renderItinerary() {
   const padL = 0, padR = 0;
   const inner = width - padL - padR;
   const barH = 45;                    // bar height reduced by ~20% from 56
-  const barY = 110;
+  const barY = 130;                   // headroom above the bar for the transit bubble
   const barBottom = barY + barH;
   // Flight dates sit right under the bar with no connector line; below-bar city names
   // and their callouts drop beneath the date row.
@@ -1225,7 +1219,11 @@ function renderItinerary() {
   const belowCalloutY = barBottom + 108;   // match the above-bar connector length (barY - 2)
 
   let x = padL;
-  const segEls = [], labelTopEls = [], labelBottomEls = [], tickEls = [];
+  const segEls = [], labelTopEls = [], labelBottomEls = [], tickEls = [], transitEls = [];
+  // One "label ........ value" row inside the transit bubble.
+  const tRow = (lx, rx, y, label, val) =>
+    `<text x="${lx}" y="${y}" font-family="Manrope, sans-serif" font-size="8.5" fill="#8F897A">${escapeHtml(label)}</text>` +
+    `<text x="${rx}" y="${y}" text-anchor="end" font-family="Manrope, sans-serif" font-size="8.5" font-weight="600" fill="#2A2822">${escapeHtml(val)}</text>`;
 
   merged.forEach((s, i) => {
     const w = (s.unitWidth / totalUnits) * inner;
@@ -1288,6 +1286,21 @@ function renderItinerary() {
       labelBottomEls.push(`<text x="${tx}" y="${bottomLabelY + 26}" text-anchor="middle" font-family="Manrope, sans-serif" font-size="11" fill="#5E574B">${escapeHtml(timeLine)}</text>`);
     }
 
+    // Transit bubble + connector line at this stop's outgoing join, for flagged layovers only.
+    // Drawn in the SVG so the line meets the bar exactly at the join.
+    (s.transits || []).forEach(t => {
+      if (!TRANSIT_BUBBLE_CITIES.some(c => c.toLowerCase() === t.via.toLowerCase())) return;
+      const bw = 140, bh = 64, bx = x2 - bw / 2, by = 10, lx = bx + 8, rx = bx + bw - 8;
+      transitEls.push(
+        `<rect x="${bx}" y="${by}" width="${bw}" height="${bh}" rx="7" fill="#FDFBF7" stroke="#C9C0AB" stroke-width="1" />` +
+        `<text x="${lx}" y="${by + 15}" font-family="Manrope, sans-serif" font-size="9" font-weight="700" fill="#B86842">${escapeHtml(t.via)} transit · ${fmtDur(t.depTime - t.landTime)}</text>` +
+        tRow(lx, rx, by + 30, t.fromCity + ' dep', d(t.outTime, true)) +
+        tRow(lx, rx, by + 43, t.via + ' land', d(t.landTime, true)) +
+        tRow(lx, rx, by + 56, t.via + ' dep', d(t.depTime, true)) +
+        `<line x1="${x2}" x2="${x2}" y1="${by + bh}" y2="${barY}" stroke="#B86842" stroke-width="1.5" />`
+      );
+    });
+
     x += w;
   });
 
@@ -1297,31 +1310,17 @@ function renderItinerary() {
     ${tickEls.join('')}
     ${labelTopEls.join('')}
     ${labelBottomEls.join('')}
+    ${transitEls.join('')}
   </svg>`;
 
   // Build hotel callouts as HTML overlays — above the SVG for "above" cities, below it
   // for "below" cities. Position each by the percentage of its segment center in the bar.
   let cursor = 0;
-  const aboveCallouts = [], belowCallouts = [], transitBubbles = [];
+  const aboveCallouts = [], belowCallouts = [];
   merged.forEach((s, i) => {
     const segStart = cursor;
     const segEnd = cursor + s.unitWidth;
     cursor = segEnd;
-    // Transit bubble(s) at this stop's outgoing join (a folded <12h layover).
-    if (s.transits && s.transits.length) {
-      const bPct = Math.max(7, Math.min(93, (segEnd / totalUnits) * 100));
-      s.transits.forEach(t => {
-        const dur = fmtDur(t.depTime - t.landTime);
-        transitBubbles.push(`
-          <div class="transit-bubble" style="left: ${bPct}%;">
-            <div class="transit-bubble-head">${escapeHtml(t.via)} transit · ${dur}</div>
-            <div class="transit-bubble-row"><span>${escapeHtml(t.fromCity)} dep</span><b>${d(t.outTime, true)}</b></div>
-            <div class="transit-bubble-row"><span>${escapeHtml(t.via)} land</span><b>${d(t.landTime, true)}</b></div>
-            <div class="transit-bubble-row"><span>${escapeHtml(t.via)} dep</span><b>${d(t.depTime, true)}</b></div>
-          </div>
-        `);
-      });
-    }
     if (s.city.toLowerCase() === 'home' || !s.hotel) return;
     const centerPct = ((segStart + s.unitWidth / 2) / totalUnits) * 100;
     const safeName = escapeHtml(s.hotel);
@@ -1337,8 +1336,7 @@ function renderItinerary() {
     (s.below ? belowCallouts : aboveCallouts).push(html);
   });
 
-  const aboveItems = aboveCallouts.concat(transitBubbles);
-  const aboveHtml = aboveItems.length ? `<div class="hotel-callouts">${aboveItems.join('')}</div>` : '';
+  const aboveHtml = aboveCallouts.length ? `<div class="hotel-callouts">${aboveCallouts.join('')}</div>` : '';
   const belowHtml = belowCallouts.length ? `<div class="hotel-callouts-below">${belowCallouts.join('')}</div>` : '';
 
   $('#itinerary-body').innerHTML = aboveHtml + svg + belowHtml;
