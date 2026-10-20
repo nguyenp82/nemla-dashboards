@@ -83,6 +83,16 @@
   .hotel-callouts-below .hotel-callout-city { order: 1; }
   .hotel-callouts-below .hotel-callout-img { order: 2; }
   .hotel-callouts-below .hotel-callout-name { order: 3; }
+  /* Transit info bubble, pinned at the top over a folded (<12h) layover stop */
+  .transit-bubble {
+    position: absolute; top: 0; transform: translateX(-50%);
+    width: 150px; background: var(--surface); border: 1px solid var(--border);
+    border-radius: 8px; padding: 7px 9px; box-shadow: 0 2px 7px rgba(0,0,0,0.09);
+    font-family: 'Manrope', sans-serif; pointer-events: none; z-index: 2;
+  }
+  .transit-bubble-head { font-size: 11px; font-weight: 700; color: #B86842; margin-bottom: 5px; white-space: nowrap; }
+  .transit-bubble-row { display: flex; justify-content: space-between; gap: 8px; font-size: 11px; color: var(--text-faint); line-height: 1.55; }
+  .transit-bubble-row b { color: var(--text); font-weight: 600; white-space: nowrap; }
 
   /* ---------- top bar ---------- */
   .topbar {
@@ -1153,8 +1163,22 @@ function renderItinerary() {
     return { ...s, nights, isTransit, knownBoth };
   });
 
-  // Step 2. Drop transit stops entirely. We no longer add a "via X" note to the previous transition.
-  const merged = stops.filter(s => !s.isTransit).map(s => ({ ...s }));
+  // Step 2. Drop transit stops from the bar, but remember each one so we can show a transit
+  // bubble at the join between the stops on either side of it.
+  const merged = [];
+  stops.forEach(s => {
+    if (s.isTransit) {
+      const prev = merged[merged.length - 1];
+      if (prev && prev.departs && s.arrives && s.departs) {
+        (prev.transits = prev.transits || []).push({
+          via: s.city, fromCity: prev.city,
+          outTime: prev.departs, landTime: s.arrives, depTime: s.departs
+        });
+      }
+    } else {
+      merged.push({ ...s });
+    }
+  });
 
   // Step 3. Decide nights per visible stop. For Home bookends and stops with unknown dates, use fallbacks.
   const HOME_BUFFER = 2;
@@ -1278,11 +1302,26 @@ function renderItinerary() {
   // Build hotel callouts as HTML overlays — above the SVG for "above" cities, below it
   // for "below" cities. Position each by the percentage of its segment center in the bar.
   let cursor = 0;
-  const aboveCallouts = [], belowCallouts = [];
+  const aboveCallouts = [], belowCallouts = [], transitBubbles = [];
   merged.forEach((s, i) => {
     const segStart = cursor;
     const segEnd = cursor + s.unitWidth;
     cursor = segEnd;
+    // Transit bubble(s) at this stop's outgoing join (a folded <12h layover).
+    if (s.transits && s.transits.length) {
+      const bPct = Math.max(7, Math.min(93, (segEnd / totalUnits) * 100));
+      s.transits.forEach(t => {
+        const dur = fmtDur(t.depTime - t.landTime);
+        transitBubbles.push(`
+          <div class="transit-bubble" style="left: ${bPct}%;">
+            <div class="transit-bubble-head">${escapeHtml(t.via)} transit · ${dur}</div>
+            <div class="transit-bubble-row"><span>${escapeHtml(t.fromCity)} dep</span><b>${d(t.outTime, true)}</b></div>
+            <div class="transit-bubble-row"><span>${escapeHtml(t.via)} land</span><b>${d(t.landTime, true)}</b></div>
+            <div class="transit-bubble-row"><span>${escapeHtml(t.via)} dep</span><b>${d(t.depTime, true)}</b></div>
+          </div>
+        `);
+      });
+    }
     if (s.city.toLowerCase() === 'home' || !s.hotel) return;
     const centerPct = ((segStart + s.unitWidth / 2) / totalUnits) * 100;
     const safeName = escapeHtml(s.hotel);
@@ -1298,7 +1337,8 @@ function renderItinerary() {
     (s.below ? belowCallouts : aboveCallouts).push(html);
   });
 
-  const aboveHtml = aboveCallouts.length ? `<div class="hotel-callouts">${aboveCallouts.join('')}</div>` : '';
+  const aboveItems = aboveCallouts.concat(transitBubbles);
+  const aboveHtml = aboveItems.length ? `<div class="hotel-callouts">${aboveItems.join('')}</div>` : '';
   const belowHtml = belowCallouts.length ? `<div class="hotel-callouts-below">${belowCallouts.join('')}</div>` : '';
 
   $('#itinerary-body').innerHTML = aboveHtml + svg + belowHtml;
@@ -1315,6 +1355,12 @@ function renderItinerary() {
 function d(dt, lowercase) {
   let s = dt.toLocaleTimeString('en-AU', { hour: 'numeric', minute: '2-digit', hour12: true });
   return lowercase ? s.toLowerCase() : s;
+}
+
+function fmtDur(ms) {
+  const mins = Math.max(0, Math.round(ms / 60000));
+  const h = Math.floor(mins / 60), m = mins % 60;
+  return (h ? h + 'h' : '') + (h && m ? ' ' : '') + (m || !h ? m + 'm' : '');
 }
 
 function renderSummary() {
