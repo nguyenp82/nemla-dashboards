@@ -1,0 +1,577 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>nemla · Health</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300..900;1,9..144,300..900&family=Manrope:wght@300..800&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@azure/msal-browser@3/lib/msal-browser.min.js"></script>
+<style>
+  :root {
+    --bg: #F7F4EE;
+    --surface: #FDFBF7;
+    --surface-2: #F1ECE2;
+    --border: #E0D9C9;
+    --border-strong: #C9C0AB;
+    --text: #2A2822;
+    --text-dim: #5E574B;
+    --text-faint: #8F897A;
+    --accent: #A07A1F;
+    --accent-soft: #F3E9CF;
+    --health: #A8475F;
+    --health-soft: #F3DDE3;
+    --back: #3E6A88;
+    --legs: #5B8C47;
+    --play: #B86842;
+    --push: #A8475F;
+    --rest: #A9A292;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html, body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Manrope', system-ui, sans-serif;
+    font-size: 14px;
+    line-height: 1.5;
+    -webkit-font-smoothing: antialiased;
+  }
+  body {
+    min-height: 100vh;
+    background-image:
+      radial-gradient(circle at 12% 8%, rgba(168,71,95,0.05) 0%, transparent 45%),
+      radial-gradient(circle at 88% 92%, rgba(62,106,136,0.05) 0%, transparent 50%);
+    background-attachment: fixed;
+  }
+  button { font-family: inherit; cursor: pointer; border: none; background: none; color: inherit; }
+  a { color: inherit; text-decoration: none; }
+  .serif { font-family: 'Fraunces', Georgia, serif; font-optical-sizing: auto; }
+  [hidden] { display: none !important; }
+
+  .shell { max-width: 1100px; margin: 0 auto; padding: 2.5rem 2rem 4rem; }
+
+  .topbar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 3rem; }
+  .brand-link { display: flex; flex-direction: column; }
+  .brand-mark { font-family: 'Fraunces', Georgia, serif; font-size: 22px; font-weight: 500; letter-spacing: 0.2px; }
+  .brand-tag { font-size: 11px; color: var(--text-faint); margin-top: 2px; text-transform: uppercase; letter-spacing: 1.5px; }
+  .user-chip { display: flex; align-items: center; gap: 10px; font-size: 13px; color: var(--text-dim); }
+  .user-avatar {
+    width: 30px; height: 30px; border-radius: 50%;
+    background: var(--health-soft); color: var(--health);
+    display: flex; align-items: center; justify-content: center; font-weight: 500; font-size: 12px;
+  }
+  .icon-btn { color: var(--text-faint); font-size: 12px; padding: 4px 8px; border-radius: 4px; }
+  .icon-btn:hover { color: var(--text); background: var(--surface-2); }
+
+  .signin-card {
+    background: var(--surface); border: 1px solid var(--border); border-radius: 14px;
+    padding: 3rem 2.5rem; max-width: 460px; margin: 4rem auto 0; text-align: center;
+  }
+  .signin-card .lock {
+    width: 56px; height: 56px; margin: 0 auto 1.5rem; background: var(--health-soft);
+    border-radius: 50%; display: flex; align-items: center; justify-content: center; color: var(--health);
+  }
+  .signin-card h2 { font-family: 'Fraunces', Georgia, serif; font-size: 24px; font-weight: 500; margin-bottom: 8px; }
+  .signin-card p { color: var(--text-dim); font-size: 13px; margin-bottom: 2rem; line-height: 1.6; }
+  .signin-btn {
+    display: inline-flex; align-items: center; justify-content: center; gap: 10px; width: 100%;
+    padding: 12px 20px; background: var(--text); color: var(--surface); border-radius: 8px;
+    font-size: 14px; font-weight: 500; transition: background 0.15s;
+  }
+  .signin-btn:hover { background: #1a1814; }
+  .signin-btn:disabled { opacity: 0.6; cursor: wait; }
+  .ms-logo { width: 16px; height: 16px; display: grid; grid-template-columns: 1fr 1fr; gap: 1px; }
+  .ms-logo span { display: block; }
+  .ms-logo span:nth-child(1) { background: #F25022; }
+  .ms-logo span:nth-child(2) { background: #7FBA00; }
+  .ms-logo span:nth-child(3) { background: #00A4EF; }
+  .ms-logo span:nth-child(4) { background: #FFB900; }
+
+  .hero { margin-bottom: 2rem; display: flex; justify-content: space-between; align-items: flex-end; gap: 1rem; flex-wrap: wrap; }
+  .hero h1 { font-family: 'Fraunces', Georgia, serif; font-size: 34px; font-weight: 400; line-height: 1.15; }
+  .hero p { font-size: 14px; color: var(--text-dim); margin-top: 8px; }
+  .hero .updated { font-size: 12px; color: var(--text-faint); }
+
+  .message {
+    background: var(--surface); border: 1px dashed var(--border-strong); border-radius: 12px;
+    padding: 1.5rem; color: var(--text-dim); font-size: 13px;
+  }
+  .message code {
+    font-family: ui-monospace, Menlo, monospace; background: var(--surface-2);
+    border: 1px solid var(--border); padding: 1px 5px; border-radius: 3px; font-size: 11px; color: var(--text);
+  }
+
+  .kpis { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; margin-bottom: 14px; }
+  .kpi { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 1.1rem 1.25rem; }
+  .kpi .k { font-size: 11px; text-transform: uppercase; letter-spacing: 1.2px; color: var(--text-faint); }
+  .kpi .v { font-family: 'Fraunces', Georgia, serif; font-size: 28px; font-weight: 500; margin-top: 4px; line-height: 1.1; }
+  .kpi .v small { font-family: 'Manrope', sans-serif; font-size: 13px; color: var(--text-dim); font-weight: 500; }
+  .kpi .n { font-size: 12px; color: var(--text-dim); margin-top: 4px; }
+
+  .panel { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; margin-bottom: 14px; overflow: hidden; }
+  .panel-head { display: flex; justify-content: space-between; align-items: baseline; gap: 10px; padding: 1rem 1.25rem; border-bottom: 1px solid var(--surface-2); }
+  .panel-head h2 { font-family: 'Fraunces', Georgia, serif; font-size: 18px; font-weight: 500; }
+  .panel-head span { font-size: 12px; color: var(--text-faint); }
+  .panel-body { padding: 1.1rem 1.25rem; }
+
+  .progress-track { position: relative; height: 12px; background: var(--surface-2); border-radius: 999px; margin: 6px 0 8px; }
+  .progress-fill { position: absolute; left: 0; top: 0; bottom: 0; background: var(--health); border-radius: 999px; min-width: 12px; }
+  .progress-ends { display: flex; justify-content: space-between; font-size: 12px; color: var(--text-dim); }
+
+  .week { display: grid; grid-template-columns: repeat(7, 1fr); gap: 8px; }
+  .day { border: 1px solid var(--border); border-top: 4px solid var(--c); border-radius: 10px; padding: 10px; min-height: 96px; background: var(--surface); }
+  .day.today { box-shadow: 0 0 0 2px var(--c); }
+  .day .d { font-size: 11px; text-transform: uppercase; letter-spacing: 1.2px; color: var(--text-faint); }
+  .day .w { font-family: 'Fraunces', Georgia, serif; font-size: 16px; font-weight: 500; color: var(--c); margin-top: 2px; }
+  .day .s { font-size: 12px; color: var(--text-dim); margin-top: 4px; line-height: 1.4; }
+
+  .sessions { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; margin-bottom: 14px; }
+  .sessions .panel { margin-bottom: 0; }
+  .sessions .panel-head h2 { color: var(--c); }
+  .note { font-size: 12px; color: var(--text-dim); padding: 0.75rem 1.25rem; border-top: 1px solid var(--surface-2); }
+
+  table { width: 100%; border-collapse: collapse; }
+  th, td { text-align: left; padding: 9px 1.25rem; border-bottom: 1px solid var(--surface-2); font-size: 13px; vertical-align: top; }
+  th { font-size: 11px; text-transform: uppercase; letter-spacing: 1.2px; color: var(--text-faint); font-weight: 600; }
+  tr:last-child td { border-bottom: 0; }
+  td.strong { font-weight: 600; }
+  td.dim { color: var(--text-dim); font-size: 12px; }
+  td.num, th.num { text-align: right; white-space: nowrap; }
+  .scroll { overflow-x: auto; }
+
+  .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+  .two-col .panel { margin-bottom: 14px; }
+
+  .meter { margin-bottom: 12px; }
+  .meter:last-child { margin-bottom: 0; }
+  .meter-top { display: flex; justify-content: space-between; font-size: 12px; color: var(--text-dim); margin-bottom: 4px; }
+  .meter-top b { color: var(--text); font-weight: 600; }
+  .meter-track { height: 8px; background: var(--surface-2); border-radius: 999px; overflow: hidden; }
+  .meter-fill { height: 100%; background: var(--accent); border-radius: 999px; }
+  .meter-fill.protein { background: var(--health); }
+
+  .rules { list-style: none; }
+  .rules li { font-size: 13px; color: var(--text-dim); padding: 6px 0 6px 16px; position: relative; }
+  .rules li::before { content: ''; position: absolute; left: 0; top: 14px; width: 6px; height: 6px; border-radius: 50%; background: var(--health); }
+
+  .footer {
+    margin-top: 3rem; padding-top: 1.5rem; border-top: 1px solid var(--border);
+    display: flex; justify-content: space-between; font-size: 12px; color: var(--text-faint);
+  }
+  .toast {
+    position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%);
+    background: var(--text); color: var(--surface); padding: 10px 18px; border-radius: 8px;
+    font-size: 13px; opacity: 0; pointer-events: none; transition: opacity 0.2s; z-index: 1000;
+  }
+  .toast.show { opacity: 1; }
+
+  @media (max-width: 900px) {
+    .kpis { grid-template-columns: repeat(2, 1fr); }
+    .sessions, .two-col { grid-template-columns: 1fr; }
+    .week { grid-template-columns: repeat(4, 1fr); }
+  }
+  @media (max-width: 520px) {
+    .shell { padding: 1.5rem 1rem 3rem; }
+    .week { grid-template-columns: repeat(2, 1fr); }
+    .hero h1 { font-size: 28px; }
+    th, td { padding: 8px 0.75rem; }
+  }
+</style>
+</head>
+<body>
+
+<div class="shell">
+
+  <div class="topbar">
+    <a href="../" class="brand-link">
+      <div class="brand-mark">nemla</div>
+      <div class="brand-tag">health</div>
+    </a>
+    <div id="user-chip" class="user-chip" hidden>
+      <div id="user-avatar" class="user-avatar">N</div>
+      <span id="user-email"></span>
+      <button class="icon-btn" onclick="signOut()">Sign out</button>
+    </div>
+  </div>
+
+  <section id="signin-view" hidden>
+    <div class="signin-card">
+      <div class="lock">
+        <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M6.5 6.5v11M17.5 6.5v11M3 9v6M21 9v6M6.5 12h11"/>
+        </svg>
+      </div>
+      <h2 class="serif">Health</h2>
+      <p>Training plan, weigh-ins and food log. Sign in to load your tracker from OneDrive.</p>
+      <button id="signin-btn" class="signin-btn" onclick="signIn()">
+        <span class="ms-logo" aria-hidden="true"><span></span><span></span><span></span><span></span></span>
+        Sign in with Microsoft
+      </button>
+    </div>
+  </section>
+
+  <section id="dashboard-view" hidden>
+    <div class="hero">
+      <div>
+        <h1 class="serif" id="hero-title">Health</h1>
+        <p id="hero-sub">Loading your tracker.</p>
+      </div>
+      <div class="updated" id="hero-updated"></div>
+    </div>
+
+    <div id="message" class="message" hidden></div>
+    <div id="content" hidden></div>
+  </section>
+
+  <div class="footer">
+    <span>dash.nemla.com.au</span>
+    <span id="status">Initialising</span>
+  </div>
+
+</div>
+
+<div id="toast" class="toast"></div>
+
+<script>
+/* ============================================================
+   CONFIG  (shared across all dashboards)
+   ============================================================ */
+const AZURE_CLIENT_ID = 'f455b7f0-a8ad-4d17-8752-7a8b709607d1';
+const AZURE_TENANT_ID = '91faaa92-6633-43b2-a302-8122e930e674';
+const GRAPH_SCOPES    = ['Files.ReadWrite', 'Sites.ReadWrite.All', 'User.Read'];
+/* Unlike the other dashboards, health data is personal and stays in the signed-in
+   user's own OneDrive, not the shared SharePoint library. Nothing is stored in this
+   page or in the repo; the file is read at runtime and never written back. */
+const DATA_FILE = 'Nguyen/claude/Health/health.json';
+
+const state = { msal: null, account: null, data: null };
+const $ = (q) => document.querySelector(q);
+
+function setStatus(text) { $('#status').textContent = text; }
+function toast(msg, ms = 2400) {
+  const t = $('#toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  clearTimeout(toast._t);
+  toast._t = setTimeout(() => t.classList.remove('show'), ms);
+}
+function esc(v) {
+  return String(v == null ? '' : v).replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+}
+
+/* ============================================================
+   VIEW SWITCHING
+   ============================================================ */
+function showSignIn() {
+  $('#signin-view').hidden = false;
+  $('#dashboard-view').hidden = true;
+  $('#user-chip').hidden = true;
+  setStatus('Not signed in');
+}
+function showDashboard(account) {
+  $('#signin-view').hidden = true;
+  $('#dashboard-view').hidden = false;
+  $('#user-chip').hidden = false;
+  $('#user-email').textContent = account.username;
+  $('#user-avatar').textContent = (account.name || account.username).charAt(0).toUpperCase();
+  setStatus('Signed in');
+}
+function showMessage(html) {
+  $('#message').innerHTML = html;
+  $('#message').hidden = false;
+  $('#content').hidden = true;
+}
+
+/* ============================================================
+   MSAL
+   ============================================================ */
+/* Static Web Apps serves a folder with and without a trailing slash (and as
+   .../index.html) all as 200, with no redirect, so window.location.pathname depends on
+   how the page was reached. Entra matches redirect URIs exactly, so normalise every
+   form to the one registered value. */
+function appRedirectUri() {
+  var path = window.location.pathname.replace(/index\.html$/i, '');
+  if (path.charAt(path.length - 1) !== '/') path += '/';
+  return window.location.origin + path;
+}
+
+async function initMsal() {
+  try {
+    state.msal = new msal.PublicClientApplication({
+      auth: {
+        clientId: AZURE_CLIENT_ID,
+        authority: `https://login.microsoftonline.com/${AZURE_TENANT_ID}`,
+        redirectUri: appRedirectUri()
+      },
+      cache: { cacheLocation: 'sessionStorage', storeAuthStateInCookie: false }
+    });
+    await state.msal.initialize();
+    const resp = await state.msal.handleRedirectPromise();
+    if (resp?.account) {
+      state.msal.setActiveAccount(resp.account);
+      state.account = resp.account;
+    } else {
+      const accounts = state.msal.getAllAccounts();
+      if (accounts.length) {
+        state.msal.setActiveAccount(accounts[0]);
+        state.account = accounts[0];
+      }
+    }
+    return true;
+  } catch (e) {
+    console.error('MSAL init failed', e);
+    toast('Sign in service failed to load');
+    return false;
+  }
+}
+
+async function signIn() {
+  if (!state.msal) return;
+  const btn = $('#signin-btn');
+  btn.disabled = true;
+  try {
+    const resp = await state.msal.loginPopup({ scopes: GRAPH_SCOPES, prompt: 'select_account' });
+    state.msal.setActiveAccount(resp.account);
+    state.account = resp.account;
+    showDashboard(resp.account);
+    await onSignedIn();
+  } catch (e) {
+    if (e.errorCode === 'popup_window_error') {
+      state.msal.loginRedirect({ scopes: GRAPH_SCOPES });
+      return;
+    } else if (e.errorCode !== 'user_cancelled') {
+      toast('Sign in failed: ' + (e.message || e.errorCode));
+    }
+    btn.disabled = false;
+  }
+}
+
+async function signOut() {
+  if (!state.msal || !state.account) return;
+  await state.msal.logoutPopup({ account: state.account });
+  state.account = null;
+  location.reload();
+}
+
+window.signIn = signIn;
+window.signOut = signOut;
+
+/* ============================================================
+   GRAPH API
+   ============================================================ */
+async function getToken() {
+  const account = state.msal.getActiveAccount();
+  if (!account) throw new Error('Not signed in');
+  try {
+    const r = await state.msal.acquireTokenSilent({ scopes: GRAPH_SCOPES, account });
+    return r.accessToken;
+  } catch (e) {
+    const r = await state.msal.acquireTokenPopup({ scopes: GRAPH_SCOPES });
+    return r.accessToken;
+  }
+}
+
+async function graphFetch(path, options = {}) {
+  const token = await getToken();
+  const res = await fetch('https://graph.microsoft.com/v1.0' + path, {
+    ...options,
+    headers: { 'Authorization': 'Bearer ' + token, ...(options.headers || {}) }
+  });
+  if (!res.ok) {
+    const text = await res.text().catch(() => '');
+    const err = new Error('Graph ' + res.status + ': ' + text.slice(0, 200));
+    err.status = res.status;
+    throw err;
+  }
+  return res;
+}
+
+function encodePath(p) {
+  return p.split('/').map(encodeURIComponent).join('/');
+}
+
+/* ============================================================
+   DATA
+   ============================================================ */
+async function onSignedIn() {
+  setStatus('Loading');
+  try {
+    const res = await graphFetch(`/me/drive/root:/${encodePath(DATA_FILE)}:/content`);
+    const data = JSON.parse(await res.text());
+    state.data = data;
+    render(data);
+    setStatus('Signed in');
+  } catch (e) {
+    console.error(e);
+    if (e.status === 404) {
+      showMessage('No tracker file found. It should be in your OneDrive at <code>' + esc(DATA_FILE) + '</code>.');
+    } else {
+      showMessage('Could not load the tracker. ' + esc(e.message || e));
+    }
+    $('#hero-sub').textContent = '';
+    setStatus('Load failed');
+  }
+}
+
+/* ============================================================
+   RENDER
+   ============================================================ */
+const MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+const DAYS = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+
+function parseDate(s) {
+  const m = /^(\d{4})-(\d{2})-(\d{2})/.exec(String(s || ''));
+  return m ? new Date(+m[1], +m[2] - 1, +m[3]) : null;
+}
+function fmtDate(s, withYear) {
+  const d = parseDate(s);
+  if (!d) return String(s || '');
+  return DAYS[d.getDay()] + ' ' + d.getDate() + ' ' + MONTHS[d.getMonth()] + (withYear ? ' ' + d.getFullYear() : '');
+}
+function num(n, dp) {
+  return Number(n).toLocaleString('en-AU', { minimumFractionDigits: dp || 0, maximumFractionDigits: dp || 0 });
+}
+function typeColor(t) {
+  return ({ back: 'var(--back)', legs: 'var(--legs)', play: 'var(--play)', push: 'var(--push)', rest: 'var(--rest)' })[t] || 'var(--rest)';
+}
+function pct(a, b) {
+  if (!b) return 0;
+  return Math.max(0, Math.min(100, (a / b) * 100));
+}
+
+function render(data) {
+  const p = data.profile || {};
+  const t = data.targets || {};
+  const weighIns = (data.weighIns || []).slice().sort((a, b) => String(a.date).localeCompare(String(b.date)));
+  const latest = weighIns.length ? weighIns[weighIns.length - 1] : null;
+  const current = latest ? Number(latest.kg) : Number(p.startKg);
+  const gained = current - Number(p.startKg);
+  const span = Number(p.goalKg) - Number(p.startKg);
+  const todayIdx = new Date().getDay();
+
+  $('#hero-title').textContent = num(p.startKg, 0) + ' kg to ' + num(p.goalKg, 0) + ' kg';
+  $('#hero-sub').textContent = 'Lean gain plan, started ' + fmtDate(p.startDate, true) + '.';
+  $('#hero-updated').textContent = data.updated ? 'Updated ' + fmtDate(data.updated, true) : '';
+
+  let html = '';
+
+  /* KPIs */
+  html += '<div class="kpis">'
+    + '<div class="kpi"><div class="k">Current</div><div class="v">' + num(current, 1) + ' <small>kg</small></div><div class="n">'
+    + (latest ? esc(fmtDate(latest.date)) : 'no weigh-in yet') + '</div></div>'
+    + '<div class="kpi"><div class="k">Gained</div><div class="v">' + (gained >= 0 ? '+' : '') + num(gained, 1) + ' <small>kg</small></div><div class="n">'
+    + num(Math.max(0, Number(p.goalKg) - current), 1) + ' kg to go</div></div>'
+    + '<div class="kpi"><div class="k">Calories</div><div class="v">' + num(t.kcal) + '</div><div class="n">per day</div></div>'
+    + '<div class="kpi"><div class="k">Protein</div><div class="v">' + num(t.proteinG) + ' <small>g</small></div><div class="n">per day</div></div>'
+    + '</div>';
+
+  /* Progress */
+  html += '<div class="panel"><div class="panel-head"><h2>Progress</h2><span>target '
+    + esc(t.rateLow) + ' to ' + esc(t.rateHigh) + ' kg per week</span></div><div class="panel-body">'
+    + '<div class="progress-track"><div class="progress-fill" style="width:' + pct(gained, span).toFixed(1) + '%"></div></div>'
+    + '<div class="progress-ends"><span>' + num(p.startKg, 1) + ' kg start</span><span>' + num(p.goalKg, 1) + ' kg goal</span></div>'
+    + '</div></div>';
+
+  /* Week */
+  html += '<div class="panel"><div class="panel-head"><h2>This week</h2><span>today is highlighted</span></div><div class="panel-body"><div class="week">';
+  (data.week || []).forEach((d) => {
+    const isToday = DAYS[todayIdx] === d.day;
+    html += '<div class="day' + (isToday ? ' today' : '') + '" style="--c:' + typeColor(d.type) + '">'
+      + '<div class="d">' + esc(d.day) + '</div><div class="w">' + esc(d.label) + '</div><div class="s">' + esc(d.note) + '</div></div>';
+  });
+  html += '</div></div></div>';
+
+  /* Sessions */
+  html += '<div class="sessions">';
+  (data.sessions || []).forEach((s) => {
+    html += '<div class="panel" style="--c:' + typeColor(s.type) + '"><div class="panel-head"><h2>' + esc(s.day) + ' · ' + esc(s.title)
+      + '</h2><span>' + esc(s.duration) + '</span></div><div class="scroll"><table>'
+      + '<tr><th>Exercise</th><th>Weight</th><th>Sets</th></tr>';
+    (s.exercises || []).forEach((x) => {
+      html += '<tr><td class="strong">' + esc(x.name) + '<div class="dim" style="font-weight:400">' + esc(x.next) + '</div></td><td>'
+        + esc(x.weight) + '</td><td>' + esc(x.sets) + '</td></tr>';
+    });
+    html += '</table></div>' + (s.note ? '<div class="note">' + esc(s.note) + '</div>' : '') + '</div>';
+  });
+  html += '</div>';
+
+  /* Food + weigh-ins */
+  const food = (data.food || []).slice().sort((a, b) => String(b.date).localeCompare(String(a.date)));
+  const lastFoodDate = food.length ? food[0].date : null;
+  const dayFood = food.filter((f) => f.date === lastFoodDate);
+  const kcal = dayFood.reduce((s, f) => s + (Number(f.kcal) || 0), 0);
+  const protein = dayFood.reduce((s, f) => s + (Number(f.protein) || 0), 0);
+
+  html += '<div class="two-col">';
+
+  html += '<div class="panel"><div class="panel-head"><h2>Food</h2><span>' + (lastFoodDate ? esc(fmtDate(lastFoodDate)) : 'nothing logged') + '</span></div>';
+  if (lastFoodDate) {
+    html += '<div class="panel-body">'
+      + '<div class="meter"><div class="meter-top"><span>Calories</span><span><b>' + num(kcal) + '</b> of ' + num(t.kcal) + '</span></div>'
+      + '<div class="meter-track"><div class="meter-fill" style="width:' + pct(kcal, t.kcal).toFixed(1) + '%"></div></div></div>'
+      + '<div class="meter"><div class="meter-top"><span>Protein</span><span><b>' + num(protein) + ' g</b> of ' + num(t.proteinG) + ' g</span></div>'
+      + '<div class="meter-track"><div class="meter-fill protein" style="width:' + pct(protein, t.proteinG).toFixed(1) + '%"></div></div></div>'
+      + '</div><div class="scroll"><table><tr><th>Day</th><th>Meal</th><th class="num">kcal</th><th class="num">Protein</th></tr>';
+    food.slice(0, 12).forEach((f) => {
+      html += '<tr><td class="dim">' + esc(fmtDate(f.date)) + '</td><td><span style="font-weight:600">' + esc(f.meal) + '</span><div class="dim">'
+        + esc(f.what) + '</div></td><td class="num">' + (f.kcal != null ? num(f.kcal) : '') + '</td><td class="num">'
+        + (f.protein != null ? num(f.protein) + ' g' : '') + '</td></tr>';
+    });
+    html += '</table></div>';
+  }
+  html += '</div>';
+
+  html += '<div><div class="panel"><div class="panel-head"><h2>Weigh-ins</h2><span>weekly</span></div><div class="scroll"><table>'
+    + '<tr><th>Date</th><th class="num">Weight</th><th class="num">Change</th><th>Note</th></tr>';
+  weighIns.slice().reverse().forEach((w, i, arr) => {
+    const prev = arr[i + 1];
+    const diff = prev ? Number(w.kg) - Number(prev.kg) : null;
+    html += '<tr><td>' + esc(fmtDate(w.date)) + '</td><td class="num strong">' + num(w.kg, 1) + ' kg</td><td class="num">'
+      + (diff == null ? '' : (diff >= 0 ? '+' : '') + num(diff, 1)) + '</td><td class="dim">' + esc(w.note) + '</td></tr>';
+  });
+  html += '</table></div></div>';
+
+  if ((data.rules || []).length) {
+    html += '<div class="panel"><div class="panel-head"><h2>Rules</h2></div><div class="panel-body"><ul class="rules">';
+    data.rules.forEach((r) => { html += '<li>' + esc(r) + '</li>'; });
+    html += '</ul></div></div>';
+  }
+  html += '</div></div>';
+
+  /* Session log */
+  const log = (data.log || []).slice().sort((a, b) => String(b.date).localeCompare(String(a.date)));
+  html += '<div class="panel"><div class="panel-head"><h2>Session log</h2><span>' + log.length + ' entries</span></div><div class="scroll"><table>'
+    + '<tr><th>Date</th><th>Session</th><th>Exercise</th><th>Weight</th><th>Sets</th></tr>';
+  log.slice(0, 40).forEach((l) => {
+    html += '<tr><td class="dim">' + esc(fmtDate(l.date)) + '</td><td>' + esc(l.session) + '</td><td class="strong">' + esc(l.exercise)
+      + '</td><td>' + esc(l.weight) + '</td><td>' + esc(l.sets) + '</td></tr>';
+  });
+  html += '</table></div></div>';
+
+  $('#content').innerHTML = html;
+  $('#message').hidden = true;
+  $('#content').hidden = false;
+}
+
+/* ============================================================
+   BOOT
+   ============================================================ */
+async function start() {
+  const ok = await initMsal();
+  if (!ok) {
+    showSignIn();
+    return;
+  }
+  if (state.account) {
+    showDashboard(state.account);
+    await onSignedIn();
+  } else {
+    showSignIn();
+  }
+}
+start();
+</script>
+
+</body>
+</html>
