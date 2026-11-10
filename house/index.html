@@ -13,6 +13,7 @@
     --border: #E0D9C9; --border-strong: #C9C0AB;
     --text: #2A2822; --text-dim: #5E574B; --text-faint: #8F897A;
     --house: #2F7F7A; --house-soft: #D9ECEA;
+    --loan: #A06A1A; --loan-soft: #F2E6C9;
     --borrow: #3E6A88; --borrow-soft: #DCE6EE;
     --tax: #A33F3F; --tax-soft: #F4DEDE;
     --ok: #3F7A46; --ok-soft: #E1EEDC;
@@ -55,6 +56,47 @@
   .field .unit { color: var(--text-faint); font-size: 12px; margin-left: -4px; }
   .group.big input { width: 160px; font-weight: 600; }
 
+  .tog { display: flex; justify-content: space-between; align-items: center; gap: 10px; margin: 6px 0; cursor: pointer; }
+  .tog span.l { color: var(--text-dim); font-size: 13px; }
+  .tog input { position: absolute; opacity: 0; width: 0; height: 0; }
+  .sw { position: relative; width: 38px; height: 22px; background: var(--border-strong); border-radius: 999px; transition: background .15s; flex: none; }
+  .sw::after { content: ''; position: absolute; top: 3px; left: 3px; width: 16px; height: 16px; background: #fff; border-radius: 50%; transition: transform .15s; }
+  .tog input:checked + .sw { background: var(--tax); }
+  .tog input:checked + .sw::after { transform: translateX(16px); }
+  .tog input:focus-visible + .sw { outline: 2px solid var(--house); outline-offset: 2px; }
+  .cgtline { margin-top: 8px; padding: 6px 10px; border-radius: 8px; font-size: 13px; display: flex; justify-content: space-between; font-variant-numeric: tabular-nums; }
+  .cgtline.off { background: var(--surface-2); color: var(--text-faint); }
+  .cgtline.on { background: var(--tax-soft); color: var(--tax); font-weight: 600; }
+  .cgtline.warn { background: #FBF1D9; color: #8A6410; font-weight: 500; }
+
+  .tabs { display: flex; gap: 6px; border-bottom: 1px solid var(--border); margin-bottom: 1.5rem; }
+  .tabs button { padding: 10px 18px; background: none; border: none; border-bottom: 3px solid transparent; margin-bottom: -1px; font-size: 14px; font-weight: 600; color: var(--text-faint); cursor: pointer; }
+  .tabs button:hover { color: var(--text); }
+  .tabs button.on { color: var(--text); border-bottom-color: var(--house); }
+  #tab-repay .field { display: block; margin: 0; }
+  #tab-repay .field label { display: block; font-size: 11px; text-transform: uppercase; letter-spacing: 1.2px; color: var(--text-faint); font-weight: 600; margin-bottom: 4px; }
+  #tab-repay .field .wrap { display: flex; align-items: center; gap: 6px; }
+  #tab-repay .field input { width: 100%; padding: 9px 10px; font-size: 18px; text-align: left; }
+  #tab-repay .field input:focus { outline: 2px solid var(--loan); border-color: var(--loan); }
+  #tab-repay .unit { color: var(--text-dim); font-size: 14px; white-space: nowrap; }
+  #tab-repay .rinputs { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 14px; }
+  #tab-repay .hero { background: var(--loan-soft); border: 1px solid #E2CF9E; border-radius: 12px; padding: 1.25rem 1.5rem; margin-bottom: 1.25rem; }
+  #tab-repay .hero .lbl { font-size: 12px; text-transform: uppercase; letter-spacing: 1.2px; color: var(--loan); font-weight: 600; }
+  #tab-repay .hero .big { font-family: 'Fraunces', Georgia, serif; font-size: 42px; font-weight: 500; line-height: 1.1; color: #6B4510; }
+  #tab-repay .hero .big small { font-size: 16px; font-family: 'Manrope', sans-serif; color: var(--text-dim); font-weight: 500; }
+  #tab-repay .hero .note { font-size: 13px; color: var(--text-dim); margin-top: 4px; }
+  #tab-repay .kpis { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 14px; margin-bottom: 1.25rem; }
+  #tab-repay .kpi { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 1rem 1.1rem; }
+  #tab-repay .kpi .k { font-size: 11px; text-transform: uppercase; letter-spacing: 1.2px; color: var(--text-faint); }
+  #tab-repay .kpi .v { font-family: 'Fraunces', Georgia, serif; font-size: 24px; font-weight: 500; margin-top: 2px; font-variant-numeric: tabular-nums; }
+  #tab-repay .kpi .n { font-size: 12px; color: var(--text-dim); margin-top: 2px; }
+  #tab-repay .bar { display: flex; height: 22px; border-radius: 6px; overflow: hidden; margin: 6px 0 8px; }
+  #tab-repay .bar .p { background: var(--house); } #tab-repay .bar .i { background: var(--tax); }
+  #tab-repay .legend { display: flex; gap: 18px; font-size: 12px; color: var(--text-dim); flex-wrap: wrap; }
+  #tab-repay .legend i { display: inline-block; width: 10px; height: 10px; border-radius: 2px; margin-right: 5px; vertical-align: -1px; }
+  #tab-repay tr.cur td { background: var(--loan-soft); font-weight: 700; }
+  #tab-repay .note-s { font-size: 12px; color: var(--text-faint); margin-top: 8px; }
+  @media (max-width: 760px) { #tab-repay .hero .big { font-size: 34px; } }
   .flow { display: grid; grid-template-columns: 1fr 44px 190px 44px 1fr; gap: 0; align-items: stretch; }
   .col { display: flex; flex-direction: column; gap: 14px; justify-content: center; }
   .arrows { display: flex; flex-direction: column; justify-content: center; align-items: center; color: var(--text-faint); font-size: 20px; }
@@ -97,6 +139,12 @@
     <div style="text-align:right"><div class="brand-mark">nemla</div><div class="brand-tag">House</div></div>
   </div>
 
+  <div class="tabs" role="tablist">
+    <button id="tb-afford" class="on" role="tab" data-tab="afford">Can I afford it?</button>
+    <button id="tb-repay" role="tab" data-tab="repay">Repayments</button>
+  </div>
+
+  <div id="tab-afford">
   <h1>Can I afford the house?</h1>
   <p class="sub">Change any figure below and the answer updates. Figures are saved in this browser only.</p>
 
@@ -129,6 +177,29 @@
     <div class="note" style="margin:0">Estimates only. Not tax or financial advice: check capital gains tax and stamp duty with your accountant and solicitor.</div>
     <button class="btn" id="reset">Clear all figures</button>
   </div>
+  </div>
+
+  <div id="tab-repay" hidden>
+    <h1>What will the repayment be?</h1>
+    <p class="sub">Type a loan amount and rate. The repayment updates as you type. Principal and interest, paid monthly.</p>
+    <div class="panel"><div class="panel-body">
+      <div class="rinputs">
+        <div class="field"><label for="r_amount">Loan amount</label><div class="wrap"><span class="unit">$</span><input id="r_amount" inputmode="decimal" autocomplete="off" placeholder="0"></div></div>
+        <div class="field"><label for="r_rate">Interest rate</label><div class="wrap"><input id="r_rate" inputmode="decimal" autocomplete="off" placeholder="6.5"><span class="unit">% a year</span></div></div>
+        <div class="field"><label for="r_years">Loan term</label><div class="wrap"><input id="r_years" inputmode="decimal" autocomplete="off" placeholder="30"><span class="unit">years</span></div></div>
+        <div class="field"><label for="r_buffer">Bank buffer</label><div class="wrap"><input id="r_buffer" inputmode="decimal" autocomplete="off" placeholder="3"><span class="unit">% added</span></div></div>
+      </div>
+      <div class="note-s" id="r_link"></div>
+    </div></div>
+    <div class="hero"><div class="lbl">Monthly repayment</div><div class="big" id="r_monthly">$0 <small>a month</small></div><div class="note" id="r_heroNote"></div></div>
+    <div class="kpis" id="r_kpis"></div>
+    <div class="panel"><div class="panel-head"><h2>Where your money goes</h2><span>Over the whole loan</span></div><div class="panel-body" id="r_split"></div></div>
+    <div class="two">
+      <div class="panel"><div class="panel-head"><h2>If the rate changes</h2><span>Monthly repayment</span></div><div class="panel-body" id="r_rates"></div></div>
+      <div class="panel"><div class="panel-head"><h2>How the loan falls</h2><span>Balance owing</span></div><div class="panel-body" id="r_balances"></div></div>
+    </div>
+    <p class="note-s">Estimate only. Assumes a fixed rate for the whole term and no extra repayments or offset. Your lender's figures may differ slightly.</p>
+  </div>
 </div>
 
 <script>
@@ -140,36 +211,42 @@ const SCHEMA = [
     ['bank', 'Bank loan (new)'],
     ['depositPct', 'Deposit at exchange', '%']
   ]},
-  { group: '280A Epsom (your home)', fields: [
+  { group: '280A Epsom (your home)', key: 'e', fields: [
     ['epsomPrice', 'Sale price'],
     ['epsomLoan', 'Loan owing'],
-    ['epsomTax', 'Capital gains tax']
+    ['epsomCgt', 'Pay capital gains tax?', 'toggle'],
+    ['epsomBase', 'Cost base']
   ]},
-  { group: 'Wife: property 1', fields: [
+  { group: 'Wife: property 1', key: 'w1', fields: [
     ['w1Price', 'Sale price'],
-    ['w1Loan', 'Loan owing']
+    ['w1Loan', 'Loan owing'],
+    ['w1Cgt', 'Pay capital gains tax?', 'toggle'],
+    ['w1Base', 'Cost base']
   ]},
-  { group: 'Wife: property 2', fields: [
+  { group: 'Wife: property 2', key: 'w2', fields: [
     ['w2Price', 'Sale price'],
-    ['w2Loan', 'Loan owing']
+    ['w2Loan', 'Loan owing'],
+    ['w2Cgt', 'Pay capital gains tax?', 'toggle'],
+    ['w2Base', 'Cost base']
   ]},
-  { group: 'Wife: tax', fields: [
-    ['wTax', 'Capital gains tax (both)']
-  ]},
-  { group: '4 Sullivan', fields: [
+  { group: '4 Sullivan', key: 's', fields: [
     ['sPrice', 'Sale price'],
     ['sLoan', 'Loan owing (yours)'],
     ['sBro', 'Brother’s share', '%'],
-    ['sTax', 'Your capital gains tax']
+    ['sCgt', 'Pay capital gains tax?', 'toggle'],
+    ['sBase', 'Cost base (whole property)']
   ]},
-  { group: 'Costs (assumptions)', fields: [
+  { group: 'Costs and tax (assumptions)', fields: [
     ['commission', 'Agent commission', '%'],
     ['fixedSelling', 'Other selling costs, each sale'],
-    ['purchaseCosts', 'Legal and other purchase costs']
+    ['purchaseCosts', 'Legal and other purchase costs'],
+    ['taxRate', 'Tax rate on the gain', '%'],
+    ['discount', 'CGT discount (held 12+ months)', '%']
   ]}
 ];
 
-const BLANK = { depositPct: 10, commission: 2, fixedSelling: 8350, purchaseCosts: 4380, sBro: 50 };
+const BLANK = { depositPct: 10, commission: 2, fixedSelling: 8350, purchaseCosts: 4380, sBro: 50,
+  taxRate: 47, discount: 50, epsomCgt: false, w1Cgt: true, w2Cgt: true, sCgt: false };
 
 let S = load();
 
@@ -200,22 +277,39 @@ function compute(price) {
   const d = duty(P);
   const need = P + d + (P > 0 ? n('purchaseCosts') : 0);
 
-  const eKeep = n('epsomPrice') - sellCost(n('epsomPrice')) - n('epsomLoan') - n('epsomTax');
+  const eKeep = n('epsomPrice') - sellCost(n('epsomPrice')) - n('epsomLoan');
   const w1Keep = n('w1Price') - sellCost(n('w1Price')) - n('w1Loan');
   const w2Keep = n('w2Price') - sellCost(n('w2Price')) - n('w2Loan');
   const sNet = n('sPrice') - sellCost(n('sPrice'));
   const sBroker = sNet * n('sBro') / 100;
-  const sKeep = sNet - sBroker - n('sLoan') - n('sTax');
+  const sKeep = sNet - sBroker - n('sLoan');
+
+  const cgt = {
+    e: cgtFor(n('epsomPrice'), n('epsomBase'), S.epsomCgt, 1),
+    w1: cgtFor(n('w1Price'), n('w1Base'), S.w1Cgt, 1),
+    w2: cgtFor(n('w2Price'), n('w2Base'), S.w2Cgt, 1),
+    s: cgtFor(n('sPrice'), n('sBase'), S.sCgt, 1 - n('sBro') / 100)
+  };
+  const cgtTotal = cgt.e.tax + cgt.w1.tax + cgt.w2.tax + cgt.s.tax;
+  const cgtMissing = Object.keys(cgt).filter(k => cgt[k].missing);
 
   const inTotal = n('bank') + eKeep + w1Keep + w2Keep + sKeep;
   const spare = inTotal - need;
-  const left = spare - n('wTax');
-  return { P, d, need, eKeep, w1Keep, w2Keep, sNet, sBroker, sKeep, inTotal, spare, left };
+  const left = spare - cgtTotal;
+  return { P, d, need, eKeep, w1Keep, w2Keep, sNet, sBroker, sKeep, cgt, cgtTotal, cgtMissing, inTotal, spare, left };
+}
+
+function cgtFor(price, base, apply, share) {
+  if (!apply || price <= 0) return { on: !!apply, gain: 0, tax: 0, missing: false };
+  if (base <= 0) return { on: true, gain: 0, tax: 0, missing: true };
+  const gain = (price - sellCost(price) - base) * share;
+  const tax = Math.max(gain, 0) * (1 - n('discount') / 100) * n('taxRate') / 100;
+  return { on: true, gain, tax, missing: false };
 }
 
 function maxPrice() {
   const base = compute(1);
-  const avail = base.inTotal - n('wTax');
+  const avail = base.inTotal - base.cgtTotal;
   if (avail <= 0) return 0;
   let lo = 0, hi = 20000000;
   for (let i = 0; i < 60; i++) {
@@ -230,10 +324,16 @@ function buildInputs() {
   const el = document.getElementById('inputs');
   el.innerHTML = SCHEMA.map(g => `
     <div class="group${g.big ? ' big' : ''}"><h3>${g.group}</h3>
-      ${g.fields.map(f => `<div class="field"><label for="f_${f[0]}">${f[1]}</label>
+      ${g.fields.map(f => f[2] === 'toggle'
+        ? `<label class="tog"><span class="l">${f[1]}</span><input type="checkbox" data-t="${f[0]}"${S[f[0]] ? ' checked' : ''}><span class="sw"></span></label>`
+        : `<div class="field"><label for="f_${f[0]}">${f[1]}</label>
         <span><input id="f_${f[0]}" data-k="${f[0]}" inputmode="decimal" autocomplete="off" placeholder="0">${f[2] ? '<span class="unit"> ' + f[2] + '</span>' : ''}</span></div>`).join('')}
+      ${g.key ? `<div class="cgtline off" id="cgt_${g.key}"></div>` : ''}
     </div>`).join('');
-  el.querySelectorAll('input').forEach(inp => {
+  el.querySelectorAll('input[data-t]').forEach(cb => {
+    cb.addEventListener('change', () => { S[cb.dataset.t] = cb.checked; save(); render(); });
+  });
+  el.querySelectorAll('input[data-k]').forEach(inp => {
     const k = inp.dataset.k;
     inp.value = S[k] !== undefined && S[k] !== '' ? Number(S[k]).toLocaleString('en-AU') : '';
     inp.addEventListener('input', () => {
@@ -251,6 +351,8 @@ function buildInputs() {
 function render() {
   const c = compute();
   const hasHouse = c.P > 0;
+  const names = { e: 'Epsom', w1: 'wife property 1', w2: 'wife property 2', s: 'Sullivan' };
+  const warn = c.cgtMissing.length ? ' Tax not counted yet for ' + c.cgtMissing.map(k => names[k]).join(', ') + ': enter the cost base.' : '';
 
   const a = document.getElementById('answer');
   if (!hasHouse) {
@@ -259,12 +361,20 @@ function render() {
   } else if (c.left >= 0) {
     a.className = 'answer ok';
     a.innerHTML = `<div class="big">You can afford it: $${fmt(c.left)} left over</div>
-      <div class="small">After buying, paying duty and fees, and her tax. The most you could pay with these figures is about $${fmt(maxPrice())}.</div>`;
+      <div class="small">After buying, paying duty and fees, and capital gains tax of $${fmt(c.cgtTotal)}. The most you could pay with these figures is about $${fmt(maxPrice())}.${warn}</div>`;
   } else {
     a.className = 'answer short';
     a.innerHTML = `<div class="big">You are short by $${fmt(-c.left)}</div>
-      <div class="small">$${fmt(Math.max(-c.spare, 0))} short at settlement, then her tax of $${fmt(n('wTax'))}. The most you could pay with these figures is about $${fmt(maxPrice())}.</div>`;
+      <div class="small">${c.spare < 0 ? '$' + fmt(-c.spare) + ' short at settlement, then capital gains tax of $' : 'Then capital gains tax of $'}${fmt(c.cgtTotal)}. The most you could pay with these figures is about $${fmt(maxPrice())}.${warn}</div>`;
   }
+
+  Object.keys(c.cgt).forEach(k => {
+    const line = document.getElementById('cgt_' + k), r = c.cgt[k];
+    if (!line) return;
+    if (!r.on) { line.className = 'cgtline off'; line.innerHTML = '<span>Capital gains tax</span><span>none</span>'; }
+    else if (r.missing) { line.className = 'cgtline warn'; line.innerHTML = '<span>Enter the cost base above</span><span>not counted</span>'; }
+    else { line.className = 'cgtline on'; line.innerHTML = '<span>Gain $' + fmt(r.gain) + ', tax</span><span>$' + fmt(r.tax) + '</span>'; }
+  });
 
   const leftCls = c.left >= 0 ? 'good' : 'bad';
   const spareCls = c.spare >= 0 ? 'good' : 'bad';
@@ -282,7 +392,7 @@ function render() {
       <div class="col">
         <div class="box total"><div class="t">House total</div><div class="a">$${fmt(c.need)}</div><div class="h">price, duty, fees</div></div>
         <div class="box ${spareCls}"><div class="t">${c.spare >= 0 ? 'Spare cash' : 'Short at settlement'}</div><div class="a">$${dollars(c.spare)}</div></div>
-        <div class="box tax"><div class="t">Her tax, paid later</div><div class="a">minus $${fmt(n('wTax'))}</div></div>
+        <div class="box tax"><div class="t">Capital gains tax, paid later</div><div class="a">minus $${fmt(c.cgtTotal)}</div></div>
         <div class="box ${leftCls}"><div class="t">${c.left >= 0 ? 'Left over' : 'Short after tax'}</div><div class="a">$${dollars(c.left)}</div></div>
       </div>
     </div>`;
@@ -291,13 +401,19 @@ function render() {
   document.getElementById('sales').innerHTML = `
     <table>
       <tr><th>Sale</th><th>You keep</th></tr>
-      ${row('Epsom: price $' + fmt(n('epsomPrice')) + ', less costs, loan, tax', '$' + dollars(c.eKeep))}
+      ${row('Epsom: price, less costs and loan', '$' + dollars(c.eKeep))}
       ${row('Wife property 1: price, less costs and loan', '$' + dollars(c.w1Keep))}
       ${row('Wife property 2: price, less costs and loan', '$' + dollars(c.w2Keep))}
-      ${row('Sullivan: after costs $' + fmt(c.sNet) + ', less brother $' + fmt(c.sBroker) + ', loan, tax', '$' + dollars(c.sKeep))}
+      ${row('Sullivan: after costs $' + fmt(c.sNet) + ', less brother $' + fmt(c.sBroker) + ', less loan', '$' + dollars(c.sKeep))}
       ${row('Total from sales', '$' + dollars(c.eKeep + c.w1Keep + c.w2Keep + c.sKeep), 'sum')}
     </table>
-    <div class="note">The loan on each property is repaid to its bank out of the sale price.</div>`;
+    <div class="note">The loan on each property is repaid to its bank out of the sale price. Capital gains tax is not taken out here: it is paid later, when you lodge your tax return.</div>
+    <table style="margin-top:14px">
+      <tr><th>Capital gains tax</th><th>Gain</th><th>Tax</th></tr>
+      ${Object.keys(names).map(k => { const r = c.cgt[k]; return `<tr><td>${names[k][0].toUpperCase() + names[k].slice(1)}</td><td>${r.on && !r.missing ? '$' + dollars(r.gain) : r.missing ? 'needs cost base' : 'not taxed'}</td><td>${r.on && !r.missing ? '$' + fmt(r.tax) : '-'}</td></tr>`; }).join('')}
+      <tr class="sum"><td>Total</td><td></td><td>$${fmt(c.cgtTotal)}</td></tr>
+    </table>
+    <div class="note">Gain = sale price, less selling costs, less cost base. Then the discount and tax rate above are applied. Sullivan counts only your share.</div>`;
 
   const dep = c.P * n('depositPct') / 100;
   document.getElementById('timing').innerHTML = `
@@ -318,6 +434,122 @@ document.getElementById('reset').addEventListener('click', () => {
 
 buildInputs();
 render();
+</script>
+<script>
+(function () {
+  const RKEY = 'nemla-repayments-v1';
+  const RDEF = { amount: '', rate: 6.5, years: 30, buffer: 3, linked: true };
+  function rload() { try { const v = JSON.parse(localStorage.getItem(RKEY)); return v && typeof v === 'object' ? v : {}; } catch (e) { return {}; } }
+  function rsave() { try { localStorage.setItem(RKEY, JSON.stringify(R)); } catch (e) {} }
+  let R = Object.assign({}, RDEF, rload());
+
+  const rn = k => Number(R[k]) || 0;
+  const rfmt = x => Math.round(x).toLocaleString('en-AU');
+  const rfmt2 = x => x.toLocaleString('en-AU', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+  const $ = id => document.getElementById(id);
+
+  function pmt(P, ratePct, years) {
+    const n = Math.round(years * 12);
+    if (P <= 0 || n <= 0) return 0;
+    const r = ratePct / 100 / 12;
+    if (r === 0) return P / n;
+    return P * r / (1 - Math.pow(1 + r, -n));
+  }
+  function balanceAfter(P, ratePct, years, months) {
+    const r = ratePct / 100 / 12, pay = pmt(P, ratePct, years), n = Math.round(years * 12);
+    if (months >= n) return 0;
+    if (r === 0) return Math.max(P - pay * months, 0);
+    return P * Math.pow(1 + r, months) - pay * (Math.pow(1 + r, months) - 1) / r;
+  }
+
+  function syncLink() {
+    const bank = Number(S.bank) || 0;
+    if (R.linked) R.amount = bank > 0 ? bank : '';
+    $('r_link').innerHTML = R.linked
+      ? (bank > 0 ? 'Using the bank loan from the "Can I afford it?" tab. Type a different amount to override.' : 'Enter a bank loan on the "Can I afford it?" tab to fill this in, or type an amount.')
+      : 'Using the amount you typed. <a href="#" id="r_use" style="text-decoration:underline">Use the bank loan from the other tab</a>';
+    const use = $('r_use');
+    if (use) use.addEventListener('click', e => { e.preventDefault(); R.linked = true; rsave(); window.refreshRepay(); });
+  }
+
+  function showInputs() {
+    ['amount', 'rate', 'years', 'buffer'].forEach(k => {
+      const el = $('r_' + k);
+      if (document.activeElement === el) return;
+      el.value = R[k] !== '' && R[k] !== undefined ? (k === 'amount' ? Number(R[k]).toLocaleString('en-AU') : R[k]) : '';
+    });
+  }
+
+  function render() {
+    const P = rn('amount'), rate = rn('rate'), yrs = rn('years') || 30, buf = rn('buffer');
+    const m = pmt(P, rate, yrs), n = Math.round(yrs * 12);
+    const total = m * n, interest = total - P;
+    const io = P * rate / 100 / 12;
+    const assessed = pmt(P, rate + buf, yrs);
+
+    $('r_monthly').innerHTML = '$' + rfmt2(m) + ' <small>a month</small>';
+    $('r_heroNote').textContent = P > 0 ? '$' + rfmt(P) + ' at ' + rate + '% over ' + yrs + ' years' : 'Enter a loan amount above';
+
+    $('r_kpis').innerHTML = [
+      ['Weekly', '$' + rfmt(m * 12 / 52), 'monthly x 12 / 52'],
+      ['Fortnightly', '$' + rfmt(m * 12 / 26), 'monthly x 12 / 26'],
+      ['Interest only', '$' + rfmt(io) + ' / mo', 'no principal paid'],
+      ['Bank assessment', '$' + rfmt(assessed) + ' / mo', 'at ' + (rate + buf).toFixed(2) + '% (rate + buffer)'],
+      ['Total repaid', '$' + rfmt(total), 'over ' + yrs + ' years'],
+      ['Total interest', '$' + rfmt(interest), P > 0 ? Math.round(interest / P * 100) + '% of the loan' : '']
+    ].map(k => `<div class="kpi"><div class="k">${k[0]}</div><div class="v">${k[1]}</div><div class="n">${k[2]}</div></div>`).join('');
+
+    const pp = total > 0 ? (P / total * 100) : 0;
+    $('r_split').innerHTML = P > 0 ? `
+      <div class="bar"><div class="p" style="width:${pp}%"></div><div class="i" style="width:${100 - pp}%"></div></div>
+      <div class="legend"><span><i style="background:var(--house)"></i>Loan repaid $${rfmt(P)}</span><span><i style="background:var(--tax)"></i>Interest $${rfmt(interest)}</span></div>` : '<div class="note-s">Enter a loan amount to see the split.</div>';
+
+    const rates = [];
+    for (let d = -1; d <= 1.001; d += 0.5) rates.push(Math.round((rate + d) * 100) / 100);
+    $('r_rates').innerHTML = P > 0 ? `<table><tr><th>Rate</th><th>Monthly</th><th>Change</th></tr>${
+      rates.filter(x => x > 0).map(x => {
+        const v = pmt(P, x, yrs), diff = v - m, cur = Math.abs(x - rate) < 0.001;
+        return `<tr${cur ? ' class="cur"' : ''}><td>${x.toFixed(2)}%</td><td>$${rfmt(v)}</td><td>${cur ? 'now' : (diff > 0 ? '+' : '-') + '$' + rfmt(Math.abs(diff))}</td></tr>`;
+      }).join('')}</table>` : '<div class="note-s">Enter a loan amount.</div>';
+
+    const marks = [1, 5, 10, 15, 20, 25].filter(y => y < yrs);
+    marks.push(yrs);
+    $('r_balances').innerHTML = P > 0 ? `<table><tr><th>After</th><th>Owing</th><th>Paid off</th></tr>${
+      marks.map(y => {
+        const b = balanceAfter(P, rate, yrs, Math.round(y * 12));
+        return `<tr><td>${y} yr${y === 1 ? '' : 's'}</td><td>$${rfmt(b)}</td><td>${Math.round((1 - b / P) * 100)}%</td></tr>`;
+      }).join('')}</table>` : '<div class="note-s">Enter a loan amount.</div>';
+  }
+
+  ['amount', 'rate', 'years', 'buffer'].forEach(k => {
+    const el = $('r_' + k);
+    el.addEventListener('input', () => {
+      const v = el.value.replace(/[^0-9.]/g, '');
+      R[k] = v === '' ? '' : Number(v);
+      if (k === 'amount') R.linked = false;
+      rsave(); syncLink(); render();
+    });
+    el.addEventListener('blur', showInputs);
+    el.addEventListener('focus', () => el.select());
+  });
+
+  window.refreshRepay = function () { syncLink(); showInputs(); render(); };
+})();
+
+(function () {
+  const tabs = { afford: document.getElementById('tab-afford'), repay: document.getElementById('tab-repay') };
+  function show(name) {
+    if (!tabs[name]) name = 'afford';
+    Object.keys(tabs).forEach(k => {
+      tabs[k].hidden = k !== name;
+      document.getElementById('tb-' + k).classList.toggle('on', k === name);
+    });
+    if (name === 'repay') window.refreshRepay();
+    try { history.replaceState(null, '', name === 'repay' ? '#repayments' : location.pathname + location.search); } catch (e) {}
+  }
+  document.querySelectorAll('.tabs button').forEach(b => b.addEventListener('click', () => show(b.dataset.tab)));
+  show(location.hash === '#repayments' ? 'repay' : 'afford');
+})();
 </script>
 </body>
 </html>
