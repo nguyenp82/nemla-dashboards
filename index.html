@@ -31,6 +31,8 @@
     --tasks-soft: #E8E0F4;
     --health: #A8475F;
     --health-soft: #F3DDE3;
+    --house: #2F7F7A;
+    --house-soft: #D9ECEA;
     --danger: #A33F3F;
   }
 
@@ -234,6 +236,7 @@
   .card-icon.travel { background: var(--travel-soft); color: var(--travel); }
   .card-icon.tasks { background: var(--tasks-soft); color: var(--tasks); }
   .card-icon.health { background: var(--health-soft); color: var(--health); }
+  .card-icon.house { background: var(--house-soft); color: var(--house); }
   .card-icon svg { width: 22px; height: 22px; stroke-width: 1.75; }
 
   .card-title {
@@ -491,6 +494,22 @@
         <div class="card-desc">Training, weigh-ins and food</div>
         <div class="card-meta">
           <span>Weekly plan</span>
+          <svg class="arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 5l7 7-7 7"/></svg>
+        </div>
+      </a>
+
+      <a href="house/" class="card active">
+        <div class="card-icon house">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M3 11l9-8 9 8"/>
+            <path d="M5 10v10h14V10"/>
+            <path d="M10 20v-6h4v6"/>
+          </svg>
+        </div>
+        <div class="card-title serif">House</div>
+        <div class="card-desc">Can we afford the next home</div>
+        <div class="card-meta">
+          <span>Calculator</span>
           <svg class="arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 5l7 7-7 7"/></svg>
         </div>
       </a>

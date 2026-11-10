@@ -1,0 +1,323 @@
+<!DOCTYPE html>
+<html lang="en-AU">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>nemla · House</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300..900&family=Manrope:wght@300..800&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #F7F4EE; --surface: #FDFBF7; --surface-2: #F1ECE2;
+    --border: #E0D9C9; --border-strong: #C9C0AB;
+    --text: #2A2822; --text-dim: #5E574B; --text-faint: #8F897A;
+    --house: #2F7F7A; --house-soft: #D9ECEA;
+    --borrow: #3E6A88; --borrow-soft: #DCE6EE;
+    --tax: #A33F3F; --tax-soft: #F4DEDE;
+    --ok: #3F7A46; --ok-soft: #E1EEDC;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html, body { background: var(--bg); color: var(--text); font-family: 'Manrope', system-ui, sans-serif; font-size: 14px; line-height: 1.5; -webkit-font-smoothing: antialiased; }
+  body { min-height: 100vh; }
+  button, input { font-family: inherit; }
+  a { color: inherit; text-decoration: none; }
+  .serif { font-family: 'Fraunces', Georgia, serif; }
+  .shell { max-width: 1100px; margin: 0 auto; padding: 2.5rem 1.25rem 4rem; }
+  .topbar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem; }
+  .brand-mark { font-family: 'Fraunces', Georgia, serif; font-size: 22px; font-weight: 500; }
+  .brand-tag { font-size: 11px; color: var(--text-faint); text-transform: uppercase; letter-spacing: 1.5px; }
+  .back { font-size: 13px; color: var(--text-dim); padding: 6px 10px; border-radius: 6px; }
+  .back:hover { background: var(--surface-2); }
+  h1 { font-family: 'Fraunces', Georgia, serif; font-size: 32px; font-weight: 400; line-height: 1.15; }
+  .sub { color: var(--text-dim); margin: 6px 0 1.75rem; }
+
+  .answer { border-radius: 12px; padding: 1.1rem 1.4rem; margin-bottom: 1.25rem; border: 1px solid; }
+  .answer.ok { background: var(--ok-soft); border-color: #B9D6B0; }
+  .answer.short { background: var(--tax-soft); border-color: #E3B5B5; }
+  .answer .big { font-family: 'Fraunces', Georgia, serif; font-size: 26px; font-weight: 500; }
+  .answer.ok .big { color: var(--ok); } .answer.short .big { color: var(--tax); }
+  .answer .small { color: var(--text-dim); font-size: 13px; margin-top: 2px; }
+
+  .panel { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; margin-bottom: 1.25rem; overflow: hidden; }
+  .panel-head { padding: .9rem 1.25rem; border-bottom: 1px solid var(--surface-2); display: flex; justify-content: space-between; align-items: baseline; gap: 10px; }
+  .panel-head h2 { font-family: 'Fraunces', Georgia, serif; font-size: 18px; font-weight: 500; }
+  .panel-head span { font-size: 12px; color: var(--text-faint); }
+  .panel-body { padding: 1.1rem 1.25rem; }
+
+  .inputs { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 14px; }
+  .group { border: 1px solid var(--border); border-radius: 10px; padding: 12px 14px; background: var(--surface); }
+  .group h3 { font-size: 11px; text-transform: uppercase; letter-spacing: 1.2px; color: var(--text-faint); margin-bottom: 8px; font-weight: 600; }
+  .field { display: flex; justify-content: space-between; align-items: center; gap: 10px; margin: 6px 0; }
+  .field label { color: var(--text-dim); font-size: 13px; }
+  .field input { width: 130px; text-align: right; padding: 6px 8px; border: 1px solid var(--border-strong); border-radius: 6px; background: #fff; font-size: 14px; font-variant-numeric: tabular-nums; color: var(--text); }
+  .field input:focus { outline: 2px solid var(--house); outline-offset: 0; border-color: var(--house); }
+  .field .unit { color: var(--text-faint); font-size: 12px; margin-left: -4px; }
+  .group.big input { width: 160px; font-weight: 600; }
+
+  .flow { display: grid; grid-template-columns: 1fr 44px 190px 44px 1fr; gap: 0; align-items: stretch; }
+  .col { display: flex; flex-direction: column; gap: 14px; justify-content: center; }
+  .arrows { display: flex; flex-direction: column; justify-content: center; align-items: center; color: var(--text-faint); font-size: 20px; }
+  .box { border-radius: 10px; border: 1px solid; padding: 10px 12px; text-align: center; }
+  .box .t { font-weight: 600; font-size: 13px; }
+  .box .a { font-variant-numeric: tabular-nums; font-size: 13px; margin-top: 2px; }
+  .box .h { font-size: 11px; opacity: .8; margin-top: 2px; }
+  .box.borrow { background: var(--borrow-soft); border-color: #A9BFD0; color: #234A66; }
+  .box.keep { background: var(--house-soft); border-color: #A8CFCB; color: #1D5753; }
+  .box.total { background: var(--surface-2); border-color: var(--border-strong); color: var(--text-dim); justify-content: center; display: flex; flex-direction: column; }
+  .box.tax { background: var(--tax-soft); border-color: #E3B5B5; color: var(--tax); }
+  .box.good { background: var(--ok-soft); border-color: #B9D6B0; color: var(--ok); }
+  .box.bad { background: var(--tax-soft); border-color: #E3B5B5; color: var(--tax); }
+  .mid { display: flex; }
+  .mid .box { flex: 1; }
+  .vdown { text-align: center; color: var(--text-faint); line-height: 1; margin: -6px 0; }
+
+  table { width: 100%; border-collapse: collapse; font-size: 13px; }
+  td, th { padding: 7px 4px; border-bottom: 1px solid var(--surface-2); text-align: right; font-variant-numeric: tabular-nums; }
+  td:first-child, th:first-child { text-align: left; color: var(--text-dim); }
+  th { font-weight: 600; color: var(--text-faint); font-size: 11px; text-transform: uppercase; letter-spacing: 1px; }
+  tr.sum td { font-weight: 700; color: var(--text); border-top: 1px solid var(--border-strong); }
+  tr.neg td:last-child, td.neg { color: var(--tax); }
+  .two { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+  .note { font-size: 12px; color: var(--text-faint); margin-top: 8px; }
+  .actions { display: flex; gap: 10px; align-items: center; justify-content: space-between; flex-wrap: wrap; }
+  .btn { border: 1px solid var(--border-strong); background: var(--surface); padding: 7px 14px; border-radius: 8px; cursor: pointer; font-size: 13px; color: var(--text-dim); }
+  .btn:hover { background: var(--surface-2); }
+  @media (max-width: 760px) {
+    .flow { grid-template-columns: 1fr; gap: 10px; }
+    .arrows { transform: rotate(90deg); height: 28px; }
+    .two { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+<div class="shell">
+  <div class="topbar">
+    <a href="../" class="back">&larr; All dashboards</a>
+    <div style="text-align:right"><div class="brand-mark">nemla</div><div class="brand-tag">House</div></div>
+  </div>
+
+  <h1>Can I afford the house?</h1>
+  <p class="sub">Change any figure below and the answer updates. Figures are saved in this browser only.</p>
+
+  <div id="answer" class="answer"></div>
+
+  <div class="panel">
+    <div class="panel-head"><h2>Your figures</h2><span>All amounts in AUD</span></div>
+    <div class="panel-body">
+      <div class="inputs" id="inputs"></div>
+    </div>
+  </div>
+
+  <div class="panel">
+    <div class="panel-head"><h2>Where the money comes from</h2><span>Sources on the left, the house on the right</span></div>
+    <div class="panel-body" id="flow"></div>
+  </div>
+
+  <div class="two">
+    <div class="panel">
+      <div class="panel-head"><h2>Each sale</h2><span>What you keep after costs and loans</span></div>
+      <div class="panel-body" id="sales"></div>
+    </div>
+    <div class="panel">
+      <div class="panel-head"><h2>Deposit and duty</h2><span>Cash needed before settlement</span></div>
+      <div class="panel-body" id="timing"></div>
+    </div>
+  </div>
+
+  <div class="actions">
+    <div class="note" style="margin:0">Estimates only. Not tax or financial advice: check capital gains tax and stamp duty with your accountant and solicitor.</div>
+    <button class="btn" id="reset">Clear all figures</button>
+  </div>
+</div>
+
+<script>
+const KEY = 'nemla-house-v1';
+
+const SCHEMA = [
+  { group: 'House to buy', big: true, fields: [
+    ['housePrice', 'House total (price)'],
+    ['bank', 'Bank loan (new)'],
+    ['depositPct', 'Deposit at exchange', '%']
+  ]},
+  { group: '280A Epsom (your home)', fields: [
+    ['epsomPrice', 'Sale price'],
+    ['epsomLoan', 'Loan owing'],
+    ['epsomTax', 'Capital gains tax']
+  ]},
+  { group: 'Wife: property 1', fields: [
+    ['w1Price', 'Sale price'],
+    ['w1Loan', 'Loan owing']
+  ]},
+  { group: 'Wife: property 2', fields: [
+    ['w2Price', 'Sale price'],
+    ['w2Loan', 'Loan owing']
+  ]},
+  { group: 'Wife: tax', fields: [
+    ['wTax', 'Capital gains tax (both)']
+  ]},
+  { group: '4 Sullivan', fields: [
+    ['sPrice', 'Sale price'],
+    ['sLoan', 'Loan owing (yours)'],
+    ['sBro', 'Brother’s share', '%'],
+    ['sTax', 'Your capital gains tax']
+  ]},
+  { group: 'Costs (assumptions)', fields: [
+    ['commission', 'Agent commission', '%'],
+    ['fixedSelling', 'Other selling costs, each sale'],
+    ['purchaseCosts', 'Legal and other purchase costs']
+  ]}
+];
+
+const BLANK = { depositPct: 10, commission: 2, fixedSelling: 8350, purchaseCosts: 4380, sBro: 50 };
+
+let S = load();
+
+function load() {
+  try { const v = JSON.parse(localStorage.getItem(KEY)); if (v && typeof v === 'object') return Object.assign({}, BLANK, v); } catch (e) {}
+  return Object.assign({}, BLANK);
+}
+function save() { try { localStorage.setItem(KEY, JSON.stringify(S)); } catch (e) {} }
+
+const n = k => Number(S[k]) || 0;
+const fmt = x => Math.round(x).toLocaleString('en-AU');
+const dollars = x => (x < 0 ? '(' + fmt(-x) + ')' : fmt(x));
+
+function duty(v) {
+  if (v <= 0) return 0;
+  if (v > 3870000) return 194137 + 0.07 * (v - 3870000);
+  if (v > 1290000) return 52237 + 0.055 * (v - 1290000);
+  if (v > 387000) return 11602 + 0.045 * (v - 387000);
+  if (v > 103000) return 1662 + 0.035 * (v - 103000);
+  if (v > 38000) return 525 + 0.0175 * (v - 38000);
+  if (v > 18000) return 225 + 0.015 * (v - 18000);
+  return Math.max(v * 0.0125, 20);
+}
+const sellCost = p => p > 0 ? p * n('commission') / 100 + n('fixedSelling') : 0;
+
+function compute(price) {
+  const P = price !== undefined ? price : n('housePrice');
+  const d = duty(P);
+  const need = P + d + (P > 0 ? n('purchaseCosts') : 0);
+
+  const eKeep = n('epsomPrice') - sellCost(n('epsomPrice')) - n('epsomLoan') - n('epsomTax');
+  const w1Keep = n('w1Price') - sellCost(n('w1Price')) - n('w1Loan');
+  const w2Keep = n('w2Price') - sellCost(n('w2Price')) - n('w2Loan');
+  const sNet = n('sPrice') - sellCost(n('sPrice'));
+  const sBroker = sNet * n('sBro') / 100;
+  const sKeep = sNet - sBroker - n('sLoan') - n('sTax');
+
+  const inTotal = n('bank') + eKeep + w1Keep + w2Keep + sKeep;
+  const spare = inTotal - need;
+  const left = spare - n('wTax');
+  return { P, d, need, eKeep, w1Keep, w2Keep, sNet, sBroker, sKeep, inTotal, spare, left };
+}
+
+function maxPrice() {
+  const base = compute(1);
+  const avail = base.inTotal - n('wTax');
+  if (avail <= 0) return 0;
+  let lo = 0, hi = 20000000;
+  for (let i = 0; i < 60; i++) {
+    const mid = (lo + hi) / 2;
+    const need = mid + duty(mid) + n('purchaseCosts');
+    if (need > avail) hi = mid; else lo = mid;
+  }
+  return lo;
+}
+
+function buildInputs() {
+  const el = document.getElementById('inputs');
+  el.innerHTML = SCHEMA.map(g => `
+    <div class="group${g.big ? ' big' : ''}"><h3>${g.group}</h3>
+      ${g.fields.map(f => `<div class="field"><label for="f_${f[0]}">${f[1]}</label>
+        <span><input id="f_${f[0]}" data-k="${f[0]}" inputmode="decimal" autocomplete="off" placeholder="0">${f[2] ? '<span class="unit"> ' + f[2] + '</span>' : ''}</span></div>`).join('')}
+    </div>`).join('');
+  el.querySelectorAll('input').forEach(inp => {
+    const k = inp.dataset.k;
+    inp.value = S[k] !== undefined && S[k] !== '' ? Number(S[k]).toLocaleString('en-AU') : '';
+    inp.addEventListener('input', () => {
+      const v = inp.value.replace(/[^0-9.]/g, '');
+      S[k] = v === '' ? '' : Number(v);
+      save(); render();
+    });
+    inp.addEventListener('blur', () => {
+      inp.value = S[k] !== undefined && S[k] !== '' ? Number(S[k]).toLocaleString('en-AU') : '';
+    });
+    inp.addEventListener('focus', () => inp.select());
+  });
+}
+
+function render() {
+  const c = compute();
+  const hasHouse = c.P > 0;
+
+  const a = document.getElementById('answer');
+  if (!hasHouse) {
+    a.className = 'answer short';
+    a.innerHTML = '<div class="big">Enter the house price to start</div><div class="small">Then add each sale price and loan below.</div>';
+  } else if (c.left >= 0) {
+    a.className = 'answer ok';
+    a.innerHTML = `<div class="big">You can afford it: $${fmt(c.left)} left over</div>
+      <div class="small">After buying, paying duty and fees, and her tax. The most you could pay with these figures is about $${fmt(maxPrice())}.</div>`;
+  } else {
+    a.className = 'answer short';
+    a.innerHTML = `<div class="big">You are short by $${fmt(-c.left)}</div>
+      <div class="small">$${fmt(Math.max(-c.spare, 0))} short at settlement, then her tax of $${fmt(n('wTax'))}. The most you could pay with these figures is about $${fmt(maxPrice())}.</div>`;
+  }
+
+  const leftCls = c.left >= 0 ? 'good' : 'bad';
+  const spareCls = c.spare >= 0 ? 'good' : 'bad';
+  document.getElementById('flow').innerHTML = `
+    <div class="flow">
+      <div class="col">
+        <div class="box borrow"><div class="t">Bank loan (new)</div><div class="a">$${fmt(n('bank'))}</div><div class="h">borrowed</div></div>
+        <div class="box keep"><div class="t">Epsom: you keep</div><div class="a">$${dollars(c.eKeep)}</div></div>
+        <div class="box keep"><div class="t">Wife's two: you keep</div><div class="a">$${dollars(c.w1Keep + c.w2Keep)}</div></div>
+        <div class="box keep"><div class="t">Sullivan: your half</div><div class="a">$${dollars(c.sKeep)}</div></div>
+      </div>
+      <div class="arrows">&rarr;</div>
+      <div class="mid"><div class="box total"><div class="t">Money in</div><div class="a">$${dollars(c.inTotal)}</div></div></div>
+      <div class="arrows">&rarr;</div>
+      <div class="col">
+        <div class="box total"><div class="t">House total</div><div class="a">$${fmt(c.need)}</div><div class="h">price, duty, fees</div></div>
+        <div class="box ${spareCls}"><div class="t">${c.spare >= 0 ? 'Spare cash' : 'Short at settlement'}</div><div class="a">$${dollars(c.spare)}</div></div>
+        <div class="box tax"><div class="t">Her tax, paid later</div><div class="a">minus $${fmt(n('wTax'))}</div></div>
+        <div class="box ${leftCls}"><div class="t">${c.left >= 0 ? 'Left over' : 'Short after tax'}</div><div class="a">$${dollars(c.left)}</div></div>
+      </div>
+    </div>`;
+
+  const row = (a, b, cls) => `<tr${cls ? ' class="' + cls + '"' : ''}><td>${a}</td><td>${b}</td></tr>`;
+  document.getElementById('sales').innerHTML = `
+    <table>
+      <tr><th>Sale</th><th>You keep</th></tr>
+      ${row('Epsom: price $' + fmt(n('epsomPrice')) + ', less costs, loan, tax', '$' + dollars(c.eKeep))}
+      ${row('Wife property 1: price, less costs and loan', '$' + dollars(c.w1Keep))}
+      ${row('Wife property 2: price, less costs and loan', '$' + dollars(c.w2Keep))}
+      ${row('Sullivan: after costs $' + fmt(c.sNet) + ', less brother $' + fmt(c.sBroker) + ', loan, tax', '$' + dollars(c.sKeep))}
+      ${row('Total from sales', '$' + dollars(c.eKeep + c.w1Keep + c.w2Keep + c.sKeep), 'sum')}
+    </table>
+    <div class="note">The loan on each property is repaid to its bank out of the sale price.</div>`;
+
+  const dep = c.P * n('depositPct') / 100;
+  document.getElementById('timing').innerHTML = `
+    <table>
+      <tr><th>When</th><th>Amount</th></tr>
+      ${row('At exchange: deposit (' + n('depositPct') + '%)', '$' + fmt(dep))}
+      ${row('About 3 months after exchange: stamp duty', '$' + fmt(c.d))}
+      ${row('Cash needed in the first 3 months', '$' + fmt(dep + c.d), 'sum')}
+      ${row('At settlement: balance of price plus fees', '$' + fmt(c.need - dep - c.d))}
+    </table>
+    <div class="note">NSW duty is due on the earlier of settlement or 3 months after exchange. With a long settlement you need the deposit and duty before your sales settle. The deposit is part of the price, not an extra cost.</div>`;
+}
+
+document.getElementById('reset').addEventListener('click', () => {
+  if (!confirm('Clear all saved figures in this browser?')) return;
+  S = Object.assign({}, BLANK); save(); buildInputs(); render();
+});
+
+buildInputs();
+render();
+</script>
+</body>
+</html>
