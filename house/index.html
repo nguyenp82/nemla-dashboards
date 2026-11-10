@@ -73,30 +73,30 @@
   .tabs button { padding: 10px 18px; background: none; border: none; border-bottom: 3px solid transparent; margin-bottom: -1px; font-size: 14px; font-weight: 600; color: var(--text-faint); cursor: pointer; }
   .tabs button:hover { color: var(--text); }
   .tabs button.on { color: var(--text); border-bottom-color: var(--house); }
-  #tab-repay .field { display: block; margin: 0; }
-  #tab-repay .field label { display: block; font-size: 11px; text-transform: uppercase; letter-spacing: 1.2px; color: var(--text-faint); font-weight: 600; margin-bottom: 4px; }
-  #tab-repay .field .wrap { display: flex; align-items: center; gap: 6px; }
-  #tab-repay .field input { width: 100%; padding: 9px 10px; font-size: 18px; text-align: left; }
-  #tab-repay .field input:focus { outline: 2px solid var(--loan); border-color: var(--loan); }
-  #tab-repay .unit { color: var(--text-dim); font-size: 14px; white-space: nowrap; }
-  #tab-repay .rinputs { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 14px; }
-  #tab-repay .hero { background: var(--loan-soft); border: 1px solid #E2CF9E; border-radius: 12px; padding: 1.25rem 1.5rem; margin-bottom: 1.25rem; }
-  #tab-repay .hero .lbl { font-size: 12px; text-transform: uppercase; letter-spacing: 1.2px; color: var(--loan); font-weight: 600; }
-  #tab-repay .hero .big { font-family: 'Fraunces', Georgia, serif; font-size: 42px; font-weight: 500; line-height: 1.1; color: #6B4510; }
-  #tab-repay .hero .big small { font-size: 16px; font-family: 'Manrope', sans-serif; color: var(--text-dim); font-weight: 500; }
-  #tab-repay .hero .note { font-size: 13px; color: var(--text-dim); margin-top: 4px; }
-  #tab-repay .kpis { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 14px; margin-bottom: 1.25rem; }
-  #tab-repay .kpi { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 1rem 1.1rem; }
-  #tab-repay .kpi .k { font-size: 11px; text-transform: uppercase; letter-spacing: 1.2px; color: var(--text-faint); }
-  #tab-repay .kpi .v { font-family: 'Fraunces', Georgia, serif; font-size: 24px; font-weight: 500; margin-top: 2px; font-variant-numeric: tabular-nums; }
-  #tab-repay .kpi .n { font-size: 12px; color: var(--text-dim); margin-top: 2px; }
-  #tab-repay .bar { display: flex; height: 22px; border-radius: 6px; overflow: hidden; margin: 6px 0 8px; }
-  #tab-repay .bar .p { background: var(--house); } #tab-repay .bar .i { background: var(--tax); }
-  #tab-repay .legend { display: flex; gap: 18px; font-size: 12px; color: var(--text-dim); flex-wrap: wrap; }
-  #tab-repay .legend i { display: inline-block; width: 10px; height: 10px; border-radius: 2px; margin-right: 5px; vertical-align: -1px; }
-  #tab-repay tr.cur td { background: var(--loan-soft); font-weight: 700; }
-  #tab-repay .note-s { font-size: 12px; color: var(--text-faint); margin-top: 8px; }
-  @media (max-width: 760px) { #tab-repay .hero .big { font-size: 34px; } }
+  #tab-repay .field, #tab-save .field { display: block; margin: 0; }
+  #tab-repay .field label, #tab-save .field label { display: block; font-size: 11px; text-transform: uppercase; letter-spacing: 1.2px; color: var(--text-faint); font-weight: 600; margin-bottom: 4px; }
+  #tab-repay .field .wrap, #tab-save .field .wrap { display: flex; align-items: center; gap: 6px; }
+  #tab-repay .field input, #tab-save .field input { width: 100%; padding: 9px 10px; font-size: 18px; text-align: left; }
+  #tab-repay .field input:focus, #tab-save .field input:focus { outline: 2px solid var(--loan); border-color: var(--loan); }
+  #tab-repay .unit, #tab-save .unit { color: var(--text-dim); font-size: 14px; white-space: nowrap; }
+  #tab-repay .rinputs, #tab-save .rinputs { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 14px; }
+  #tab-repay .hero, #tab-save .hero { background: var(--loan-soft); border: 1px solid #E2CF9E; border-radius: 12px; padding: 1.25rem 1.5rem; margin-bottom: 1.25rem; }
+  #tab-repay .hero .lbl, #tab-save .hero .lbl { font-size: 12px; text-transform: uppercase; letter-spacing: 1.2px; color: var(--loan); font-weight: 600; }
+  #tab-repay .hero .big, #tab-save .hero .big { font-family: 'Fraunces', Georgia, serif; font-size: 42px; font-weight: 500; line-height: 1.1; color: #6B4510; }
+  #tab-repay .hero .big small, #tab-save .hero .big small { font-size: 16px; font-family: 'Manrope', sans-serif; color: var(--text-dim); font-weight: 500; }
+  #tab-repay .hero .note, #tab-save .hero .note { font-size: 13px; color: var(--text-dim); margin-top: 4px; }
+  #tab-repay .kpis, #tab-save .kpis { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 14px; margin-bottom: 1.25rem; }
+  #tab-repay .kpi, #tab-save .kpi { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 1rem 1.1rem; }
+  #tab-repay .kpi .k, #tab-save .kpi .k { font-size: 11px; text-transform: uppercase; letter-spacing: 1.2px; color: var(--text-faint); }
+  #tab-repay .kpi .v, #tab-save .kpi .v { font-family: 'Fraunces', Georgia, serif; font-size: 24px; font-weight: 500; margin-top: 2px; font-variant-numeric: tabular-nums; }
+  #tab-repay .kpi .n, #tab-save .kpi .n { font-size: 12px; color: var(--text-dim); margin-top: 2px; }
+  #tab-repay .bar, #tab-save .bar { display: flex; height: 22px; border-radius: 6px; overflow: hidden; margin: 6px 0 8px; }
+  #tab-repay .bar .p, #tab-save .bar .p { background: var(--house); } #tab-repay .bar .i, #tab-save .bar .i { background: var(--tax); }
+  #tab-repay .legend, #tab-save .legend { display: flex; gap: 18px; font-size: 12px; color: var(--text-dim); flex-wrap: wrap; }
+  #tab-repay .legend i, #tab-save .legend i { display: inline-block; width: 10px; height: 10px; border-radius: 2px; margin-right: 5px; vertical-align: -1px; }
+  #tab-repay tr.cur td, #tab-save tr.cur td { background: var(--loan-soft); font-weight: 700; }
+  #tab-repay .note-s, #tab-save .note-s { font-size: 12px; color: var(--text-faint); margin-top: 8px; }
+  @media (max-width: 760px) { #tab-repay .hero .big, #tab-save .hero .big { font-size: 34px; } }
   .flow { display: grid; grid-template-columns: 1fr 44px 190px 44px 1fr; gap: 0; align-items: stretch; }
   .col { display: flex; flex-direction: column; gap: 14px; justify-content: center; }
   .arrows { display: flex; flex-direction: column; justify-content: center; align-items: center; color: var(--text-faint); font-size: 20px; }
@@ -142,6 +142,7 @@
   <div class="tabs" role="tablist">
     <button id="tb-afford" class="on" role="tab" data-tab="afford">Can I afford it?</button>
     <button id="tb-repay" role="tab" data-tab="repay">Repayments</button>
+    <button id="tb-save" role="tab" data-tab="save">Savings</button>
   </div>
 
   <div id="tab-afford">
@@ -200,7 +201,29 @@
       <div class="panel"><div class="panel-head"><h2>If the rate changes</h2><span>Monthly repayment</span></div><div class="panel-body" id="r_rates"></div></div>
       <div class="panel"><div class="panel-head"><h2>How the loan falls</h2><span>Balance owing</span></div><div class="panel-body" id="r_balances"></div></div>
     </div>
-    <p class="note-s">Estimate only. Assumes a fixed rate for the whole term and no extra repayments or offset. Your lender's figures may differ slightly.</p>
+    <p class="note-s">Estimate only. Assumes a fixed rate for the whole term and no offset. Your lender's figures may differ slightly.</p>
+  </div>
+
+  <div id="tab-save" hidden>
+    <h1>How long to reach your goal?</h1>
+    <p class="sub">Interest is paid into the account each month and earns interest itself. Change any figure and the answer updates.</p>
+    <div class="panel"><div class="panel-body">
+      <div class="rinputs">
+        <div class="field"><label for="s_start">Saved now</label><div class="wrap"><span class="unit">$</span><input id="s_start" inputmode="decimal" autocomplete="off" placeholder="0"></div></div>
+        <div class="field"><label for="s_rate">Interest rate</label><div class="wrap"><input id="s_rate" inputmode="decimal" autocomplete="off" placeholder="5"><span class="unit">% a year</span></div></div>
+        <div class="field"><label for="s_goal">Goal</label><div class="wrap"><span class="unit">$</span><input id="s_goal" inputmode="decimal" autocomplete="off" placeholder="1,000,000"></div></div>
+        <div class="field"><label for="s_add">Add each month</label><div class="wrap"><span class="unit">$</span><input id="s_add" inputmode="decimal" autocomplete="off" placeholder="0"></div></div>
+      </div>
+    </div></div>
+    <div class="hero"><div class="lbl">Time to reach your goal</div><div class="big" id="s_big">-</div><div class="note" id="s_note"></div></div>
+    <div class="kpis" id="s_kpis"></div>
+    <div class="panel"><div class="panel-head"><h2>Growth over time</h2><span>Your own money vs interest earned</span></div><div class="panel-body" id="s_chart"></div></div>
+    <div class="two">
+      <div class="panel"><div class="panel-head"><h2>If you add more each month</h2><span>Time to goal</span></div><div class="panel-body" id="s_adds"></div></div>
+      <div class="panel"><div class="panel-head"><h2>If the rate changes</h2><span>Time to goal</span></div><div class="panel-body" id="s_rates"></div></div>
+    </div>
+    <div class="panel"><div class="panel-head"><h2>Year by year</h2><span>Balance at each milestone</span></div><div class="panel-body" id="s_years"></div></div>
+    <p class="note-s">Estimate only. Assumes a constant rate, interest added monthly (rate / 12) and deposits made at month end. Interest is taxable income, so tax would slow this down: check with your accountant. Figures are saved in this browser only.</p>
   </div>
 </div>
 
@@ -585,7 +608,135 @@ render();
 })();
 
 (function () {
-  const tabs = { afford: document.getElementById('tab-afford'), repay: document.getElementById('tab-repay') };
+  const SKEY = 'nemla-savings-v1';
+  const SDEF = { start: '', rate: 5, goal: 1000000, add: '' };
+  function sload() { try { const v = JSON.parse(localStorage.getItem(SKEY)); return v && typeof v === 'object' ? v : {}; } catch (e) { return {}; } }
+  function ssave() { try { localStorage.setItem(SKEY, JSON.stringify(V)); } catch (e) {} }
+  let V = Object.assign({}, SDEF, sload());
+  const sn = k => Number(V[k]) || 0;
+  const sf = x => Math.round(x).toLocaleString('en-AU');
+  const g = id => document.getElementById(id);
+  const MAXM = 1200;
+
+  // month-by-month: interest added monthly, deposit at month end. Returns balances[0..months]
+  function sim(start, ratePct, add, goal) {
+    const r = ratePct / 100 / 12, bal = [start];
+    let b = start;
+    while (b < goal && bal.length <= MAXM) { b = b + b * r + add; bal.push(b); }
+    return { bal, reached: b >= goal, months: bal.length - 1 };
+  }
+  function span(mo) {
+    const y = Math.floor(mo / 12), m = mo % 12;
+    if (y === 0) return m + ' month' + (m === 1 ? '' : 's');
+    return y + ' yr' + (y === 1 ? '' : 's') + (m ? ' ' + m + ' mth' + (m === 1 ? '' : 's') : '');
+  }
+  function when(mo) {
+    const d = new Date(); d.setMonth(d.getMonth() + mo);
+    return d.toLocaleDateString('en-AU', { month: 'long', year: 'numeric' });
+  }
+  function timeTxt(s) { return s.reached ? span(s.months) : 'Over 100 years'; }
+
+  function showInputs() {
+    [['start', 1], ['rate', 0], ['goal', 1], ['add', 1]].forEach(([k, money]) => {
+      const el = g('s_' + k);
+      if (document.activeElement === el) return;
+      el.value = V[k] !== '' && V[k] !== undefined ? (money ? Number(V[k]).toLocaleString('en-AU') : V[k]) : '';
+    });
+  }
+
+  function chart(s, start, add) {
+    const W = 640, H = 220, L = 52, B = 26, T = 10, R = 10, n = s.months || 1;
+    const goal = sn('goal'), top = Math.max(goal, s.bal[s.bal.length - 1]);
+    const X = i => L + (W - L - R) * i / n, Y = v => T + (H - T - B) * (1 - v / top);
+    const total = s.bal.map(v => v), own = s.bal.map((v, i) => start + add * i);
+    const pts = a => a.map((v, i) => X(i).toFixed(1) + ',' + Y(v).toFixed(1)).join(' ');
+    const area = a => 'M' + X(0) + ',' + Y(0) + ' L' + pts(a).replace(/ /g, ' L') + ' L' + X(n) + ',' + Y(0) + ' Z';
+    let grid = '';
+    for (let k = 0; k <= 4; k++) {
+      const v = top * k / 4, y = Y(v);
+      grid += `<line x1="${L}" x2="${W - R}" y1="${y}" y2="${y}" stroke="var(--border)"/><text x="${L - 6}" y="${y + 4}" text-anchor="end" font-size="11" fill="var(--text-faint)">$${v >= 1e6 ? (v / 1e6).toFixed(1) + 'M' : Math.round(v / 1000) + 'k'}</text>`;
+    }
+    let xl = '';
+    const step = n > 240 ? 10 : n > 120 ? 5 : n > 48 ? 2 : 1;
+    for (let y = 0; y * 12 <= n; y += step) xl += `<text x="${X(y * 12)}" y="${H - 8}" text-anchor="middle" font-size="11" fill="var(--text-faint)">${y}y</text>`;
+    return `<svg viewBox="0 0 ${W} ${H}" width="100%" role="img" aria-label="Savings growth chart">${grid}${xl}
+      <path d="${area(total)}" fill="var(--tax)" opacity=".55"/><path d="${area(own)}" fill="var(--house)" opacity=".75"/>
+      <line x1="${L}" x2="${W - R}" y1="${Y(goal)}" y2="${Y(goal)}" stroke="var(--text)" stroke-dasharray="4 4"/>
+      <text x="${W - R}" y="${Y(goal) - 5}" text-anchor="end" font-size="11" fill="var(--text)">Goal $${sf(goal)}</text></svg>
+      <div class="legend"><span><i style="background:var(--house)"></i>Your own money</span><span><i style="background:var(--tax)"></i>Interest earned</span></div>`;
+  }
+
+  function render() {
+    const start = sn('start'), rate = sn('rate'), goal = sn('goal'), add = sn('add');
+    const s = sim(start, rate, add, goal);
+    if (start <= 0 && add <= 0) {
+      g('s_big').innerHTML = '-'; g('s_note').textContent = 'Enter what you have saved now, or an amount to add each month.';
+      ['s_kpis', 's_chart', 's_adds', 's_rates', 's_years'].forEach(i => g(i).innerHTML = '<div class="note-s">Enter a starting balance.</div>');
+      return;
+    }
+    if (start >= goal) {
+      g('s_big').innerHTML = 'Already there'; g('s_note').textContent = 'Your balance is at or above the goal.';
+      ['s_kpis', 's_chart', 's_adds', 's_rates', 's_years'].forEach(i => g(i).innerHTML = '');
+      return;
+    }
+    g('s_big').innerHTML = s.reached ? span(s.months) : 'Over 100 years';
+    g('s_note').textContent = s.reached ? 'Around ' + when(s.months) + ' to reach $' + sf(goal) + ' at ' + rate + '% a year' : 'At this rate it does not get there within 100 years. Add money each month.';
+    if (!s.reached) { ['s_kpis', 's_chart', 's_adds', 's_rates', 's_years'].forEach(i => g(i).innerHTML = ''); }
+
+    const end = s.bal[s.months], own = start + add * s.months, interest = end - own;
+    const r = rate / 100 / 12;
+    g('s_kpis').innerHTML = [
+      ['Reached around', when(s.months), 'from today'],
+      ['Interest earned', '$' + sf(interest), s.reached ? Math.round(interest / end * 100) + '% of the final balance' : ''],
+      ['Your own money', '$' + sf(own), add > 0 ? '$' + sf(start) + ' + $' + sf(add) + ' x ' + s.months + ' months' : 'no extra deposits'],
+      ['Interest in month 1', '$' + sf(start * r), 'paid to your account'],
+      ['Interest a month at the end', '$' + sf(s.bal[Math.max(s.months - 1, 0)] * r), 'when you reach the goal']
+    ].map(k => `<div class="kpi"><div class="k">${k[0]}</div><div class="v">${k[1]}</div><div class="n">${k[2]}</div></div>`).join('');
+
+    g('s_chart').innerHTML = chart(s, start, add);
+
+    const adds = [0, 250, 500, 1000, 2000].concat(add > 0 && [0, 250, 500, 1000, 2000].indexOf(add) < 0 ? [add] : []).sort((a, b) => a - b);
+    g('s_adds').innerHTML = `<table><tr><th>Add a month</th><th>Time</th><th>Sooner by</th></tr>${adds.map(a => {
+      const t = sim(start, rate, a, goal), cur = a === add;
+      const diff = s.months - t.months;
+      return `<tr${cur ? ' class="cur"' : ''}><td>$${sf(a)}</td><td>${timeTxt(t)}</td><td>${cur ? 'now' : (t.reached && s.reached ? (diff > 0 ? span(diff) : '-') : '-')}</td></tr>`;
+    }).join('')}</table>`;
+
+    const rates = [];
+    for (let d = -1; d <= 1.001; d += 0.5) rates.push(Math.round((rate + d) * 100) / 100);
+    g('s_rates').innerHTML = `<table><tr><th>Rate</th><th>Time</th><th>Change</th></tr>${rates.filter(x => x > 0).map(x => {
+      const t = sim(start, x, add, goal), cur = Math.abs(x - rate) < 0.001, diff = t.months - s.months;
+      return `<tr${cur ? ' class="cur"' : ''}><td>${x.toFixed(2)}%</td><td>${timeTxt(t)}</td><td>${cur ? 'now' : (t.reached && s.reached ? (diff > 0 ? '+' : '-') + span(Math.abs(diff)) : '-')}</td></tr>`;
+    }).join('')}</table>`;
+
+    const rows = [];
+    const yrsTotal = Math.ceil(s.months / 12);
+    const marks = [];
+    for (let y = 5; y < yrsTotal; y += 5) marks.push(y);
+    marks.push(yrsTotal);
+    g('s_years').innerHTML = `<table><tr><th>After</th><th>Balance</th><th>Interest so far</th></tr>${marks.map(y => {
+      const m = Math.min(y * 12, s.months), b = s.bal[m];
+      return `<tr><td>${m === s.months ? span(m) : y + ' yrs'}</td><td>$${sf(b)}</td><td>$${sf(b - start - add * m)}</td></tr>`;
+    }).join('')}</table>`;
+  }
+
+  [['start', 1], ['rate', 0], ['goal', 1], ['add', 1]].forEach(([k]) => {
+    const el = g('s_' + k);
+    el.addEventListener('input', () => {
+      const v = el.value.replace(/[^0-9.]/g, '');
+      V[k] = v === '' ? '' : Number(v);
+      ssave(); render();
+    });
+    el.addEventListener('blur', showInputs);
+    el.addEventListener('focus', () => el.select());
+  });
+
+  window.refreshSave = function () { showInputs(); render(); };
+})();
+
+(function () {
+  const tabs = { afford: document.getElementById('tab-afford'), repay: document.getElementById('tab-repay'), save: document.getElementById('tab-save') };
+  const hashes = { repay: '#repayments', save: '#savings' };
   function show(name) {
     if (!tabs[name]) name = 'afford';
     Object.keys(tabs).forEach(k => {
@@ -593,10 +744,11 @@ render();
       document.getElementById('tb-' + k).classList.toggle('on', k === name);
     });
     if (name === 'repay') window.refreshRepay();
-    try { history.replaceState(null, '', name === 'repay' ? '#repayments' : location.pathname + location.search); } catch (e) {}
+    if (name === 'save') window.refreshSave();
+    try { history.replaceState(null, '', hashes[name] || location.pathname + location.search); } catch (e) {}
   }
   document.querySelectorAll('.tabs button').forEach(b => b.addEventListener('click', () => show(b.dataset.tab)));
-  show(location.hash === '#repayments' ? 'repay' : 'afford');
+  show(location.hash === '#repayments' ? 'repay' : location.hash === '#savings' ? 'save' : 'afford');
 })();
 </script>
 </body>
