@@ -187,12 +187,14 @@
         <div class="field"><label for="r_amount">Loan amount</label><div class="wrap"><span class="unit">$</span><input id="r_amount" inputmode="decimal" autocomplete="off" placeholder="0"></div></div>
         <div class="field"><label for="r_rate">Interest rate</label><div class="wrap"><input id="r_rate" inputmode="decimal" autocomplete="off" placeholder="6.5"><span class="unit">% a year</span></div></div>
         <div class="field"><label for="r_years">Loan term</label><div class="wrap"><input id="r_years" inputmode="decimal" autocomplete="off" placeholder="30"><span class="unit">years</span></div></div>
+        <div class="field"><label for="r_extra">Extra each month</label><div class="wrap"><span class="unit">$</span><input id="r_extra" inputmode="decimal" autocomplete="off" placeholder="0"></div></div>
         <div class="field"><label for="r_buffer">Bank buffer</label><div class="wrap"><input id="r_buffer" inputmode="decimal" autocomplete="off" placeholder="3"><span class="unit">% added</span></div></div>
       </div>
       <div class="note-s" id="r_link"></div>
     </div></div>
     <div class="hero"><div class="lbl">Monthly repayment</div><div class="big" id="r_monthly">$0 <small>a month</small></div><div class="note" id="r_heroNote"></div></div>
     <div class="kpis" id="r_kpis"></div>
+    <div class="panel"><div class="panel-head"><h2>Pay extra, finish sooner</h2><span>Set "Extra each month" above</span></div><div class="panel-body" id="r_extra_out"></div></div>
     <div class="panel"><div class="panel-head"><h2>Where your money goes</h2><span>Over the whole loan</span></div><div class="panel-body" id="r_split"></div></div>
     <div class="two">
       <div class="panel"><div class="panel-head"><h2>If the rate changes</h2><span>Monthly repayment</span></div><div class="panel-body" id="r_rates"></div></div>
@@ -438,7 +440,7 @@ render();
 <script>
 (function () {
   const RKEY = 'nemla-repayments-v1';
-  const RDEF = { amount: '', rate: 6.5, years: 30, buffer: 3, linked: true };
+  const RDEF = { amount: '', rate: 6.5, years: 30, buffer: 3, extra: '', linked: true };
   function rload() { try { const v = JSON.parse(localStorage.getItem(RKEY)); return v && typeof v === 'object' ? v : {}; } catch (e) { return {}; } }
   function rsave() { try { localStorage.setItem(RKEY, JSON.stringify(R)); } catch (e) {} }
   let R = Object.assign({}, RDEF, rload());
@@ -462,6 +464,23 @@ render();
     return P * Math.pow(1 + r, months) - pay * (Math.pow(1 + r, months) - 1) / r;
   }
 
+  function payoff(P, ratePct, years, extra) {
+    const r = ratePct / 100 / 12, pay = pmt(P, ratePct, years) + extra;
+    let bal = P, months = 0, interest = 0;
+    const cap = Math.round(years * 12) + 1;
+    while (bal > 0.005 && months < cap) {
+      const i = bal * r;
+      interest += i;
+      bal = bal + i - pay;
+      months++;
+    }
+    return { months, interest };
+  }
+  const span = mo => {
+    const y = Math.floor(mo / 12), m = mo % 12;
+    return (y ? y + ' yr' + (y === 1 ? '' : 's') : '') + (y && m ? ' ' : '') + (m ? m + ' mo' : (y ? '' : '0 mo'));
+  };
+
   function syncLink() {
     const bank = Number(S.bank) || 0;
     if (R.linked) R.amount = bank > 0 ? bank : '';
@@ -473,10 +492,10 @@ render();
   }
 
   function showInputs() {
-    ['amount', 'rate', 'years', 'buffer'].forEach(k => {
+    ['amount', 'rate', 'years', 'buffer', 'extra'].forEach(k => {
       const el = $('r_' + k);
       if (document.activeElement === el) return;
-      el.value = R[k] !== '' && R[k] !== undefined ? (k === 'amount' ? Number(R[k]).toLocaleString('en-AU') : R[k]) : '';
+      el.value = R[k] !== '' && R[k] !== undefined ? (k === 'amount' || k === 'extra' ? Number(R[k]).toLocaleString('en-AU') : R[k]) : '';
     });
   }
 
@@ -498,6 +517,35 @@ render();
       ['Total repaid', '$' + rfmt(total), 'over ' + yrs + ' years'],
       ['Total interest', '$' + rfmt(interest), P > 0 ? Math.round(interest / P * 100) + '% of the loan' : '']
     ].map(k => `<div class="kpi"><div class="k">${k[0]}</div><div class="v">${k[1]}</div><div class="n">${k[2]}</div></div>`).join('');
+
+    const extra = rn('extra');
+    if (P <= 0) {
+      $('r_extra_out').innerHTML = '<div class="note-s">Enter a loan amount.</div>';
+    } else {
+      const base = payoff(P, rate, yrs, 0), withX = payoff(P, rate, yrs, extra);
+      const saved = base.interest - withX.interest, sooner = base.months - withX.months;
+      const w = base.months > 0 ? withX.months / base.months * 100 : 100;
+      const head = extra > 0 ? `
+        <div class="kpis" style="margin-bottom:12px">
+          <div class="kpi"><div class="k">Paid off in</div><div class="v">${span(withX.months)}</div><div class="n">instead of ${span(base.months)}</div></div>
+          <div class="kpi"><div class="k">Time saved</div><div class="v">${span(sooner)}</div><div class="n">paying $${rfmt(m + extra)} a month</div></div>
+          <div class="kpi"><div class="k">Interest saved</div><div class="v">$${rfmt(saved)}</div><div class="n">interest left: $${rfmt(withX.interest)}</div></div>
+        </div>
+        <div style="font-size:12px;color:var(--text-dim)">Normal: ${span(base.months)}</div>
+        <div class="bar"><div class="i" style="width:100%"></div></div>
+        <div style="font-size:12px;color:var(--text-dim)">With $${rfmt(extra)} extra a month: ${span(withX.months)}</div>
+        <div class="bar"><div class="p" style="width:${w}%"></div></div>`
+        : '<div class="note-s" style="margin:0 0 10px">Type an amount in "Extra each month" above to see your result. Some examples are below.</div>';
+      const steps = [250, 500, 1000, 2000, 3000];
+      if (extra > 0 && steps.indexOf(extra) < 0) steps.push(extra);
+      steps.sort((a, b) => a - b);
+      const rows = steps.map(x => {
+        const o = payoff(P, rate, yrs, x);
+        return `<tr${x === extra ? ' class="cur"' : ''}><td>+$${rfmt(x)} a month</td><td>${span(o.months)}</td><td>${span(base.months - o.months)}</td><td>$${rfmt(base.interest - o.interest)}</td></tr>`;
+      }).join('');
+      $('r_extra_out').innerHTML = head + `<table style="margin-top:12px"><tr><th>Extra</th><th>Paid off in</th><th>Sooner by</th><th>Interest saved</th></tr>${rows}</table>
+        <div class="note-s">Assumes the extra is paid every month from the start and the rate stays the same. Check your lender allows extra repayments without a fee.</div>`;
+    }
 
     const pp = total > 0 ? (P / total * 100) : 0;
     $('r_split').innerHTML = P > 0 ? `
@@ -521,7 +569,7 @@ render();
       }).join('')}</table>` : '<div class="note-s">Enter a loan amount.</div>';
   }
 
-  ['amount', 'rate', 'years', 'buffer'].forEach(k => {
+  ['amount', 'rate', 'years', 'buffer', 'extra'].forEach(k => {
     const el = $('r_' + k);
     el.addEventListener('input', () => {
       const v = el.value.replace(/[^0-9.]/g, '');
