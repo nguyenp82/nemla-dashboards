@@ -50,10 +50,11 @@
   .group { border: 1px solid var(--border); border-radius: 10px; padding: 12px 14px; background: var(--surface); }
   .group h3 { font-size: 11px; text-transform: uppercase; letter-spacing: 1.2px; color: var(--text-faint); margin-bottom: 8px; font-weight: 600; }
   .field { display: flex; justify-content: space-between; align-items: center; gap: 10px; margin: 6px 0; }
-  .field label { color: var(--text-dim); font-size: 13px; }
+  .field label { color: var(--text-dim); font-size: 13px; flex: 1; min-width: 0; }
+  .field .iw { display: flex; align-items: center; gap: 4px; flex: none; }
   .field input { width: 130px; text-align: right; padding: 6px 8px; border: 1px solid var(--border-strong); border-radius: 6px; background: #fff; font-size: 14px; font-variant-numeric: tabular-nums; color: var(--text); }
   .field input:focus { outline: 2px solid var(--house); outline-offset: 0; border-color: var(--house); }
-  .field .unit { color: var(--text-faint); font-size: 12px; margin-left: -4px; }
+  .field .unit { color: var(--text-faint); font-size: 12px; width: 14px; flex: none; }
   .group.big input { width: 160px; font-weight: 600; }
 
   .tog { display: flex; justify-content: space-between; align-items: center; gap: 10px; margin: 6px 0; cursor: pointer; }
@@ -234,6 +235,7 @@ const SCHEMA = [
   { group: 'House to buy', big: true, fields: [
     ['housePrice', 'House total (price)'],
     ['bank', 'Bank loan (new)'],
+    ['cash', 'Your own cash'],
     ['depositPct', 'Deposit at exchange', '%']
   ]},
   { group: '280A Epsom (your home)', key: 'e', fields: [
@@ -271,12 +273,21 @@ const SCHEMA = [
 ];
 
 const BLANK = { depositPct: 10, commission: 2, fixedSelling: 8350, purchaseCosts: 4380, sBro: 50,
-  taxRate: 47, discount: 50, epsomCgt: false, w1Cgt: true, w2Cgt: true, sCgt: false };
+  taxRate: 47, discount: 50, epsomCgt: false, w1Cgt: true, w2Cgt: true, sCgt: false,
+  epsomLoan: 740000, w1Loan: 555278.51, w2Loan: 902283.01, _v: 2 };
 
 let S = load();
 
 function load() {
-  try { const v = JSON.parse(localStorage.getItem(KEY)); if (v && typeof v === 'object') return Object.assign({}, BLANK, v); } catch (e) {}
+  try {
+    const v = JSON.parse(localStorage.getItem(KEY));
+    if (v && typeof v === 'object') {
+      const s = Object.assign({}, BLANK, v);
+      // one-time update to the confirmed loan balances
+      if (v._v !== 2) { s.epsomLoan = BLANK.epsomLoan; s.w1Loan = BLANK.w1Loan; s.w2Loan = BLANK.w2Loan; s._v = 2; }
+      return s;
+    }
+  } catch (e) {}
   return Object.assign({}, BLANK);
 }
 function save() { try { localStorage.setItem(KEY, JSON.stringify(S)); } catch (e) {} }
@@ -318,7 +329,7 @@ function compute(price) {
   const cgtTotal = cgt.e.tax + cgt.w1.tax + cgt.w2.tax + cgt.s.tax;
   const cgtMissing = Object.keys(cgt).filter(k => cgt[k].missing);
 
-  const inTotal = n('bank') + eKeep + w1Keep + w2Keep + sKeep;
+  const inTotal = n('bank') + n('cash') + eKeep + w1Keep + w2Keep + sKeep;
   const spare = inTotal - need;
   const left = spare - cgtTotal;
   return { P, d, need, eKeep, w1Keep, w2Keep, sNet, sBroker, sKeep, cgt, cgtTotal, cgtMissing, inTotal, spare, left };
@@ -347,14 +358,16 @@ function maxPrice() {
 
 function buildInputs() {
   const el = document.getElementById('inputs');
-  el.innerHTML = SCHEMA.map(g => `
+  el.innerHTML = SCHEMA.map(g => {
+    const hasUnit = g.fields.some(f => f[2] && f[2] !== 'toggle');
+    return `
     <div class="group${g.big ? ' big' : ''}"><h3>${g.group}</h3>
       ${g.fields.map(f => f[2] === 'toggle'
         ? `<label class="tog"><span class="l">${f[1]}</span><input type="checkbox" data-t="${f[0]}"${S[f[0]] ? ' checked' : ''}><span class="sw"></span></label>`
         : `<div class="field"><label for="f_${f[0]}">${f[1]}</label>
-        <span><input id="f_${f[0]}" data-k="${f[0]}" inputmode="decimal" autocomplete="off" placeholder="0">${f[2] ? '<span class="unit"> ' + f[2] + '</span>' : ''}</span></div>`).join('')}
+        <span class="iw"><input id="f_${f[0]}" data-k="${f[0]}" inputmode="decimal" autocomplete="off" placeholder="0">${hasUnit ? '<span class="unit">' + (f[2] || '') + '</span>' : ''}</span></div>`).join('')}
       ${g.key ? `<div class="cgtline off" id="cgt_${g.key}"></div>` : ''}
-    </div>`).join('');
+    </div>`; }).join('');
   el.querySelectorAll('input[data-t]').forEach(cb => {
     cb.addEventListener('change', () => { S[cb.dataset.t] = cb.checked; save(); render(); });
   });
@@ -407,6 +420,7 @@ function render() {
     <div class="flow">
       <div class="col">
         <div class="box borrow"><div class="t">Bank loan (new)</div><div class="a">$${fmt(n('bank'))}</div><div class="h">borrowed</div></div>
+        ${n('cash') > 0 ? `<div class="box keep"><div class="t">Your own cash</div><div class="a">$${fmt(n('cash'))}</div><div class="h">savings</div></div>` : ''}
         <div class="box keep"><div class="t">Epsom: you keep</div><div class="a">$${dollars(c.eKeep)}</div></div>
         <div class="box keep"><div class="t">Wife's two: you keep</div><div class="a">$${dollars(c.w1Keep + c.w2Keep)}</div></div>
         <div class="box keep"><div class="t">Sullivan: your half</div><div class="a">$${dollars(c.sKeep)}</div></div>
