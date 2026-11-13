@@ -274,7 +274,7 @@ const SCHEMA = [
 
 const BLANK = { depositPct: 10, commission: 2, fixedSelling: 8350, purchaseCosts: 4380, sBro: 50,
   taxRate: 47, discount: 50, epsomCgt: false, w1Cgt: true, w2Cgt: true, sCgt: false,
-  epsomLoan: 740000, w1Loan: 555278.51, w2Loan: 902283.01, _v: 2 };
+  epsomLoan: 740000, w1Loan: 555000, w2Loan: 900000, _v: 3 };
 
 let S = load();
 
@@ -284,7 +284,7 @@ function load() {
     if (v && typeof v === 'object') {
       const s = Object.assign({}, BLANK, v);
       // one-time update to the confirmed loan balances
-      if (v._v !== 2) { s.epsomLoan = BLANK.epsomLoan; s.w1Loan = BLANK.w1Loan; s.w2Loan = BLANK.w2Loan; s._v = 2; }
+      if (v._v !== 3) { s.epsomLoan = BLANK.epsomLoan; s.w1Loan = BLANK.w1Loan; s.w2Loan = BLANK.w2Loan; s._v = 3; }
       return s;
     }
   } catch (e) {}
