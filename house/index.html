@@ -244,13 +244,13 @@ const SCHEMA = [
     ['epsomCgt', 'Pay capital gains tax?', 'toggle'],
     ['epsomBase', 'Cost base']
   ]},
-  { group: 'Wife: property 1', key: 'w1', fields: [
+  { group: '3 Robyn Cres (wife)', key: 'w1', fields: [
     ['w1Price', 'Sale price'],
     ['w1Loan', 'Loan owing'],
     ['w1Cgt', 'Pay capital gains tax?', 'toggle'],
     ['w1Base', 'Cost base']
   ]},
-  { group: 'Wife: property 2', key: 'w2', fields: [
+  { group: '117 Maud St (wife)', key: 'w2', fields: [
     ['w2Price', 'Sale price'],
     ['w2Loan', 'Loan owing'],
     ['w2Cgt', 'Pay capital gains tax?', 'toggle'],
@@ -275,7 +275,7 @@ const SCHEMA = [
 const BLANK = { depositPct: 10, commission: 2, fixedSelling: 8350, purchaseCosts: 4380, sBro: 50,
   taxRate: 47, discount: 50, epsomCgt: false, w1Cgt: true, w2Cgt: true, sCgt: false,
   epsomLoan: 740000, w1Loan: 555000, w2Loan: 900000,
-  epsomBase: 1070000, w1Base: 770000, w2Base: 1050000, sBase: 500000, _v: 5 };
+  epsomBase: 1070000, w1Base: 775000, w2Base: 1025000, sBase: 500000, _v: 6 };
 
 let S = load();
 
@@ -286,8 +286,8 @@ function load() {
       const s = Object.assign({}, BLANK, v);
       // one-time update to the confirmed loan balances
       if (!(v._v >= 3)) { s.epsomLoan = BLANK.epsomLoan; s.w1Loan = BLANK.w1Loan; s.w2Loan = BLANK.w2Loan; }
-      if (!(v._v >= 5)) { s.epsomBase = BLANK.epsomBase; s.w1Base = BLANK.w1Base; s.w2Base = BLANK.w2Base; s.sBase = BLANK.sBase; }
-      s._v = 5;
+      if (!(v._v >= 6)) { s.epsomBase = BLANK.epsomBase; s.w1Base = BLANK.w1Base; s.w2Base = BLANK.w2Base; s.sBase = BLANK.sBase; }
+      s._v = 6;
       return s;
     }
   } catch (e) {}
@@ -392,7 +392,7 @@ function buildInputs() {
 function render() {
   const c = compute();
   const hasHouse = c.P > 0;
-  const names = { e: 'Epsom', w1: 'wife property 1', w2: 'wife property 2', s: 'Sullivan' };
+  const names = { e: 'Epsom', w1: '3 Robyn Cres', w2: '117 Maud St', s: 'Sullivan' };
   const warn = c.cgtMissing.length ? ' Tax not counted yet for ' + c.cgtMissing.map(k => names[k]).join(', ') + ': enter the cost base.' : '';
 
   const a = document.getElementById('answer');
@@ -444,8 +444,8 @@ function render() {
     <table>
       <tr><th>Sale</th><th>You keep</th></tr>
       ${row('Epsom: price, less costs and loan', '$' + dollars(c.eKeep))}
-      ${row('Wife property 1: price, less costs and loan', '$' + dollars(c.w1Keep))}
-      ${row('Wife property 2: price, less costs and loan', '$' + dollars(c.w2Keep))}
+      ${row('3 Robyn Cres: price, less costs and loan', '$' + dollars(c.w1Keep))}
+      ${row('117 Maud St: price, less costs and loan', '$' + dollars(c.w2Keep))}
       ${row('Sullivan: after costs $' + fmt(c.sNet) + ', less brother $' + fmt(c.sBroker) + ', less loan', '$' + dollars(c.sKeep))}
       ${row('Total from sales', '$' + dollars(c.eKeep + c.w1Keep + c.w2Keep + c.sKeep), 'sum')}
     </table>
